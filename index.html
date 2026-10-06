@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="style.css?v=20261006-scene">
   <link rel="stylesheet" href="scene.css?v=20261006-scene">
   <link rel="stylesheet" href="interests.css?v=20261006-wave">
-  <link rel="stylesheet" href="arrival.css?v=20261006-spiral">
+  <link rel="stylesheet" href="arrival.css?v=20261006-envelope">
 </head>
 <body>
-  <div class="site-arrival" aria-label="K 落地成型后旋转一圈立起，网页内容从四周旋转进场">
+  <div class="site-arrival" aria-label="鸽子携带信封飞入，信封落地后旋转变成 K，K 旋转立起，网页内容从四周旋转进场">
     <div class="arrival-curtain" aria-hidden="true"></div>
     <div class="arrival-flock" aria-hidden="true">
       <div class="intro-dove" data-dove></div>
@@ -52,6 +52,7 @@
         <linearGradient id="arrival-k-side" x1="280" y1="55" x2="45" y2="315" gradientUnits="userSpaceOnUse"><stop data-tone="#738b87" data-alpha=".4" stop-color="#425b4b"/><stop offset="1" data-tone="#f5faf7" data-alpha=".07" stop-color="#425b4b"/></linearGradient>
         <filter id="arrival-k-shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="24" stdDeviation="20" flood-color="#47615b" flood-opacity=".13"/></filter>
       </defs>
+      <g class="arrival-paper">
       <g class="arrival-k-faces" filter="url(#arrival-k-shadow)" stroke="#ffffff" stroke-opacity="0" stroke-linejoin="round">
         <path data-face="stem-side" fill="url(#arrival-k-side)" stroke-width="1"/>
         <path data-face="stem-front" fill="url(#arrival-k-front)" stroke-width="1.6"/>
@@ -63,7 +64,18 @@
         <path data-face="lower-front" fill="url(#arrival-k-front)" stroke-width="1.4"/>
         <path data-face="lower-end" data-tone="#eef7ef" fill="#425b4b"/>
       </g>
+      <g class="arrival-envelope-details">
+        <rect x="31" y="160" width="339" height="257" rx="3"/>
+        <path d="M31 417 160 292M370 417 242 292"/>
+        <g class="arrival-envelope-flap"><path d="M31 160H370L209 291Q201 298 193 291Z"/></g>
+        <g stroke="#8a9b7a" stroke-width="1.4">
+          <rect x="292" y="337" width="49" height="49" rx="2" stroke-dasharray="3 3"/>
+          <path d="M306 348V375M309 362 327 348M309 362 329 375" stroke-width="2.5"/>
+          <path d="M64 362H146M64 373H119" opacity=".6"/>
+        </g>
+      </g>
       <path class="arrival-k-highlights" d="M82 66V391M192 215 315 67M199 260 343 392" fill="none" stroke="#fff" stroke-width="2" opacity="0"/>
+      </g>
     </svg>
     <svg class="arrival-field arrival-field-front" viewBox="0 0 900 700" fill="none" aria-hidden="true"></svg>
     <button class="arrival-skip" type="button">跳过开场 <span aria-hidden="true">↗</span></button>
@@ -241,7 +253,7 @@
       <footer><span>© 2026 谢凯伦 / KELEN — PERSONAL ARCHIVE</span><span>DESIGNED AS AN OPEN SYSTEM</span><a href="#home">BACK TO TOP ↑</a></footer>
     </main>
   </div>
-  <script src="arrival.js?v=20261006-spiral" defer></script>
+  <script src="arrival.js?v=20261006-envelope" defer></script>
   <script src="interaction.js?v=20261006-scene" defer></script>
   <script src="interests.js?v=20261006-wave" defer></script>
 </body>

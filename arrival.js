@@ -31,7 +31,10 @@
   const mark = arrival.querySelector('.arrival-mark');
   const ground = arrival.querySelector('.arrival-ground');
   const faces = mark.querySelector('.arrival-k-faces');
+  const paper = mark.querySelector('.arrival-paper');
   const highlights = mark.querySelector('.arrival-k-highlights');
+  const envelopeDetails = mark.querySelector('.arrival-envelope-details');
+  const envelopeFlap = mark.querySelector('.arrival-envelope-flap');
   const sourceDrawing = frame.querySelector('.scene-drawing');
   const tether = arrival.querySelector('.arrival-tether');
   const thread = tether.querySelector('path');
@@ -54,20 +57,20 @@
   let revealing = false;
   const entranceAnimations = [];
 
-  // Every face moves from a flat letter to the matching face of the homepage K.
+  // The envelope's paper panels unfold into the matching glass faces of the K.
   const geometry = {
-    'stem-side': [[[50,19],[50,19],[50,423],[50,423]], [[31,28],[82,46],[82,417],[31,399]]],
-    'stem-front': [[[50,19],[110,19],[110,423],[50,423]], [[82,46],[132,28],[132,399],[82,417]]],
-    'stem-top': [[[50,19],[80,19],[110,19],[80,19]], [[31,28],[81,9],[132,28],[82,46]]],
-    'upper-side': [[[110,188],[245,19],[245,19],[110,188]], [[132,199],[241,62],[290,80],[180,217]]],
-    'upper-front': [[[110,188],[166,188],[245,19],[313,19],[185,212],[163,235],[110,248]], [[132,199],[180,217],[290,80],[339,62],[228,217],[180,254],[132,236]]],
-    'upper-top': [[[245,19],[275,19],[313,19],[275,19]], [[241,62],[290,43],[339,62],[290,80]]],
-    'lower-side': [[[110,235],[110,235],[260,423],[260,423],[110,248]], [[132,236],[180,254],[321,405],[271,423],[132,273]]],
-    'lower-front': [[[110,235],[175,222],[336,423],[260,423]], [[180,254],[228,236],[370,386],[321,405]]],
-    'lower-end': [[[260,423],[336,423],[336,423],[260,423]], [[271,423],[321,405],[370,386],[321,405]]]
+    'stem-side': [[[31,160],[31,160],[31,417],[31,417]], [[31,28],[82,46],[82,417],[31,399]]],
+    'stem-front': [[[31,160],[132,160],[132,417],[31,417]], [[82,46],[132,28],[132,399],[82,417]]],
+    'stem-top': [[[31,160],[82,160],[132,160],[82,160]], [[31,28],[81,9],[132,28],[82,46]]],
+    'upper-side': [[[132,160],[370,160],[370,160],[132,160]], [[132,199],[241,62],[290,80],[180,217]]],
+    'upper-front': [[[132,160],[251,160],[370,160],[370,225],[370,291],[251,291],[132,291]], [[132,199],[180,217],[290,80],[339,62],[228,217],[180,254],[132,236]]],
+    'upper-top': [[[251,160],[310,160],[370,160],[310,160]], [[241,62],[290,43],[339,62],[290,80]]],
+    'lower-side': [[[132,291],[132,291],[370,417],[370,417],[132,417]], [[132,236],[180,254],[321,405],[271,423],[132,273]]],
+    'lower-front': [[[132,291],[370,291],[370,417],[132,417]], [[180,254],[228,236],[370,386],[321,405]]],
+    'lower-end': [[[132,417],[251,417],[370,417],[251,417]], [[271,423],[321,405],[370,386],[321,405]]]
   };
   const faceNodes = [...mark.querySelectorAll('[data-face]')].map(node => ({node, points:geometry[node.dataset.face]}));
-  const ink = [66,91,75];
+  const ink = [234,239,221];
   const paints = [...mark.querySelectorAll('[data-tone]')].map(node => ({
     node,
     color:node.dataset.tone.slice(1).match(/.{2}/g).map(part => parseInt(part,16)),
@@ -86,6 +89,11 @@
     });
     faces.setAttribute('stroke-opacity', p);
     highlights.setAttribute('opacity', .7 * smooth((p - .35) / .65));
+    envelopeDetails.setAttribute('opacity', 1 - smooth((p - .1) / .55));
+    const flapOpening = Math.cos(Math.PI * smooth(p / .55));
+    envelopeFlap.setAttribute('transform', `translate(0 160) scale(1 ${flapOpening}) translate(0 -160)`);
+    // Spin in the paper's plane so it stays flat on the floor while unfolding.
+    paper.setAttribute('transform', `rotate(${360*p} 205 ${mix(288.5,230,p)})`);
   }
   formK(0);
 
@@ -219,11 +227,9 @@
       const matrix = carrier.getScreenCTM();
       if (matrix) {
         const beak = new DOMPoint(33,69).matrixTransform(matrix);
-        drawMark({x:beak.x+baseWidth*.85,y:beak.y+baseHeight*.55+Math.sin(elapsed/220)*5,angle:-9+Math.sin(elapsed/280)*7,w:baseWidth,h:baseHeight});
-        const angle = markPosition.angle * Math.PI/180;
-        const localX = (110/410-.5)*baseWidth, localY = (19/460-.5)*baseHeight;
-        const anchorX = markPosition.x + localX*Math.cos(angle)-localY*Math.sin(angle);
-        const anchorY = markPosition.y + localX*Math.sin(angle)+localY*Math.cos(angle);
+        drawMark({x:beak.x+baseWidth*.85,y:beak.y+baseHeight*.34+Math.sin(elapsed/220)*5,angle:-9+Math.sin(elapsed/280)*7,w:baseWidth,h:baseHeight});
+        const anchor = new DOMPoint(50,180).matrixTransform(mark.getScreenCTM());
+        const anchorX = anchor.x, anchorY = anchor.y;
         tether.setAttribute('viewBox',`0 0 ${vw} ${vh}`);
         thread.setAttribute('d',`M${beak.x} ${beak.y}Q${(beak.x+anchorX)/2} ${Math.max(beak.y,anchorY)+16} ${anchorX} ${anchorY}`);
         tether.style.opacity = '1';
@@ -252,7 +258,7 @@
       const floorX = mix(vw*.52,target.x,stand);
       const floorY = mix(vh*.72,target.y+target.h*.42,stand);
       formK(form);
-      drawMark({x:floorX,y:floorY-height*.42,w:width,h:height,tilt:76*(1-stand),yaw:-360*stand,angle:mix(0,target.angle,stand)+22*Math.sin(stand*Math.PI)});
+      drawMark({x:floorX,y:floorY-height*.42,w:width,h:height,tilt:76*(1-stand),yaw:-360*stand,angle:360+mix(0,target.angle,stand)+22*Math.sin(stand*Math.PI)});
       const floorWidth = Math.min(vw*.9,Math.max(300,target.w*1.6));
       const floorHeight = floorWidth*170/600;
       Object.assign(ground.style,{left:`${floorX-floorWidth/2}px`,top:`${floorY-floorHeight*110/170}px`,width:`${floorWidth}px`,height:`${floorHeight}px`,opacity:String((1-smooth((stand-.15)/.7))*.8)});
