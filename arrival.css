@@ -1,13 +1,13 @@
-/* A silhouette flock delivers a letter that unfolds into the live page. */
+/* A flat K grows glass faces and joins the orbiting K on the homepage. */
 :root{--arrival-tempo:.7}
 .site-arrival{display:none}
 html.intro-pending{overflow:hidden}
 .intro-pending body{background:var(--paper,#eeede8)}
 .intro-pending .site-frame{opacity:0;pointer-events:none}
-.intro-unfolding .site-frame{animation:arrival-interface calc(1.55s * var(--arrival-tempo)) cubic-bezier(.22,.7,.2,1) both}
+.intro-revealing .site-frame{animation:arrival-interface calc(1.1s * var(--arrival-tempo)) ease-out both}
 .intro-pending .site-arrival{display:block;position:fixed;inset:0;z-index:1000;isolation:isolate;overflow:clip;pointer-events:none}
 .arrival-curtain{position:absolute;inset:0;background:radial-gradient(ellipse at 83% 78%,#f7f8f1 0%,#e9ece3 48%,#e4e8de 100%)}
-.intro-unfolding .arrival-curtain{animation:arrival-curtain calc(.2s * var(--arrival-tempo)) linear both}
+.intro-revealing .arrival-curtain{animation:arrival-curtain calc(.65s * var(--arrival-tempo)) ease-out both}
 .arrival-flock{position:absolute;inset:0;pointer-events:none}
 .intro-dove{--dove-size:170px;--launch-y:75vh;--bend-one:49vh;--bend-two:26vh;--exit-y:11vh;--flight-delay:0s;--flight-duration:3.12s;--flap-speed:.63s;--flap-phase:-.12s;--bank-start:23deg;--bank-mid:17deg;--bank-late:9deg;--bank-end:3deg;--sway-speed:1.41s;--dove-ink:#869186;position:absolute;left:100%;top:0;width:var(--dove-size);opacity:0;will-change:transform}
 .intro-running .intro-dove{animation:arrival-flight calc(var(--flight-duration) * var(--arrival-tempo)) calc(var(--flight-delay) * var(--arrival-tempo)) linear both}
@@ -22,44 +22,21 @@ html.intro-pending{overflow:hidden}
 .intro-dove:nth-child(7){--dove-size:157px;--launch-y:90vh;--bend-one:50vh;--bend-two:23vh;--exit-y:16vh;--flight-delay:1.11s;--flight-duration:2.7s;--flap-speed:.61s;--flap-phase:-.23s;--bank-start:32deg;--bank-mid:27deg;--bank-late:15deg;--bank-end:6deg;--sway-speed:1.53s;--dove-ink:#8a9885}
 .arrival-tether{position:absolute;inset:0;width:100%;height:100%;overflow:visible;fill:none;stroke:#6e7c62;stroke-width:1.2;stroke-linecap:round;opacity:0;transition:opacity .12s}
 .intro-released .arrival-tether{opacity:0!important}
-.arrival-mail{position:absolute;top:0;left:0;width:clamp(112px,12.8vw,164px);aspect-ratio:160/108;opacity:0;will-change:transform;transform-origin:50% 50%}
-.arrival-envelope{position:absolute;inset:0;perspective:650px;filter:drop-shadow(0 8px 10px #3a49391b)}
-.mail-back{position:absolute;inset:0;background:#f3f1e7;border:1px solid #a8b19c;border-radius:2px}
-.mail-flap{position:absolute;top:0;left:0;width:100%;height:64%;z-index:4;transform-origin:50% 0;backface-visibility:visible;transform-style:preserve-3d}
-.mail-flap svg{display:block;width:100%;height:100%;overflow:visible;fill:#f6f4eb;stroke:#b8bfa9;stroke-width:.8}
-.mail-pocket{position:absolute;inset:0;width:100%;height:100%;z-index:3;overflow:visible;stroke:#b3bba5;stroke-width:.65}
-.pocket-left{fill:#eceee2}.pocket-right{fill:#e4e8d8}.pocket-bottom{fill:#f3f3e9}.mail-pocket .pocket-fold{fill:none;stroke:#c0c6b3;stroke-width:.65}
-.mail-seal{position:absolute;top:47%;left:50%;display:grid;place-items:center;width:23px;height:23px;border-radius:50%;transform:translate(-50%,-50%);background:#829868;color:#f6f8ed;font:500 10px var(--mono,monospace);box-shadow:0 1px 2px #4f61363b;z-index:5}
-.mail-address{position:absolute;bottom:12%;left:0;width:100%;text-align:center;color:#7b886b;font:5px var(--mono,monospace);letter-spacing:.13em;z-index:4}
-.arrival-letter{position:absolute;left:8%;top:8%;width:84%;height:83%;z-index:2;padding:9% 9%;background:#fffef7;border:1px solid #d5d9c9;box-shadow:0 0 5px #4c5e4014;display:flex;flex-direction:column;overflow:hidden;transform-origin:50% 100%}
-.letter-from{font:4px var(--mono,monospace);letter-spacing:.14em;color:#7a866e;white-space:nowrap}
-.arrival-letter b{font:800 clamp(16px,1.8vw,24px)/1 var(--sans,sans-serif);letter-spacing:-.06em;color:#344835;margin:7% 0 5%}
-.letter-rule{height:1px;flex-shrink:0;background:#c9d0bb;margin-bottom:7%}
-.letter-greeting{font:4px/1.8 var(--sans,sans-serif);color:#839175;white-space:nowrap}
-.arrival-letter i{height:1px;background:#e2e6d7;margin-top:5%;width:85%;flex-shrink:0}.arrival-letter i+i{width:65%}
-.arrival-letter small{font:3px var(--mono,monospace);letter-spacing:.08em;color:#98a18b;white-space:nowrap;margin-top:auto}
-.arrival-mail-shadow{position:absolute;left:52%;top:calc(63vh + 44px);width:160px;height:14px;background:#72806526;border-radius:50%;filter:blur(10px);transform:translateX(-50%) scale(.5);opacity:0}
-.intro-landed .arrival-mail-shadow{animation:arrival-shadow calc(.35s * var(--arrival-tempo)) ease-out both}
-.intro-opening .mail-seal{animation:arrival-unseal calc(.3s * var(--arrival-tempo)) ease-out both}
-.intro-opening .mail-flap{animation:arrival-flap calc(.65s * var(--arrival-tempo)) cubic-bezier(.4,0,.2,1) both}
-.intro-letter .arrival-letter{animation:arrival-letter calc(.7s * var(--arrival-tempo)) cubic-bezier(.22,.7,.2,1) both}
-.intro-unfolding .arrival-letter{opacity:0;transition:opacity calc(.15s * var(--arrival-tempo))}
-.intro-unfolding .arrival-envelope{animation:arrival-envelope-away calc(.65s * var(--arrival-tempo)) ease-in both}
-.intro-unfolding .arrival-mail-shadow{opacity:0;animation:none;transition:opacity .3s}
-.arrival-paper{display:none;position:absolute;left:var(--paper-left);top:var(--paper-top);width:var(--paper-width);height:var(--paper-height);border:1px solid #b6c0a688;box-shadow:0 8px 35px #5365481a;pointer-events:none}
-.arrival-paper:before,.arrival-paper:after{content:"";position:absolute;left:0;right:0;top:33%;height:1px;background:#8fa07530;box-shadow:0 1px 0 #ffffffc7}.arrival-paper:after{top:66%}
-.intro-unfolding .arrival-paper{display:block;animation:arrival-paper calc(1.55s * var(--arrival-tempo)) cubic-bezier(.22,.7,.2,1) both}
+.arrival-mark{position:absolute;top:0;left:0;width:clamp(124px,12.8vw,164px);aspect-ratio:410/460;overflow:visible;opacity:0;transform-origin:50% 50%;will-change:transform,width,height}
+.arrival-field{position:absolute;overflow:visible;opacity:0;pointer-events:none}
+.arrival-field-back{z-index:2}.arrival-mark{z-index:3}.arrival-field-front{z-index:4}
+.arrival-trails{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:#78a39b;stroke-width:1;stroke-linecap:round;opacity:0;z-index:1}
+.arrival-trails path{stroke-dasharray:1 1;stroke-dashoffset:1}
+.arrival-trails path:nth-child(2){stroke:#a7b874;stroke-width:.8}.arrival-trails path:nth-child(3){stroke:#91b6af;stroke-width:.8}.arrival-trails path:nth-child(4){stroke:#638c83}
+/* Pause the real scene while the opening copies move into exactly the same place. */
+.intro-pending .site-frame .scene-glass,.intro-pending .site-frame .scene-halo,.intro-pending .site-frame .scene-orbit,.intro-pending .site-frame .scene-ribbon{animation-play-state:paused!important}
+.intro-pending:not(.intro-handoff) .site-frame .scene-glass,.intro-pending:not(.intro-handoff) .site-frame .scene-halo,.intro-pending:not(.intro-handoff) .site-frame .scene-orbit,.intro-pending:not(.intro-handoff) .site-frame .scene-ribbon{visibility:hidden}
+.intro-handoff .arrival-mark,.intro-handoff .arrival-field{visibility:hidden}
 .arrival-skip{position:absolute;z-index:10;right:max(30px,4vw);top:27px;min-height:42px;padding:9px 0 9px 14px;border:0;background:transparent;color:#63705c;font:9px var(--mono,monospace);letter-spacing:.07em;cursor:pointer;pointer-events:auto;transition:color .2s}
 .arrival-skip span{margin-left:14px;font-size:14px}.arrival-skip:hover{color:#29382a}.arrival-skip:focus-visible{outline:1px solid currentColor;outline-offset:5px}
 @keyframes arrival-flight{0%{opacity:0;transform:translate3d(0,var(--launch-y),0) rotate(var(--bank-start))}6%{opacity:1}27%{opacity:1;transform:translate3d(calc(-27vw - 75.6px),var(--bend-one),0) rotate(var(--bank-mid))}62%{opacity:1;transform:translate3d(calc(-62vw - 173.6px),var(--bend-two),0) rotate(var(--bank-late))}100%{opacity:1;transform:translate3d(calc(-100vw - 280px),var(--exit-y),0) rotate(var(--bank-end))}}
 @keyframes arrival-sway{0%,100%{transform:translateY(-3px) rotate(-1deg)}50%{transform:translateY(5px) rotate(1.5deg)}}
-@keyframes arrival-shadow{to{opacity:1;transform:translateX(-50%) scale(1)}}
-@keyframes arrival-unseal{to{opacity:0;transform:translate(-50%,25%) scale(.7)}}
-@keyframes arrival-flap{0%{transform:rotateX(0);z-index:4}48%{z-index:4}49%{z-index:1}100%{transform:rotateX(180deg);z-index:1}}
-@keyframes arrival-letter{0%{transform:translateY(0)}100%{transform:translateY(-108%)}}
-@keyframes arrival-envelope-away{to{opacity:0;transform:translateY(55px) scale(.94)}}
 @keyframes arrival-curtain{to{opacity:0}}
-@keyframes arrival-paper{0%{opacity:1}50%{left:4vw;top:10vh;width:92vw;height:80vh;opacity:.8}100%{left:0;top:0;width:100vw;height:100vh;opacity:0}}
-@keyframes arrival-interface{0%{opacity:1;clip-path:inset(var(--sheet-top) var(--sheet-right) calc(100% - var(--sheet-bottom)) var(--sheet-left) round 2px)}50%{opacity:1;clip-path:inset(var(--unfold-top) var(--unfold-right) calc(100% - var(--unfold-bottom)) var(--unfold-left) round 2px)}100%{opacity:1;clip-path:inset(var(--viewport-top) var(--viewport-right) calc(100% - var(--viewport-bottom)) var(--viewport-left) round 0)}}
-@media(max-width:680px){.intro-dove{width:calc(var(--dove-size) * .68)}.arrival-skip{top:14px;right:6%;font-size:8px}.arrival-mail-shadow{width:112px;top:calc(63vh + 34px)}}
-@media(prefers-reduced-motion:reduce){html.intro-pending{overflow:visible}.intro-pending .site-arrival{display:none!important}.intro-pending .site-frame{opacity:1;clip-path:none;animation:none!important;pointer-events:auto}}
+@keyframes arrival-interface{from{opacity:0}to{opacity:1}}
+@media(max-width:680px){.intro-dove{width:calc(var(--dove-size) * .68)}.arrival-skip{top:14px;right:6%;font-size:8px}}
+@media(prefers-reduced-motion:reduce){html.intro-pending{overflow:visible}.intro-pending .site-arrival{display:none!important}.intro-pending .site-frame{opacity:1;animation:none!important;pointer-events:auto}}

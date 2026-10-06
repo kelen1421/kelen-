@@ -4,9 +4,8 @@
   const frame = document.querySelector('.site-frame');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const tempo = Math.max(.1, parseFloat(getComputedStyle(root).getPropertyValue('--arrival-tempo')) || 1);
-  const introClasses = ['intro-pending', 'intro-running', 'intro-released', 'intro-landed', 'intro-opening', 'intro-letter', 'intro-unfolding'];
+  const introClasses = ['intro-pending', 'intro-running', 'intro-released', 'intro-landed', 'intro-forming', 'intro-revealing', 'intro-handoff'];
   if (!arrival || !frame) return;
-
   if (!root.classList.contains('intro-pending') || reducedMotion.matches) {
     clearTimeout(window.arrivalFallback);
     root.classList.remove(...introClasses);
@@ -21,124 +20,202 @@
     const speed = `${parseFloat(style.getPropertyValue('--flap-speed')) * tempo}s`;
     const phase = parseFloat(style.getPropertyValue('--flap-phase')) * tempo;
     dove.querySelectorAll('animateTransform').forEach(animation => {
-      const farWing = animation.closest('.dove-wing-far');
       animation.setAttribute('dur', speed);
-      animation.setAttribute('begin', `${phase - (farWing ? .11 * tempo : 0)}s`);
+      animation.setAttribute('begin', `${phase - (animation.closest('.dove-wing-far') ? .11 * tempo : 0)}s`);
     });
   });
   template.remove();
   frame.inert = true;
 
   const carrier = arrival.querySelector('.intro-carrier .arrival-bird');
-  const mail = arrival.querySelector('.arrival-mail');
-  const letter = arrival.querySelector('.arrival-letter');
+  const mark = arrival.querySelector('.arrival-mark');
+  const faces = mark.querySelector('.arrival-k-faces');
+  const highlights = mark.querySelector('.arrival-k-highlights');
+  const sourceDrawing = frame.querySelector('.scene-drawing');
   const tether = arrival.querySelector('.arrival-tether');
   const thread = tether.querySelector('path');
-  const RELEASE = 1900;
-  const LAND = 2800;
-  const OPEN = 3020;
-  const LETTER = 3330;
-  const UNFOLD = 4100;
-  const END = 5780;
-  const cssVariables = [];
+  const fields = [...arrival.querySelectorAll('.arrival-field')];
+  const trails = arrival.querySelector('.arrival-trails');
+  const trailPaths = [...trails.querySelectorAll('path')];
+  const baseWidth = mark.clientWidth;
+  const baseHeight = baseWidth * 460 / 410;
+  const RELEASE = 1900, LAND = 2800, FORM = 2800, FORMED = 4300;
+  const REVEAL = 4000, HANDOFF = 5480, END = 5780;
+  const clamp = value => Math.min(1, Math.max(0, value));
+  const smooth = value => { const p = clamp(value); return p * p * (3 - 2 * p); };
+  const mix = (from, to, p) => from + (to - from) * p;
   let finished = false;
   let animationFrame;
   let startedAt;
   let releasePoint;
-  let mailPosition;
-  let unfolding = false;
+  let markPosition;
+  let target;
 
-  function setVariable(name, value) {
-    root.style.setProperty(name, `${value}px`);
-    cssVariables.push(name);
-  }
-
-  function drawMail(position) {
-    const {width, height} = mail.getBoundingClientRect();
-    // offsetWidth/Height stay stable while the envelope rotates.
-    const w = mail.offsetWidth || width;
-    const h = mail.offsetHeight || height;
-    mail.style.transform = `translate3d(${position.x - w / 2}px,${position.y - h / 2}px,0) rotate(${position.angle}deg)`;
-    return {w, h};
-  }
-
-  function unfoldPage() {
-    unfolding = true;
-    const paper = letter.getBoundingClientRect();
-    const page = frame.getBoundingClientRect();
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    setVariable('--paper-left', paper.left);
-    setVariable('--paper-top', paper.top);
-    setVariable('--paper-width', paper.width);
-    setVariable('--paper-height', paper.height);
-    // Clip the real page to the sheet, including when entering a deep link.
-    const regions = {
-      sheet: {left:paper.left, top:paper.top, right:paper.right, bottom:paper.bottom},
-      unfold: {left:vw * .04, top:vh * .1, right:vw * .96, bottom:vh * .9},
-      viewport: {left:0, top:0, right:vw, bottom:vh}
-    };
-    Object.entries(regions).forEach(([name, region]) => {
-      setVariable(`--${name}-left`, Math.max(0, region.left - page.left));
-      setVariable(`--${name}-right`, Math.max(0, page.right - region.right));
-      setVariable(`--${name}-top`, Math.max(0, region.top - page.top));
-      setVariable(`--${name}-bottom`, Math.min(page.height, region.bottom - page.top));
+  // Every face moves from a flat letter to the matching face of the homepage K.
+  const geometry = {
+    'stem-side': [[[50,19],[50,19],[50,423],[50,423]], [[31,28],[82,46],[82,417],[31,399]]],
+    'stem-front': [[[50,19],[110,19],[110,423],[50,423]], [[82,46],[132,28],[132,399],[82,417]]],
+    'stem-top': [[[50,19],[80,19],[110,19],[80,19]], [[31,28],[81,9],[132,28],[82,46]]],
+    'upper-side': [[[110,188],[245,19],[245,19],[110,188]], [[132,199],[241,62],[290,80],[180,217]]],
+    'upper-front': [[[110,188],[166,188],[245,19],[313,19],[185,212],[163,235],[110,248]], [[132,199],[180,217],[290,80],[339,62],[228,217],[180,254],[132,236]]],
+    'upper-top': [[[245,19],[275,19],[313,19],[275,19]], [[241,62],[290,43],[339,62],[290,80]]],
+    'lower-side': [[[110,235],[110,235],[260,423],[260,423],[110,248]], [[132,236],[180,254],[321,405],[271,423],[132,273]]],
+    'lower-front': [[[110,235],[175,222],[336,423],[260,423]], [[180,254],[228,236],[370,386],[321,405]]],
+    'lower-end': [[[260,423],[336,423],[336,423],[260,423]], [[271,423],[321,405],[370,386],[321,405]]]
+  };
+  const faceNodes = [...mark.querySelectorAll('[data-face]')].map(node => ({node, points:geometry[node.dataset.face]}));
+  const ink = [66,91,75];
+  const paints = [...mark.querySelectorAll('[data-tone]')].map(node => ({
+    node,
+    color:node.dataset.tone.slice(1).match(/.{2}/g).map(part => parseInt(part,16)),
+    alpha:Number(node.dataset.alpha || 1),
+    stop:node.tagName.toLowerCase() === 'stop'
+  }));
+  function formK(p) {
+    faceNodes.forEach(({node, points:[flat, glass]}) => {
+      const path = flat.map(([x,y],i) => `${mix(x,glass[i][0],p)},${mix(y,glass[i][1],p)}`).join('L');
+      node.setAttribute('d', `M${path}Z`);
+      if (node.dataset.face.endsWith('side')) node.setAttribute('stroke-opacity', p * .6);
     });
-    root.classList.add('intro-unfolding');
+    paints.forEach(({node,color,alpha,stop}) => {
+      node.setAttribute(stop ? 'stop-color' : 'fill', `rgb(${color.map((end,i) => Math.round(mix(ink[i],end,p))).join(',')})`);
+      if (stop) node.setAttribute('stop-opacity', mix(1,alpha,p));
+    });
+    faces.setAttribute('stroke-opacity', p);
+    highlights.setAttribute('opacity', .7 * smooth((p - .35) / .65));
+  }
+  formK(0);
+
+  // Reuse the homepage's rings and ribbon so the last opening frame joins it seamlessly.
+  const orbitLines = [];
+  fields.forEach((field,index) => {
+    const defs = sourceDrawing.querySelector('defs').cloneNode(true);
+    const references = new Map();
+    defs.querySelectorAll('[id]').forEach(node => {
+      const oldId = node.id;
+      node.id = `arrival-field-${index}-${oldId}`;
+      references.set(oldId,node.id);
+    });
+    field.append(defs);
+    const groups = index === 0 ? ['.scene-halo','.scene-orbit'] : ['.scene-ribbon'];
+    groups.forEach(selector => {
+      const source = sourceDrawing.querySelector(selector);
+      const clone = source.cloneNode(true);
+      const style = getComputedStyle(source);
+      clone.removeAttribute('class');
+      clone.style.transform = style.transform;
+      clone.style.transformOrigin = style.transformOrigin;
+      clone.style.opacity = style.opacity;
+      clone.querySelectorAll('[fill],[filter]').forEach(node => {
+        ['fill','filter'].forEach(attribute => {
+          const value = node.getAttribute(attribute);
+          if (value?.startsWith('url(#')) {
+            const id = value.slice(5,-1);
+            if (references.has(id)) node.setAttribute(attribute,`url(#${references.get(id)})`);
+          }
+        });
+      });
+      clone.querySelectorAll('circle,ellipse,path').forEach(node => {
+        if (node.tagName.toLowerCase() === 'circle' && Number(node.getAttribute('r')) < 10) return;
+        if (index === 1 && node.getAttribute('fill')) return;
+        orbitLines.push({node,dashes:node.getAttribute('stroke-dasharray') || 'none'});
+        node.setAttribute('pathLength','1');
+        node.style.strokeDasharray = '1 1';
+        node.style.strokeDashoffset = '1';
+      });
+      field.append(clone);
+    });
+  });
+
+  function measureTarget() {
+    const vw = innerWidth, vh = innerHeight;
+    let rectangle = sourceDrawing.getBoundingClientRect();
+    let matrix = sourceDrawing.querySelector('.scene-glass').getScreenCTM();
+    let orbitMatrix = sourceDrawing.getScreenCTM();
+    if (!matrix || rectangle.bottom < 60 || rectangle.top > vh * .9) {
+      const width = Math.min(vw * .96,950), height = Math.min(vh * .92,700);
+      rectangle = {left:(vw-width)/2,top:(vh-height)/2,width,height};
+      const scale = Math.min(width/900,height/700);
+      matrix = new DOMMatrix([scale,0,0,scale,rectangle.left+(width-900*scale)/2,rectangle.top+(height-700*scale)/2]);
+      orbitMatrix = matrix;
+    }
+    fields.forEach(field => {
+      Object.assign(field.style,{left:`${rectangle.left}px`,top:`${rectangle.top}px`,width:`${rectangle.width}px`,height:`${rectangle.height}px`});
+    });
+    const center = new DOMPoint(525,335).matrixTransform(matrix);
+    const orbit = new DOMPoint(435,334).matrixTransform(orbitMatrix);
+    const scale = Math.hypot(matrix.a,matrix.b);
+    const radius = 259 * Math.hypot(orbitMatrix.a,orbitMatrix.b);
+    const x = orbit.x, y = orbit.y, r = radius;
+    trails.setAttribute('viewBox',`0 0 ${vw} ${vh}`);
+    const paths = [
+      `M-80 ${vh*.4}C${vw*.22} ${vh*.07} ${x-r*1.1} ${y-r*.5} ${x-r*.72} ${y+r*.5}S${x+r*.45} ${y+r*.95} ${x+r*.8} ${y-r*.4}`,
+      `M${vw+80} ${vh*.2}C${vw*.72} ${vh*.02} ${x+r*1.2} ${y+r*.6} ${x+r*.9} ${y+r*.25}S${x-r*.3} ${y-r*1.1} ${x-r*.75} ${y-r*.22}`,
+      `M${vw*.45} -80C${vw*.78} ${vh*.14} ${x+r*.9} ${y-r} ${x+r*.3} ${y-r*.9}S${x-r*1.1} ${y+r*.1} ${x-r*.4} ${y+r*.8}`,
+      `M${vw*.27} ${vh+80}C${vw*.07} ${vh*.7} ${x-r*.4} ${y+r*1.1} ${x-r*.1} ${y+r*.8}S${x+r*.9} ${y-r*.1} ${x+r*.35} ${y-r*.75}`
+    ];
+    trailPaths.forEach((path,i) => path.setAttribute('d',paths[i]));
+    return {x:center.x,y:center.y,w:410*scale,h:460*scale,angle:Math.atan2(matrix.b,matrix.a)*180/Math.PI};
+  }
+
+  function drawMark(position) {
+    markPosition = position;
+    Object.assign(mark.style,{
+      width:`${position.w}px`,height:`${position.h}px`,
+      transform:`translate3d(${position.x-position.w/2}px,${position.y-position.h/2}px,0) rotate(${position.angle}deg)`,
+      opacity:'1'
+    });
   }
 
   function tick(now) {
     if (finished) return;
-    // One clock speeds up the flight, drop, opening and page reveal together.
     const elapsed = (now - startedAt) / tempo;
     if (elapsed >= END) { finish(); return; }
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const w = mail.offsetWidth;
-    const h = mail.offsetHeight;
+    const vw = innerWidth, vh = innerHeight;
     if (!releasePoint) {
-      // The SVG matrix keeps the string tied to the beak during flapping and banking.
       const matrix = carrier.getScreenCTM();
       if (matrix) {
-        const beak = new DOMPoint(33, 69).matrixTransform(matrix);
-        mailPosition = {
-          x:beak.x + w * .95,
-          y:beak.y + h * .78 + Math.sin(elapsed / 220) * 5,
-          angle:-9 + Math.sin(elapsed / 280) * 7
-        };
-        drawMail(mailPosition);
-        mail.style.opacity = '1';
-        tether.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
-        const radians = mailPosition.angle * Math.PI / 180;
-        const anchorX = mailPosition.x + Math.sin(radians) * h * .5;
-        const anchorY = mailPosition.y - Math.cos(radians) * h * .5;
-        thread.setAttribute('d', `M${beak.x} ${beak.y} Q${(beak.x + anchorX) / 2} ${Math.max(beak.y, anchorY) + 16} ${anchorX} ${anchorY}`);
+        const beak = new DOMPoint(33,69).matrixTransform(matrix);
+        drawMark({x:beak.x+baseWidth*.85,y:beak.y+baseHeight*.55+Math.sin(elapsed/220)*5,angle:-9+Math.sin(elapsed/280)*7,w:baseWidth,h:baseHeight});
+        const angle = markPosition.angle * Math.PI/180;
+        const localX = (110/410-.5)*baseWidth, localY = (19/460-.5)*baseHeight;
+        const anchorX = markPosition.x + localX*Math.cos(angle)-localY*Math.sin(angle);
+        const anchorY = markPosition.y + localX*Math.sin(angle)+localY*Math.cos(angle);
+        tether.setAttribute('viewBox',`0 0 ${vw} ${vh}`);
+        thread.setAttribute('d',`M${beak.x} ${beak.y}Q${(beak.x+anchorX)/2} ${Math.max(beak.y,anchorY)+16} ${anchorX} ${anchorY}`);
         tether.style.opacity = '1';
       }
-      if (elapsed >= RELEASE && mailPosition) {
-        releasePoint = {...mailPosition};
+      if (elapsed >= RELEASE && markPosition) {
+        releasePoint = {...markPosition};
         root.classList.add('intro-released');
       }
     }
     if (releasePoint && elapsed < LAND) {
-      const p = Math.min(1, (elapsed - RELEASE) / (LAND - RELEASE));
-      const drift = 1 - Math.pow(1 - p, 2);
-      const fall = p < .84 ? Math.pow(p / .84, 2) : 1;
-      const bounce = p < .84 ? 0 : -Math.sin((p - .84) / .16 * Math.PI) * 8;
-      mailPosition = {
-        x:releasePoint.x + (vw * .52 - releasePoint.x) * drift,
-        y:releasePoint.y + (vh * .63 - releasePoint.y) * fall + bounce,
-        // A full turn slows into an upright landing before the flap opens.
-        angle:releasePoint.angle * (1 - drift) + 360 * drift
-      };
-      drawMail(mailPosition);
-    } else if (releasePoint && !unfolding) {
-      drawMail({x:vw * .52, y:vh * .63, angle:0});
-      root.classList.add('intro-landed');
+      const p = clamp((elapsed-RELEASE)/(LAND-RELEASE));
+      const drift = 1-Math.pow(1-p,2);
+      const fall = p<.84 ? Math.pow(p/.84,2) : 1;
+      const bounce = p<.84 ? 0 : -Math.sin((p-.84)/.16*Math.PI)*8;
+      drawMark({x:mix(releasePoint.x,vw*.52,drift),y:mix(releasePoint.y,vh*.63,fall)+bounce,angle:releasePoint.angle*(1-drift)+360*drift,w:baseWidth,h:baseHeight});
     }
-    if (elapsed >= OPEN) root.classList.add('intro-opening');
-    if (elapsed >= LETTER) root.classList.add('intro-letter');
-    if (elapsed >= UNFOLD && !unfolding) unfoldPage();
+    if (releasePoint && elapsed >= FORM) {
+      if (!target) {
+        target = measureTarget();
+        root.classList.add('intro-landed','intro-forming');
+      }
+      const p = smooth((elapsed-FORM)/(FORMED-FORM));
+      formK(p);
+      drawMark({x:mix(vw*.52,target.x,p),y:mix(vh*.63,target.y,p),w:mix(baseWidth,target.w,p),h:mix(baseHeight,target.h,p),angle:mix(0,target.angle,p)});
+      const lineProgress = smooth((elapsed-FORM)/1100);
+      fields.forEach(field => { field.style.opacity = String(lineProgress); });
+      orbitLines.forEach(({node,dashes}) => {
+        node.style.strokeDasharray = lineProgress > .995 ? dashes : '1 1';
+        node.style.strokeDashoffset = String(1-lineProgress);
+      });
+      trailPaths.forEach((path,i) => { path.style.strokeDashoffset = String(1-smooth((elapsed-FORM-i*75)/950)); });
+      trails.style.opacity = String(lineProgress * (1-smooth((elapsed-4300)/(HANDOFF-4300))) * .5);
+    }
+    if (elapsed >= REVEAL) root.classList.add('intro-revealing');
+    if (elapsed >= HANDOFF) root.classList.add('intro-handoff');
     animationFrame = requestAnimationFrame(tick);
   }
 
@@ -148,31 +225,23 @@
     clearTimeout(window.arrivalFallback);
     cancelAnimationFrame(animationFrame);
     root.classList.remove(...introClasses);
-    cssVariables.forEach(name => root.style.removeProperty(name));
     frame.inert = false;
     arrival.remove();
-    window.removeEventListener('keydown', skipWithKeyboard);
-    window.removeEventListener('pagehide', onPageHide);
-    window.removeEventListener('resize', onResize);
-    reducedMotion.removeEventListener('change', onMotionChange);
+    window.removeEventListener('keydown',skipWithKeyboard);
+    window.removeEventListener('pagehide',onPageHide);
+    window.removeEventListener('resize',onResize);
+    reducedMotion.removeEventListener('change',onMotionChange);
     if (fromSkip) frame.querySelector('.identity')?.focus({preventScroll:true});
   }
-
-  function skipWithKeyboard(event) {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      finish(true);
-    }
-  }
+  function skipWithKeyboard(event) { if (event.key === 'Escape') { event.preventDefault(); finish(true); } }
   function onMotionChange(event) { if (event.matches) finish(); }
   function onPageHide() { finish(); }
-  function onResize() { if (unfolding) finish(); }
-
-  arrival.querySelector('.arrival-skip').addEventListener('click', () => finish(true));
-  window.addEventListener('keydown', skipWithKeyboard);
-  window.addEventListener('pagehide', onPageHide);
-  window.addEventListener('resize', onResize);
-  reducedMotion.addEventListener('change', onMotionChange);
+  function onResize() { if (target) finish(); }
+  arrival.querySelector('.arrival-skip').addEventListener('click',() => finish(true));
+  window.addEventListener('keydown',skipWithKeyboard);
+  window.addEventListener('pagehide',onPageHide);
+  window.addEventListener('resize',onResize);
+  reducedMotion.addEventListener('change',onMotionChange);
   animationFrame = requestAnimationFrame(now => {
     startedAt = now;
     root.classList.add('intro-running');
