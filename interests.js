@@ -55,6 +55,9 @@
   let currentTab = 'overview';
   let focusTimer;
   let parallaxFrame;
+  let pointerSample;
+  let lastMouseSelection;
+  let hoverResumeAt = 0;
   let swipeStart;
   let drag;
   let rotation = {x:0,y:0};
@@ -63,6 +66,7 @@
   ground.className = 'archive-ground';
   world.append(ground);
   const volumes = [];
+  const waveVolumes = [];
   const geometry = document.createDocumentFragment();
   for (let row = 0; row < 3; row++) {
     for (let column = 0; column < 24; column++) {
@@ -71,6 +75,7 @@
       volume.style.setProperty('--book-x', `${column * 48}px`);
       volume.style.setProperty('--book-y', `${row * 392}px`);
       volume.style.setProperty('--book-height', `${152 + ((column + row * 3) % 5) * 2}px`);
+      waveVolumes.push({volume, row, column});
       ['volume-top','volume-cover','volume-spine'].forEach(name => {
         const face = document.createElement('span');
         face.className = name;
@@ -86,9 +91,26 @@
         volumes[index] = volume;
       }
       geometry.append(volume);
+      // A fixed plane keeps mouse selection steady while the files rise above it.
+      const pickArea = document.createElement('div');
+      pickArea.className = 'archive-pick-area';
+      pickArea.style.setProperty('--book-x', `${column * 48}px`);
+      pickArea.style.setProperty('--book-y', `${row * 392}px`);
+      pickArea.dataset.pick = Math.max(0, Math.min(records.length - 1, column - 6));
+      geometry.append(pickArea);
     }
   }
   world.append(geometry);
+
+  function shapeWave(index) {
+    const crest = index + 6;
+    waveVolumes.forEach(({volume, row, column}) => {
+      const distance = column - crest;
+      const amplitude = row === 1 ? 134 : 89;
+      const rise = amplitude * Math.exp(-(distance * distance) / 11.5) - 27;
+      volume.style.setProperty('--wave-rise', `${rise.toFixed(2)}px`);
+    });
+  }
 
   function animateCopy(element, name) {
     element.classList.remove(name);
@@ -121,12 +143,17 @@
     }
   }
 
-  function setRecord(index, animate = true) {
+  function setRecord(index, animate = true, pointerDriven = false) {
+    if (!pointerDriven) {
+      stopPointerFrame();
+      hoverResumeAt = performance.now() + 450;
+    }
     current = (index + records.length) % records.length;
     const record = records[current];
     const number = String(current + 1).padStart(2, '0');
     archive.dataset.current = current;
-    archive.style.setProperty('--archive-pan', `${112 - current * 37}px`);
+    archive.style.setProperty('--archive-focus-pan', `${112 - current * 37}px`);
+    shapeWave(current);
     volumes.forEach((volume, i) => volume.classList.toggle('is-current', i === current));
     dots.forEach((dot, i) => dot.setAttribute('aria-pressed', String(i === current)));
     $('.archive-file-number b').textContent = record.id;
@@ -154,6 +181,7 @@
 
   function openRecord(index = current) {
     clearTimeout(focusTimer);
+    stopPointerFrame();
     if (dialog.open) dialog.close();
     currentTab = 'overview';
     setRecord(index, false);
@@ -283,18 +311,47 @@
     if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
   });
 
+  function stopPointerFrame() {
+    if (parallaxFrame) cancelAnimationFrame(parallaxFrame);
+    parallaxFrame = null;
+    pointerSample = null;
+    lastMouseSelection = null;
+  }
   archive.addEventListener('pointermove', event => {
-    if (motion.matches || archive.dataset.view !== 'overview' || event.pointerType !== 'mouse' || parallaxFrame) return;
+    if (archive.dataset.view !== 'overview' || dialog.open || event.pointerType !== 'mouse') return;
+    if (performance.now() < hoverResumeAt || (event.movementX === 0 && event.movementY === 0)) return;
+    if (pointerSample && event.clientX === pointerSample.clientX && event.clientY === pointerSample.clientY) return;
+    const file = event.target.closest('.file-volume[data-record]');
+    const pickArea = event.target.closest('.archive-pick-area');
     const bounds = archive.getBoundingClientRect();
-    const x = ((event.clientX - bounds.left) / bounds.width - .5) * 13;
-    const y = ((event.clientY - bounds.top) / bounds.height - .5) * 7;
+    pointerSample = {
+      index: file ? Number(file.dataset.record) : pickArea ? Number(pickArea.dataset.pick) : null,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      x: ((event.clientX - bounds.left) / bounds.width - .5) * 8,
+      y: ((event.clientY - bounds.top) / bounds.height - .5) * 4
+    };
+    if (parallaxFrame) return;
     parallaxFrame = requestAnimationFrame(() => {
-      archive.style.setProperty('--camera-x', `${x}px`);
-      archive.style.setProperty('--camera-y', `${y}px`);
       parallaxFrame = null;
+      if (!pointerSample || archive.dataset.view !== 'overview' || dialog.open) return;
+      const {index, x, y, clientX, clientY} = pointerSample;
+      const moved = !lastMouseSelection || Math.hypot(clientX - lastMouseSelection.x, clientY - lastMouseSelection.y) > 10;
+      if (index !== null && index !== current && moved) {
+        setRecord(index, true, true);
+        lastMouseSelection = {x:clientX, y:clientY};
+      }
+      archive.style.setProperty('--camera-x', `${motion.matches ? 0 : x}px`);
+      archive.style.setProperty('--camera-y', `${motion.matches ? 0 : y}px`);
     });
   });
+  archive.addEventListener('click', event => {
+    const file = event.target.closest('.file-volume[data-record]');
+    const pickArea = event.target.closest('.archive-pick-area');
+    if ((file || pickArea) && archive.dataset.view === 'overview' && !dialog.open) openRecord(Number(file ? file.dataset.record : pickArea.dataset.pick));
+  });
   archive.addEventListener('pointerleave', () => {
+    stopPointerFrame();
     archive.style.setProperty('--camera-x','0px');
     archive.style.setProperty('--camera-y','0px');
   });
