@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261006-video">
 </head>
 <body>
   <div class="site-frame">
@@ -31,7 +31,21 @@
       <section class="hero page-section" id="home">
         <div class="micro-head"><span>PERSONAL INFORMATION SYSTEM</span><span>ISSUE NO. 001&nbsp; / &nbsp;2026</span></div>
         <div class="hero-layout">
-          <div class="title-block"><span class="section-tab">INTRODUCTION</span><div class="black-title"><p class="title-kicker">XIE KAILUN / PERSONAL ARCHIVE</p><h1>HELLO<br>WORLD</h1><p class="title-caption">谢凯伦 · 也可以叫我 KELEN</p><span class="title-coordinate">K / 001</span></div><div class="vertical-index">I&nbsp; / &nbsp;FROM IDEAS TO FORM</div></div>
+          <div class="title-block">
+            <div class="intro-media">
+              <span class="section-tab">INTRODUCTION</span>
+              <h1 class="sr-only">谢凯伦，也可以叫我 Kelen</h1>
+              <div class="intro-video-frame">
+                <video id="intro-video" class="intro-video" muted loop playsinline preload="metadata" poster="assets/introduction-poster.jpg" width="480" height="264" aria-label="浅色动漫人物与飞鸟的动态插画">
+                  <source src="assets/introduction.mp4" type="video/mp4">
+                  你的浏览器不支持播放视频。<a href="assets/introduction.mp4">打开视频</a>
+                </video>
+                <button id="intro-video-toggle" class="intro-video-toggle" type="button" aria-label="播放视频" title="播放视频" hidden><span aria-hidden="true">▶</span></button>
+              </div>
+              <div class="intro-media-caption"><span>谢凯伦 · 也可以叫我 KELEN</span><span>K / 001</span></div>
+            </div>
+            <div class="vertical-index">I&nbsp; / &nbsp;FROM IDEAS TO FORM</div>
+          </div>
           <div class="hero-art" aria-label="抽象建筑空间与档案信息">
             <div class="art-grid"></div><div class="architecture"><div class="arch-slab slab-a"></div><div class="arch-slab slab-b"></div><div class="arch-pillar"></div><div class="arch-stair"></div></div>
             <div class="art-cross cross-a">＋</div><div class="art-cross cross-b">＋</div><div class="art-cross cross-c">＋</div>
@@ -74,6 +88,50 @@
     const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { links.forEach(link => link.classList.toggle('active', link.hash === `#${entry.target.id}`)); } }), { rootMargin: '-35% 0px -55% 0px' });
     sections.forEach(section => observer.observe(section));
     document.querySelectorAll('a[href^="#"]').forEach(link => link.addEventListener('click', event => { const target = document.querySelector(link.getAttribute('href')); if (target) { event.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); history.replaceState(null, '', link.getAttribute('href')); } }));
+
+    const introVideo = document.querySelector('#intro-video');
+    const videoToggle = document.querySelector('#intro-video-toggle');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let userPaused = reducedMotion.matches;
+    let videoVisible = true;
+
+    function updateVideoToggle() {
+      const label = introVideo.paused ? '播放视频' : '暂停视频';
+      videoToggle.setAttribute('aria-label', label);
+      videoToggle.title = label;
+      videoToggle.firstElementChild.textContent = introVideo.paused ? '▶' : 'Ⅱ';
+    }
+
+    function syncVideoPlayback() {
+      if (userPaused || !videoVisible || document.hidden) {
+        introVideo.pause();
+      } else {
+        introVideo.play().catch(error => {
+          if (error.name === 'AbortError') return;
+          userPaused = true;
+          updateVideoToggle();
+        });
+      }
+    }
+
+    videoToggle.hidden = false;
+    introVideo.muted = true;
+    introVideo.addEventListener('play', updateVideoToggle);
+    introVideo.addEventListener('pause', updateVideoToggle);
+    videoToggle.addEventListener('click', () => {
+      userPaused = !introVideo.paused;
+      syncVideoPlayback();
+    });
+    reducedMotion.addEventListener('change', event => {
+      userPaused = event.matches;
+      syncVideoPlayback();
+    });
+    document.addEventListener('visibilitychange', syncVideoPlayback);
+    new IntersectionObserver(([entry]) => {
+      videoVisible = entry.isIntersecting;
+      syncVideoPlayback();
+    }).observe(introVideo);
+    syncVideoPlayback();
   </script>
 </body>
 </html>
