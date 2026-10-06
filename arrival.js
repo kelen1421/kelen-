@@ -4,7 +4,7 @@
   const frame = document.querySelector('.site-frame');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const tempo = Math.max(.1, parseFloat(getComputedStyle(root).getPropertyValue('--arrival-tempo')) || 1);
-  const introClasses = ['intro-pending', 'intro-running', 'intro-released', 'intro-landed', 'intro-forming', 'intro-revealing', 'intro-handoff'];
+  const introClasses = ['intro-pending', 'intro-running', 'intro-released', 'intro-landed', 'intro-forming', 'intro-standing', 'intro-revealing', 'intro-handoff'];
   if (!arrival || !frame) return;
   if (!root.classList.contains('intro-pending') || reducedMotion.matches) {
     clearTimeout(window.arrivalFallback);
@@ -29,6 +29,7 @@
 
   const carrier = arrival.querySelector('.intro-carrier .arrival-bird');
   const mark = arrival.querySelector('.arrival-mark');
+  const ground = arrival.querySelector('.arrival-ground');
   const faces = mark.querySelector('.arrival-k-faces');
   const highlights = mark.querySelector('.arrival-k-highlights');
   const sourceDrawing = frame.querySelector('.scene-drawing');
@@ -39,8 +40,8 @@
   const trailPaths = [...trails.querySelectorAll('path')];
   const baseWidth = mark.clientWidth;
   const baseHeight = baseWidth * 460 / 410;
-  const RELEASE = 1900, LAND = 2800, FORM = 2800, FORMED = 4300;
-  const REVEAL = 4000, HANDOFF = 5480, END = 5780;
+  const RELEASE = 1900, LAND = 2800, FORM = 2800, FORMED = 3600;
+  const STAND = 3600, UPRIGHT = 4750, REVEAL = 4450, HANDOFF = 5480, END = 5780;
   const clamp = value => Math.min(1, Math.max(0, value));
   const smooth = value => { const p = clamp(value); return p * p * (3 - 2 * p); };
   const mix = (from, to, p) => from + (to - from) * p;
@@ -160,9 +161,14 @@
 
   function drawMark(position) {
     markPosition = position;
+    const radians = position.angle * Math.PI / 180;
+    // The lower edge stays on the floor while the K pivots upright.
+    const pivotOffset = position.h * .42;
+    const correctionX = Math.sin(radians) * pivotOffset;
+    const correctionY = (1 - Math.cos(radians)) * pivotOffset;
     Object.assign(mark.style,{
       width:`${position.w}px`,height:`${position.h}px`,
-      transform:`translate3d(${position.x-position.w/2}px,${position.y-position.h/2}px,0) rotate(${position.angle}deg)`,
+      transform:`translate3d(${position.x-position.w/2-correctionX}px,${position.y-position.h/2-correctionY}px,0) perspective(1100px) rotateZ(${position.angle}deg) rotateY(${position.yaw || 0}deg) rotateX(${position.tilt || 0}deg)`,
       opacity:'1'
     });
   }
@@ -195,24 +201,33 @@
       const drift = 1-Math.pow(1-p,2);
       const fall = p<.84 ? Math.pow(p/.84,2) : 1;
       const bounce = p<.84 ? 0 : -Math.sin((p-.84)/.16*Math.PI)*8;
-      drawMark({x:mix(releasePoint.x,vw*.52,drift),y:mix(releasePoint.y,vh*.63,fall)+bounce,angle:releasePoint.angle*(1-drift)+360*drift,w:baseWidth,h:baseHeight});
+      drawMark({x:mix(releasePoint.x,vw*.52,drift),y:mix(releasePoint.y,vh*.72-baseHeight*.42,fall)+bounce,angle:releasePoint.angle*(1-drift)+360*drift,tilt:76*smooth((p-.25)/.65),w:baseWidth,h:baseHeight});
     }
     if (releasePoint && elapsed >= FORM) {
       if (!target) {
         target = measureTarget();
         root.classList.add('intro-landed','intro-forming');
       }
-      const p = smooth((elapsed-FORM)/(FORMED-FORM));
-      formK(p);
-      drawMark({x:mix(vw*.52,target.x,p),y:mix(vh*.63,target.y,p),w:mix(baseWidth,target.w,p),h:mix(baseHeight,target.h,p),angle:mix(0,target.angle,p)});
-      const lineProgress = smooth((elapsed-FORM)/1100);
+      const form = smooth((elapsed-FORM)/(FORMED-FORM));
+      const stand = smooth((elapsed-STAND)/(UPRIGHT-STAND));
+      const width = mix(baseWidth,target.w,form);
+      const height = mix(baseHeight,target.h,form);
+      const floorX = mix(vw*.52,target.x,stand);
+      const floorY = mix(vh*.72,target.y+target.h*.42,stand);
+      formK(form);
+      drawMark({x:floorX,y:floorY-height*.42,w:width,h:height,tilt:76*(1-stand),yaw:-24*Math.sin(stand*Math.PI),angle:mix(0,target.angle,stand)+22*Math.sin(stand*Math.PI)});
+      const floorWidth = Math.min(vw*.9,Math.max(300,target.w*1.6));
+      const floorHeight = floorWidth*170/600;
+      Object.assign(ground.style,{left:`${floorX-floorWidth/2}px`,top:`${floorY-floorHeight*110/170}px`,width:`${floorWidth}px`,height:`${floorHeight}px`,opacity:String((1-smooth((stand-.15)/.7))*.8)});
+      if (elapsed >= STAND) root.classList.add('intro-standing');
+      const lineProgress = smooth((elapsed-STAND)/1000);
       fields.forEach(field => { field.style.opacity = String(lineProgress); });
       orbitLines.forEach(({node,dashes}) => {
         node.style.strokeDasharray = lineProgress > .995 ? dashes : '1 1';
         node.style.strokeDashoffset = String(1-lineProgress);
       });
-      trailPaths.forEach((path,i) => { path.style.strokeDashoffset = String(1-smooth((elapsed-FORM-i*75)/950)); });
-      trails.style.opacity = String(lineProgress * (1-smooth((elapsed-4300)/(HANDOFF-4300))) * .5);
+      trailPaths.forEach((path,i) => { path.style.strokeDashoffset = String(1-smooth((elapsed-STAND-i*55)/850)); });
+      trails.style.opacity = String(lineProgress * (1-smooth((elapsed-4700)/(HANDOFF-4700))) * .5);
     }
     if (elapsed >= REVEAL) root.classList.add('intro-revealing');
     if (elapsed >= HANDOFF) root.classList.add('intro-handoff');

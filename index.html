@@ -10,7 +10,7 @@
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       document.documentElement.classList.add('intro-pending');
       window.arrivalFallback = window.setTimeout(() => {
-        document.documentElement.classList.remove('intro-pending', 'intro-running', 'intro-released', 'intro-landed', 'intro-forming', 'intro-revealing', 'intro-handoff');
+        document.documentElement.classList.remove('intro-pending', 'intro-running', 'intro-released', 'intro-landed', 'intro-forming', 'intro-standing', 'intro-revealing', 'intro-handoff');
         const frame = document.querySelector('.site-frame');
         if (frame) frame.inert = false;
         document.querySelector('.site-arrival')?.remove();
@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="style.css?v=20261006-scene">
   <link rel="stylesheet" href="scene.css?v=20261006-scene">
   <link rel="stylesheet" href="interests.css?v=20261006-wave">
-  <link rel="stylesheet" href="arrival.css?v=20261006-kform">
+  <link rel="stylesheet" href="arrival.css?v=20261006-kstand">
 </head>
 <body>
-  <div class="site-arrival" aria-label="鸽子带来平面 K，变成半透明立体 K，环绕线条引出个人网站">
+  <div class="site-arrival" aria-label="平面 K 落到地板，成型后旋转立起，环绕线条引出个人网站">
     <div class="arrival-curtain" aria-hidden="true"></div>
     <div class="arrival-flock" aria-hidden="true">
       <div class="intro-dove" data-dove></div>
@@ -38,6 +38,12 @@
       <div class="intro-dove" data-dove></div>
     </div>
     <svg class="arrival-tether" aria-hidden="true"><path d=""/></svg>
+    <svg class="arrival-ground" viewBox="0 0 600 170" fill="none" aria-hidden="true">
+      <defs><radialGradient id="arrival-floor-shadow"><stop stop-color="#667d69" stop-opacity=".18"/><stop offset="1" stop-color="#667d69" stop-opacity="0"/></radialGradient><linearGradient id="arrival-floor-wash" x1="300" y1="40" x2="300" y2="165" gradientUnits="userSpaceOnUse"><stop stop-color="#fff" stop-opacity="0"/><stop offset=".6" stop-color="#f8fcf5" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+      <path d="M120 35H480L600 155H0Z" fill="url(#arrival-floor-wash)"/>
+      <g stroke="#819a812d" stroke-width=".7"><path d="M120 35 0 155M210 35 150 155M300 35V155M390 35 450 155M480 35 600 155M105 50H495M75 80H525M40 115H560M0 155H600"/></g>
+      <ellipse cx="300" cy="110" rx="220" ry="26" fill="url(#arrival-floor-shadow)"/>
+    </svg>
     <svg class="arrival-trails" aria-hidden="true"><path pathLength="1"/><path pathLength="1"/><path pathLength="1"/><path pathLength="1"/></svg>
     <svg class="arrival-field arrival-field-back" viewBox="0 0 900 700" fill="none" aria-hidden="true"></svg>
     <svg class="arrival-mark" viewBox="0 0 410 460" aria-hidden="true">
@@ -235,7 +241,7 @@
       <footer><span>© 2026 谢凯伦 / KELEN — PERSONAL ARCHIVE</span><span>DESIGNED AS AN OPEN SYSTEM</span><a href="#home">BACK TO TOP ↑</a></footer>
     </main>
   </div>
-  <script src="arrival.js?v=20261006-kform" defer></script>
+  <script src="arrival.js?v=20261006-kstand" defer></script>
   <script src="interaction.js?v=20261006-scene" defer></script>
   <script src="interests.js?v=20261006-wave" defer></script>
 </body>

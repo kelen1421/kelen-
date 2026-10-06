@@ -1,5 +1,5 @@
 /* A flat K grows glass faces and joins the orbiting K on the homepage. */
-:root{--arrival-tempo:.7}
+:root{--arrival-tempo:.44}
 .site-arrival{display:none}
 html.intro-pending{overflow:hidden}
 .intro-pending body{background:var(--paper,#eeede8)}
@@ -22,7 +22,8 @@ html.intro-pending{overflow:hidden}
 .intro-dove:nth-child(7){--dove-size:157px;--launch-y:90vh;--bend-one:50vh;--bend-two:23vh;--exit-y:16vh;--flight-delay:1.11s;--flight-duration:2.7s;--flap-speed:.61s;--flap-phase:-.23s;--bank-start:32deg;--bank-mid:27deg;--bank-late:15deg;--bank-end:6deg;--sway-speed:1.53s;--dove-ink:#8a9885}
 .arrival-tether{position:absolute;inset:0;width:100%;height:100%;overflow:visible;fill:none;stroke:#6e7c62;stroke-width:1.2;stroke-linecap:round;opacity:0;transition:opacity .12s}
 .intro-released .arrival-tether{opacity:0!important}
-.arrival-mark{position:absolute;top:0;left:0;width:clamp(124px,12.8vw,164px);aspect-ratio:410/460;overflow:visible;opacity:0;transform-origin:50% 50%;will-change:transform,width,height}
+.arrival-mark{position:absolute;top:0;left:0;width:clamp(124px,12.8vw,164px);aspect-ratio:410/460;overflow:visible;opacity:0;transform-origin:50% 92%;will-change:transform,width,height}
+.arrival-ground{position:absolute;opacity:0;overflow:visible;pointer-events:none;z-index:1}
 .arrival-field{position:absolute;overflow:visible;opacity:0;pointer-events:none}
 .arrival-field-back{z-index:2}.arrival-mark{z-index:3}.arrival-field-front{z-index:4}
 .arrival-trails{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:#78a39b;stroke-width:1;stroke-linecap:round;opacity:0;z-index:1}
@@ -31,7 +32,7 @@ html.intro-pending{overflow:hidden}
 /* Pause the real scene while the opening copies move into exactly the same place. */
 .intro-pending .site-frame .scene-glass,.intro-pending .site-frame .scene-halo,.intro-pending .site-frame .scene-orbit,.intro-pending .site-frame .scene-ribbon{animation-play-state:paused!important}
 .intro-pending:not(.intro-handoff) .site-frame .scene-glass,.intro-pending:not(.intro-handoff) .site-frame .scene-halo,.intro-pending:not(.intro-handoff) .site-frame .scene-orbit,.intro-pending:not(.intro-handoff) .site-frame .scene-ribbon{visibility:hidden}
-.intro-handoff .arrival-mark,.intro-handoff .arrival-field{visibility:hidden}
+.intro-handoff .arrival-mark,.intro-handoff .arrival-field,.intro-handoff .arrival-ground{visibility:hidden}
 .arrival-skip{position:absolute;z-index:10;right:max(30px,4vw);top:27px;min-height:42px;padding:9px 0 9px 14px;border:0;background:transparent;color:#63705c;font:9px var(--mono,monospace);letter-spacing:.07em;cursor:pointer;pointer-events:auto;transition:color .2s}
 .arrival-skip span{margin-left:14px;font-size:14px}.arrival-skip:hover{color:#29382a}.arrival-skip:focus-visible{outline:1px solid currentColor;outline-offset:5px}
 @keyframes arrival-flight{0%{opacity:0;transform:translate3d(0,var(--launch-y),0) rotate(var(--bank-start))}6%{opacity:1}27%{opacity:1;transform:translate3d(calc(-27vw - 75.6px),var(--bend-one),0) rotate(var(--bank-mid))}62%{opacity:1;transform:translate3d(calc(-62vw - 173.6px),var(--bend-two),0) rotate(var(--bank-late))}100%{opacity:1;transform:translate3d(calc(-100vw - 280px),var(--exit-y),0) rotate(var(--bank-end))}}
