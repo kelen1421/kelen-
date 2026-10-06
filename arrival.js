@@ -41,7 +41,7 @@
   const baseWidth = mark.clientWidth;
   const baseHeight = baseWidth * 460 / 410;
   const RELEASE = 1900, LAND = 2800, FORM = 2800, FORMED = 3600;
-  const STAND = 3600, UPRIGHT = 4750, REVEAL = 4450, HANDOFF = 5480, END = 5780;
+  const STAND = 3600, UPRIGHT = 4750, REVEAL = 3700, HANDOFF = 5480, END = 5780;
   const clamp = value => Math.min(1, Math.max(0, value));
   const smooth = value => { const p = clamp(value); return p * p * (3 - 2 * p); };
   const mix = (from, to, p) => from + (to - from) * p;
@@ -51,6 +51,8 @@
   let releasePoint;
   let markPosition;
   let target;
+  let revealing = false;
+  const entranceAnimations = [];
 
   // Every face moves from a flat letter to the matching face of the homepage K.
   const geometry = {
@@ -173,6 +175,41 @@
     });
   }
 
+  function revealPage() {
+    revealing = true;
+    // Animate the actual content along curved turns from all four edges.
+    // Native animations leave the existing scene and hover animations intact.
+    const entrances = [
+      {selector:'.rail',from:'translate3d(-115%,14vh,0) rotate(-38deg)',via:'translate3d(-12%,-4vh,0) rotate(9deg)',origin:'100% 50%',delay:0},
+      {selector:'.micro-head',from:'translate3d(-12vw,-40vh,0) rotate(32deg)',via:'translate3d(2vw,-5vh,0) rotate(-8deg)',origin:'80% 100%',delay:40},
+      {selector:'.scene-topline',from:'translate3d(18vw,-45vh,0) rotate(-35deg)',via:'translate3d(-2vw,-4vh,0) rotate(7deg)',origin:'50% 100%',delay:100},
+      {selector:'.scene-intro',from:'translate3d(-45vw,65vh,0) rotate(-62deg)',via:'translate3d(-6vw,6vh,0) rotate(12deg)',origin:'100% 0%',delay:55},
+      {selector:'.scene-link:nth-child(1)',from:'translate3d(60vw,-45vh,0) rotate(78deg)',via:'translate3d(6vw,3vh,0) rotate(-12deg)',origin:'0% 100%',delay:0},
+      {selector:'.scene-link:nth-child(2)',from:'translate3d(70vw,8vh,0) rotate(68deg)',via:'translate3d(7vw,-3vh,0) rotate(-10deg)',origin:'0% 50%',delay:45},
+      {selector:'.scene-link:nth-child(3)',from:'translate3d(65vw,40vh,0) rotate(-62deg)',via:'translate3d(6vw,3vh,0) rotate(9deg)',origin:'0% 50%',delay:95},
+      {selector:'.scene-link:nth-child(4)',from:'translate3d(28vw,65vh,0) rotate(-75deg)',via:'translate3d(-3vw,6vh,0) rotate(11deg)',origin:'0% 0%',delay:140},
+      {selector:'.scene-bottomline,.hero-footer',from:'translate3d(12vw,55vh,0) rotate(-28deg)',via:'translate3d(-2vw,5vh,0) rotate(7deg)',origin:'50% 0%',delay:110},
+      {selector:'.page-head,.contact-top',from:'translate3d(-12vw,-45vh,0) rotate(35deg)',via:'translate3d(2vw,-4vh,0) rotate(-7deg)',origin:'50% 100%',delay:25},
+      {selector:'.profile-layout,.notes-layout',from:'translate3d(70vw,14vh,0) rotate(38deg)',via:'translate3d(7vw,-3vh,0) rotate(-8deg)',origin:'0% 50%',delay:65},
+      {selector:'.interest-archive,.contact-main',from:'translate3d(-65vw,18vh,0) rotate(-34deg)',via:'translate3d(-6vw,-3vh,0) rotate(8deg)',origin:'100% 50%',delay:65},
+      {selector:'.contact-bottom,footer',from:'translate3d(12vw,55vh,0) rotate(-30deg)',via:'translate3d(-2vw,4vh,0) rotate(6deg)',origin:'50% 0%',delay:110}
+    ];
+    entrances.forEach(({selector,from,via,origin,delay}) => {
+      frame.querySelectorAll(selector).forEach(node => {
+        const bounds = node.getBoundingClientRect();
+        if (bounds.bottom <= 0 || bounds.top >= innerHeight || bounds.right <= 0 || bounds.left >= innerWidth) return;
+        const computed = getComputedStyle(node).transform;
+        const base = computed === 'none' ? '' : computed;
+        entranceAnimations.push(node.animate([
+          {opacity:0,transform:`${from} ${base}`,transformOrigin:origin,offset:0},
+          {opacity:.9,transform:`${via} ${base}`,transformOrigin:origin,offset:.58},
+          {opacity:1,transform:base || 'none',transformOrigin:origin,offset:1}
+        ],{duration:1700*tempo,delay:delay*tempo,easing:'cubic-bezier(.18,.72,.24,1)',fill:'both'}));
+      });
+    });
+    root.classList.add('intro-revealing');
+  }
+
   function tick(now) {
     if (finished) return;
     const elapsed = (now - startedAt) / tempo;
@@ -215,7 +252,7 @@
       const floorX = mix(vw*.52,target.x,stand);
       const floorY = mix(vh*.72,target.y+target.h*.42,stand);
       formK(form);
-      drawMark({x:floorX,y:floorY-height*.42,w:width,h:height,tilt:76*(1-stand),yaw:-24*Math.sin(stand*Math.PI),angle:mix(0,target.angle,stand)+22*Math.sin(stand*Math.PI)});
+      drawMark({x:floorX,y:floorY-height*.42,w:width,h:height,tilt:76*(1-stand),yaw:-360*stand,angle:mix(0,target.angle,stand)+22*Math.sin(stand*Math.PI)});
       const floorWidth = Math.min(vw*.9,Math.max(300,target.w*1.6));
       const floorHeight = floorWidth*170/600;
       Object.assign(ground.style,{left:`${floorX-floorWidth/2}px`,top:`${floorY-floorHeight*110/170}px`,width:`${floorWidth}px`,height:`${floorHeight}px`,opacity:String((1-smooth((stand-.15)/.7))*.8)});
@@ -229,7 +266,7 @@
       trailPaths.forEach((path,i) => { path.style.strokeDashoffset = String(1-smooth((elapsed-STAND-i*55)/850)); });
       trails.style.opacity = String(lineProgress * (1-smooth((elapsed-4700)/(HANDOFF-4700))) * .5);
     }
-    if (elapsed >= REVEAL) root.classList.add('intro-revealing');
+    if (elapsed >= REVEAL && !revealing) revealPage();
     if (elapsed >= HANDOFF) root.classList.add('intro-handoff');
     animationFrame = requestAnimationFrame(tick);
   }
@@ -239,6 +276,7 @@
     finished = true;
     clearTimeout(window.arrivalFallback);
     cancelAnimationFrame(animationFrame);
+    entranceAnimations.forEach(animation => animation.cancel());
     root.classList.remove(...introClasses);
     frame.inert = false;
     arrival.remove();
