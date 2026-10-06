@@ -4,30 +4,33 @@ html.intro-pending{overflow:hidden}
 .intro-pending .site-frame{opacity:0;transform:translateY(14px);filter:blur(5px);pointer-events:none}
 .intro-pending.intro-running .site-frame{animation:arrival-interface 1.8s 1.15s cubic-bezier(.2,.7,.2,1) both}
 .intro-pending .site-arrival{display:block;position:fixed;inset:0;z-index:1000;isolation:isolate;overflow:clip}
-.arrival-curtain{position:absolute;inset:0 auto 0 0;width:100%;background:radial-gradient(ellipse at 78% 36%,#f8f9f2 0%,#e9ece3 45%,#e2e7db 100%);box-shadow:55px 0 85px 38px #eef0e7;will-change:width}
+.arrival-curtain{position:absolute;inset:0;background:radial-gradient(ellipse at 89% 85%,#f8f9f2 0%,#e9ece3 45%,#e2e7db 100%);mask-image:linear-gradient(135deg,#000 43%,transparent 58%);mask-size:240% 240%;mask-position:0% 0%;mask-repeat:no-repeat;will-change:mask-position}
 .intro-running .arrival-curtain{animation:arrival-curtain 2.55s .95s cubic-bezier(.3,.04,.45,1) both}
 .arrival-flock{position:absolute;inset:0;pointer-events:none}
-.intro-dove{--dove-size:170px;--flight-y:17vh;--flight-delay:0s;--flight-duration:3.2s;--flap-speed:.63s;--flap-phase:-.12s;--dove-arc:-24px;position:absolute;left:100%;top:var(--flight-y);width:var(--dove-size);opacity:0;will-change:transform}
+.intro-dove{--dove-size:170px;--launch-y:75vh;--bend-one:49vh;--bend-two:26vh;--exit-y:11vh;--flight-delay:0s;--flight-duration:3.12s;--flap-speed:.63s;--flap-phase:-.12s;--bank-start:23deg;--bank-mid:17deg;--bank-late:9deg;--bank-end:3deg;--sway-speed:1.41s;position:absolute;left:100%;top:0;width:var(--dove-size);opacity:0;will-change:transform}
 .intro-running .intro-dove{animation:arrival-flight var(--flight-duration) var(--flight-delay) linear both}
 .arrival-bird{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 6px 7px #8a98722b)}
-.intro-dove:nth-child(2){--dove-size:124px;--flight-y:9vh;--flight-delay:.37s;--flight-duration:2.92s;--flap-speed:.56s;--flap-phase:-.31s;--dove-arc:-16px;filter:blur(.3px)}
-.intro-dove:nth-child(3){--dove-size:258px;--flight-y:30vh;--flight-delay:.18s;--flight-duration:3.15s;--flap-speed:.69s;--flap-phase:-.07s;--dove-arc:-36px}
-.intro-dove:nth-child(4){--dove-size:181px;--flight-y:49vh;--flight-delay:.66s;--flight-duration:3.04s;--flap-speed:.6s;--flap-phase:-.35s;--dove-arc:18px}
-.intro-dove:nth-child(5){--dove-size:135px;--flight-y:65vh;--flight-delay:.5s;--flight-duration:3.2s;--flap-speed:.53s;--flap-phase:-.19s;--dove-arc:-27px;filter:blur(.4px)}
-.intro-dove:nth-child(6){--dove-size:211px;--flight-y:19vh;--flight-delay:.84s;--flight-duration:2.9s;--flap-speed:.65s;--flap-phase:-.42s;--dove-arc:-14px}
-.intro-dove:nth-child(7){--dove-size:157px;--flight-y:40vh;--flight-delay:1.05s;--flight-duration:2.88s;--flap-speed:.58s;--flap-phase:-.23s;--dove-arc:23px}
+.intro-running .arrival-bird{animation:arrival-sway var(--sway-speed) var(--flap-phase) ease-in-out infinite}
+/* All seven leave the lower right, then spread along independent rising paths. */
+.intro-dove:nth-child(2){--dove-size:124px;--launch-y:82vh;--bend-one:51vh;--bend-two:19vh;--exit-y:6vh;--flight-delay:.72s;--flight-duration:2.62s;--flap-speed:.54s;--flap-phase:-.31s;--bank-start:30deg;--bank-mid:24deg;--bank-late:14deg;--sway-speed:1.17s;filter:blur(.3px)}
+.intro-dove:nth-child(3){--dove-size:258px;--launch-y:77vh;--bend-one:53vh;--bend-two:31vh;--exit-y:19vh;--flight-delay:.13s;--flight-duration:3.48s;--flap-speed:.72s;--flap-phase:-.07s;--bank-start:24deg;--bank-mid:15deg;--bank-end:7deg;--sway-speed:1.79s}
+.intro-dove:nth-child(4){--dove-size:181px;--launch-y:84vh;--bend-one:70vh;--bend-two:51vh;--exit-y:44vh;--flight-delay:.99s;--flight-duration:2.53s;--flap-speed:.59s;--flap-phase:-.35s;--bank-start:17deg;--bank-mid:14deg;--bank-late:5deg;--bank-end:-2deg;--sway-speed:1.33s}
+.intro-dove:nth-child(5){--dove-size:135px;--launch-y:71vh;--bend-one:36vh;--bend-two:13vh;--exit-y:2vh;--flight-delay:.4s;--flight-duration:3.56s;--flap-speed:.53s;--flap-phase:-.19s;--bank-start:34deg;--bank-mid:27deg;--bank-late:13deg;--sway-speed:1.21s;filter:blur(.4px)}
+.intro-dove:nth-child(6){--dove-size:211px;--launch-y:87vh;--bend-one:68vh;--bend-two:47vh;--exit-y:40vh;--flight-delay:.57s;--flight-duration:2.95s;--flap-speed:.66s;--flap-phase:-.42s;--bank-start:13deg;--bank-mid:19deg;--bank-late:4deg;--bank-end:-3deg;--sway-speed:1.65s}
+.intro-dove:nth-child(7){--dove-size:157px;--launch-y:90vh;--bend-one:50vh;--bend-two:23vh;--exit-y:16vh;--flight-delay:1.11s;--flight-duration:2.7s;--flap-speed:.61s;--flap-phase:-.23s;--bank-start:32deg;--bank-mid:27deg;--bank-late:15deg;--bank-end:6deg;--sway-speed:1.53s}
 .arrival-skip{position:absolute;z-index:2;right:max(30px,4vw);top:27px;min-height:42px;padding:9px 0 9px 14px;border:0;background:transparent;color:#63705c;font:9px var(--mono,monospace);letter-spacing:.07em;cursor:pointer;transition:color .2s}
 .arrival-skip span{margin-left:14px;font-size:14px}
 .arrival-skip:hover{color:#29382a}
 .arrival-skip:focus-visible{outline:1px solid currentColor;outline-offset:5px}
 @keyframes arrival-flight{
-  0%{opacity:0;transform:translate3d(0,18px,0) rotate(-3deg)}
+  0%{opacity:0;transform:translate3d(0,var(--launch-y),0) rotate(var(--bank-start))}
   6%{opacity:1}
-  35%{opacity:1;transform:translate3d(calc(-35vw - 98px),var(--dove-arc),0) rotate(-1deg)}
-  70%{opacity:1;transform:translate3d(calc(-70vw - 196px),calc(var(--dove-arc) * .6),0) rotate(2deg)}
-  100%{opacity:1;transform:translate3d(calc(-100vw - 280px),-8px,0) rotate(0deg)}
+  27%{opacity:1;transform:translate3d(calc(-27vw - 75.6px),var(--bend-one),0) rotate(var(--bank-mid))}
+  62%{opacity:1;transform:translate3d(calc(-62vw - 173.6px),var(--bend-two),0) rotate(var(--bank-late))}
+  100%{opacity:1;transform:translate3d(calc(-100vw - 280px),var(--exit-y),0) rotate(var(--bank-end))}
 }
-@keyframes arrival-curtain{0%{width:100%;opacity:1}88%{opacity:1}100%{width:0;opacity:0}}
+@keyframes arrival-sway{0%,100%{transform:translateY(-3px) rotate(-1deg)}50%{transform:translateY(5px) rotate(1.5deg)}}
+@keyframes arrival-curtain{0%{mask-position:0% 0%;opacity:1}88%{opacity:1}100%{mask-position:100% 100%;opacity:0}}
 @keyframes arrival-interface{from{opacity:0;transform:translateY(14px);filter:blur(5px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
-@media(max-width:680px){.intro-dove{width:calc(var(--dove-size) * .68)}.arrival-skip{top:14px;right:6%;font-size:8px}.arrival-curtain{box-shadow:30px 0 55px 20px #eef0e7}}
+@media(max-width:680px){.intro-dove{width:calc(var(--dove-size) * .68)}.arrival-skip{top:14px;right:6%;font-size:8px}}
 @media(prefers-reduced-motion:reduce){html.intro-pending{overflow:visible}.intro-pending .site-arrival{display:none!important}.intro-pending .site-frame{opacity:1;transform:none;filter:none;animation:none!important;pointer-events:auto}}
