@@ -6,14 +6,66 @@
   <meta name="theme-color" content="#eeede8">
   <meta name="description" content="认识谢凯伦 / Kelen：基本信息、兴趣爱好、性格与计划，以及对生活的好奇。">
   <title>KELEN — SYNTHESIZE INFORMATION / ANALYSIS OS</title>
+  <script>
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('intro-pending');
+      window.arrivalFallback = window.setTimeout(() => {
+        document.documentElement.classList.remove('intro-pending', 'intro-running');
+        const frame = document.querySelector('.site-frame');
+        if (frame) frame.inert = false;
+        document.querySelector('.site-arrival')?.remove();
+      }, 6500);
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=20261006-scene">
   <link rel="stylesheet" href="scene.css?v=20261006-scene">
   <link rel="stylesheet" href="interests.css?v=20261006-wave">
+  <link rel="stylesheet" href="arrival.css?v=20261006-doves">
 </head>
 <body>
+  <div class="site-arrival" aria-label="白鸽飞过，进入 Kelen 的个人网站">
+    <div class="arrival-curtain" aria-hidden="true"></div>
+    <div class="arrival-flock" aria-hidden="true">
+      <div class="intro-dove" data-dove></div>
+      <div class="intro-dove" data-dove></div>
+      <div class="intro-dove" data-dove></div>
+      <div class="intro-dove" data-dove></div>
+      <div class="intro-dove" data-dove></div>
+      <div class="intro-dove" data-dove></div>
+      <div class="intro-dove" data-dove></div>
+    </div>
+    <button class="arrival-skip" type="button">跳过开场 <span aria-hidden="true">↗</span></button>
+    <template id="arrival-dove">
+      <svg class="arrival-bird" viewBox="0 -56 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(103 78)"><g class="dove-wing dove-wing-far">
+          <animateTransform attributeName="transform" type="scale" values="1 .84;1 -.68;1 .72;1 .84" keyTimes="0;.43;.8;1" dur=".63s" repeatCount="indefinite"/>
+          <animateTransform attributeName="transform" type="rotate" values="5;-7;4;5" keyTimes="0;.43;.8;1" dur=".63s" repeatCount="indefinite" additive="sum"/>
+          <g transform="translate(-103 -78)">
+          <path d="M100 77C82 57 78 33 78 10L83-22C86-29 92-35 97-35L96-10 103-24 104-2 110-13 110 11 117 0 117 25 124 18 122 43 130 37C128 59 118 76 106 86Z" fill="#e8eae3" stroke="#c7cec1" stroke-width=".7"/>
+          <path d="M96-10 94 41M104-2 101 47M110 11 110 54M117 25 118 61" stroke="#c6cdbf" stroke-width=".65"/>
+        </g></g></g>
+        <path d="M141 75 194 62 217 65 197 76 210 77 191 86 203 88 180 98 143 91Z" fill="#f7f8f2" stroke="#cbd0c2" stroke-width=".7"/>
+        <path d="m154 83 41-13m-39 18 35-9m-29 11 22-5" stroke="#d5d9cd" stroke-width=".65"/>
+        <path d="M60 61C67 57 77 63 86 69 105 60 131 66 151 77L163 89C149 102 123 108 98 99 81 94 77 83 66 78L57 77C47 78 43 73 44 65 45 56 52 54 59 58Z" fill="#fcfdf8" stroke="#c6cdbf" stroke-width=".8"/>
+        <path d="M78 80C84 91 98 98 116 100M69 67C66 71 66 75 69 79" stroke="#d2d8ca" stroke-width=".8" stroke-linecap="round"/>
+        <path d="m45 65-12 4 12 3" fill="#d6cba6" stroke="#b4ad8d" stroke-width=".5"/>
+        <circle cx="50.5" cy="63" r="1.7" fill="#626f61"/>
+        <circle cx="50" cy="62.5" r=".5" fill="#fff"/>
+        <path d="m119 100 9 2 8-2" stroke="#bdb79e" stroke-width="1" stroke-linecap="round"/>
+        <g transform="translate(108 78)"><g class="dove-wing dove-wing-near">
+          <animateTransform attributeName="transform" type="scale" values="1 1;1 .45;1 -.82;1 -.2;1 .86;1 1" keyTimes="0;.22;.43;.65;.82;1" dur=".63s" repeatCount="indefinite"/>
+          <animateTransform attributeName="transform" type="rotate" values="-8;2;10;3;-7;-8" keyTimes="0;.22;.43;.65;.82;1" dur=".63s" repeatCount="indefinite" additive="sum"/>
+          <g transform="translate(-108 -78)">
+          <path d="M107 81C113 60 111 38 119 13 126-8 137-28 151-44 156-49 162-50 165-45L151-16 172-39C179-43 182-41 179-33L162-4 181-25C186-29 190-26 186-18L168 12 184-4C190-9 193-5 187 4L164 34 178 24C184 20 187 25 180 33L149 63 162 57C166 57 165 63 159 68 141 83 125 91 107 89Z" fill="#fffef9" stroke="#c6cebd" stroke-width=".8" stroke-linejoin="round"/>
+          <path d="M151-16 131 39M162-4 137 45M168 12 141 51M164 34 139 60M149 63 128 76" stroke="#d1d8c9" stroke-width=".8" stroke-linecap="round"/>
+          <path d="M113 81C124 70 130 54 132 32" stroke="#e0e5d8" stroke-width="2" stroke-linecap="round"/>
+        </g></g></g>
+      </svg>
+    </template>
+  </div>
   <div class="site-frame">
     <aside class="rail">
       <a href="#home" class="identity"><span>KELEN</span><small>SYNTHESIZE INFORMATION</small><b>ANALYSIS&nbsp; <i>OS</i></b></a>
@@ -170,6 +222,7 @@
       <footer><span>© 2026 谢凯伦 / KELEN — PERSONAL ARCHIVE</span><span>DESIGNED AS AN OPEN SYSTEM</span><a href="#home">BACK TO TOP ↑</a></footer>
     </main>
   </div>
+  <script src="arrival.js?v=20261006-doves" defer></script>
   <script src="interaction.js?v=20261006-scene" defer></script>
   <script src="interests.js?v=20261006-wave" defer></script>
 </body>
