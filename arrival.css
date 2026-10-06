@@ -1,17 +1,18 @@
 /* A silhouette flock delivers a letter that unfolds into the live page. */
+:root{--arrival-tempo:.7}
 .site-arrival{display:none}
 html.intro-pending{overflow:hidden}
 .intro-pending body{background:var(--paper,#eeede8)}
 .intro-pending .site-frame{opacity:0;pointer-events:none}
-.intro-unfolding .site-frame{animation:arrival-interface 1.55s cubic-bezier(.22,.7,.2,1) both}
+.intro-unfolding .site-frame{animation:arrival-interface calc(1.55s * var(--arrival-tempo)) cubic-bezier(.22,.7,.2,1) both}
 .intro-pending .site-arrival{display:block;position:fixed;inset:0;z-index:1000;isolation:isolate;overflow:clip;pointer-events:none}
 .arrival-curtain{position:absolute;inset:0;background:radial-gradient(ellipse at 83% 78%,#f7f8f1 0%,#e9ece3 48%,#e4e8de 100%)}
-.intro-unfolding .arrival-curtain{animation:arrival-curtain .2s linear both}
+.intro-unfolding .arrival-curtain{animation:arrival-curtain calc(.2s * var(--arrival-tempo)) linear both}
 .arrival-flock{position:absolute;inset:0;pointer-events:none}
 .intro-dove{--dove-size:170px;--launch-y:75vh;--bend-one:49vh;--bend-two:26vh;--exit-y:11vh;--flight-delay:0s;--flight-duration:3.12s;--flap-speed:.63s;--flap-phase:-.12s;--bank-start:23deg;--bank-mid:17deg;--bank-late:9deg;--bank-end:3deg;--sway-speed:1.41s;--dove-ink:#869186;position:absolute;left:100%;top:0;width:var(--dove-size);opacity:0;will-change:transform}
-.intro-running .intro-dove{animation:arrival-flight var(--flight-duration) var(--flight-delay) linear both}
+.intro-running .intro-dove{animation:arrival-flight calc(var(--flight-duration) * var(--arrival-tempo)) calc(var(--flight-delay) * var(--arrival-tempo)) linear both}
 .arrival-bird{display:block;width:100%;height:auto;overflow:visible;fill:var(--dove-ink)}
-.intro-running .arrival-bird{animation:arrival-sway var(--sway-speed) var(--flap-phase) ease-in-out infinite}
+.intro-running .arrival-bird{animation:arrival-sway calc(var(--sway-speed) * var(--arrival-tempo)) calc(var(--flap-phase) * var(--arrival-tempo)) ease-in-out infinite}
 /* Uneven timing and independent rising routes keep the flock loose. */
 .intro-dove:nth-child(2){--dove-size:124px;--launch-y:82vh;--bend-one:51vh;--bend-two:19vh;--exit-y:6vh;--flight-delay:.72s;--flight-duration:2.62s;--flap-speed:.54s;--flap-phase:-.31s;--bank-start:30deg;--bank-mid:24deg;--bank-late:14deg;--sway-speed:1.17s;--dove-ink:#9ba498}
 .intro-dove:nth-child(3){--dove-size:258px;--launch-y:77vh;--bend-one:53vh;--bend-two:31vh;--exit-y:19vh;--flight-delay:.13s;--flight-duration:3.48s;--flap-speed:.72s;--flap-phase:-.07s;--bank-start:24deg;--bank-mid:15deg;--bank-end:7deg;--sway-speed:1.79s;--dove-ink:#526454}
@@ -21,7 +22,7 @@ html.intro-pending{overflow:hidden}
 .intro-dove:nth-child(7){--dove-size:157px;--launch-y:90vh;--bend-one:50vh;--bend-two:23vh;--exit-y:16vh;--flight-delay:1.11s;--flight-duration:2.7s;--flap-speed:.61s;--flap-phase:-.23s;--bank-start:32deg;--bank-mid:27deg;--bank-late:15deg;--bank-end:6deg;--sway-speed:1.53s;--dove-ink:#8a9885}
 .arrival-tether{position:absolute;inset:0;width:100%;height:100%;overflow:visible;fill:none;stroke:#6e7c62;stroke-width:1.2;stroke-linecap:round;opacity:0;transition:opacity .12s}
 .intro-released .arrival-tether{opacity:0!important}
-.arrival-mail{position:absolute;top:0;left:0;width:clamp(112px,12.8vw,164px);aspect-ratio:160/108;opacity:0;will-change:transform}
+.arrival-mail{position:absolute;top:0;left:0;width:clamp(112px,12.8vw,164px);aspect-ratio:160/108;opacity:0;will-change:transform;transform-origin:50% 50%}
 .arrival-envelope{position:absolute;inset:0;perspective:650px;filter:drop-shadow(0 8px 10px #3a49391b)}
 .mail-back{position:absolute;inset:0;background:#f3f1e7;border:1px solid #a8b19c;border-radius:2px}
 .mail-flap{position:absolute;top:0;left:0;width:100%;height:64%;z-index:4;transform-origin:50% 0;backface-visibility:visible;transform-style:preserve-3d}
@@ -38,16 +39,16 @@ html.intro-pending{overflow:hidden}
 .arrival-letter i{height:1px;background:#e2e6d7;margin-top:5%;width:85%;flex-shrink:0}.arrival-letter i+i{width:65%}
 .arrival-letter small{font:3px var(--mono,monospace);letter-spacing:.08em;color:#98a18b;white-space:nowrap;margin-top:auto}
 .arrival-mail-shadow{position:absolute;left:52%;top:calc(63vh + 44px);width:160px;height:14px;background:#72806526;border-radius:50%;filter:blur(10px);transform:translateX(-50%) scale(.5);opacity:0}
-.intro-landed .arrival-mail-shadow{animation:arrival-shadow .35s ease-out both}
-.intro-opening .mail-seal{animation:arrival-unseal .3s ease-out both}
-.intro-opening .mail-flap{animation:arrival-flap .65s cubic-bezier(.4,0,.2,1) both}
-.intro-letter .arrival-letter{animation:arrival-letter .7s cubic-bezier(.22,.7,.2,1) both}
-.intro-unfolding .arrival-letter{opacity:0;transition:opacity .15s}
-.intro-unfolding .arrival-envelope{animation:arrival-envelope-away .65s ease-in both}
+.intro-landed .arrival-mail-shadow{animation:arrival-shadow calc(.35s * var(--arrival-tempo)) ease-out both}
+.intro-opening .mail-seal{animation:arrival-unseal calc(.3s * var(--arrival-tempo)) ease-out both}
+.intro-opening .mail-flap{animation:arrival-flap calc(.65s * var(--arrival-tempo)) cubic-bezier(.4,0,.2,1) both}
+.intro-letter .arrival-letter{animation:arrival-letter calc(.7s * var(--arrival-tempo)) cubic-bezier(.22,.7,.2,1) both}
+.intro-unfolding .arrival-letter{opacity:0;transition:opacity calc(.15s * var(--arrival-tempo))}
+.intro-unfolding .arrival-envelope{animation:arrival-envelope-away calc(.65s * var(--arrival-tempo)) ease-in both}
 .intro-unfolding .arrival-mail-shadow{opacity:0;animation:none;transition:opacity .3s}
 .arrival-paper{display:none;position:absolute;left:var(--paper-left);top:var(--paper-top);width:var(--paper-width);height:var(--paper-height);border:1px solid #b6c0a688;box-shadow:0 8px 35px #5365481a;pointer-events:none}
 .arrival-paper:before,.arrival-paper:after{content:"";position:absolute;left:0;right:0;top:33%;height:1px;background:#8fa07530;box-shadow:0 1px 0 #ffffffc7}.arrival-paper:after{top:66%}
-.intro-unfolding .arrival-paper{display:block;animation:arrival-paper 1.55s cubic-bezier(.22,.7,.2,1) both}
+.intro-unfolding .arrival-paper{display:block;animation:arrival-paper calc(1.55s * var(--arrival-tempo)) cubic-bezier(.22,.7,.2,1) both}
 .arrival-skip{position:absolute;z-index:10;right:max(30px,4vw);top:27px;min-height:42px;padding:9px 0 9px 14px;border:0;background:transparent;color:#63705c;font:9px var(--mono,monospace);letter-spacing:.07em;cursor:pointer;pointer-events:auto;transition:color .2s}
 .arrival-skip span{margin-left:14px;font-size:14px}.arrival-skip:hover{color:#29382a}.arrival-skip:focus-visible{outline:1px solid currentColor;outline-offset:5px}
 @keyframes arrival-flight{0%{opacity:0;transform:translate3d(0,var(--launch-y),0) rotate(var(--bank-start))}6%{opacity:1}27%{opacity:1;transform:translate3d(calc(-27vw - 75.6px),var(--bend-one),0) rotate(var(--bank-mid))}62%{opacity:1;transform:translate3d(calc(-62vw - 173.6px),var(--bend-two),0) rotate(var(--bank-late))}100%{opacity:1;transform:translate3d(calc(-100vw - 280px),var(--exit-y),0) rotate(var(--bank-end))}}

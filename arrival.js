@@ -3,6 +3,7 @@
   const arrival = document.querySelector('.site-arrival');
   const frame = document.querySelector('.site-frame');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const tempo = Math.max(.1, parseFloat(getComputedStyle(root).getPropertyValue('--arrival-tempo')) || 1);
   const introClasses = ['intro-pending', 'intro-running', 'intro-released', 'intro-landed', 'intro-opening', 'intro-letter', 'intro-unfolding'];
   if (!arrival || !frame) return;
 
@@ -17,12 +18,12 @@
   arrival.querySelectorAll('[data-dove]').forEach(dove => {
     dove.append(template.content.cloneNode(true));
     const style = getComputedStyle(dove);
-    const speed = style.getPropertyValue('--flap-speed').trim();
-    const phase = parseFloat(style.getPropertyValue('--flap-phase'));
+    const speed = `${parseFloat(style.getPropertyValue('--flap-speed')) * tempo}s`;
+    const phase = parseFloat(style.getPropertyValue('--flap-phase')) * tempo;
     dove.querySelectorAll('animateTransform').forEach(animation => {
       const farWing = animation.closest('.dove-wing-far');
       animation.setAttribute('dur', speed);
-      animation.setAttribute('begin', `${phase - (farWing ? .11 : 0)}s`);
+      animation.setAttribute('begin', `${phase - (farWing ? .11 * tempo : 0)}s`);
     });
   });
   template.remove();
@@ -88,7 +89,8 @@
 
   function tick(now) {
     if (finished) return;
-    const elapsed = now - startedAt;
+    // One clock speeds up the flight, drop, opening and page reveal together.
+    const elapsed = (now - startedAt) / tempo;
     if (elapsed >= END) { finish(); return; }
     const vw = window.innerWidth;
     const vh = window.innerHeight;
@@ -126,7 +128,8 @@
       mailPosition = {
         x:releasePoint.x + (vw * .52 - releasePoint.x) * drift,
         y:releasePoint.y + (vh * .63 - releasePoint.y) * fall + bounce,
-        angle:releasePoint.angle * (1 - drift) + Math.sin(p * Math.PI * 2) * 16 * (1 - p)
+        // A full turn slows into an upright landing before the flap opens.
+        angle:releasePoint.angle * (1 - drift) + 360 * drift
       };
       drawMail(mailPosition);
     } else if (releasePoint && !unfolding) {
