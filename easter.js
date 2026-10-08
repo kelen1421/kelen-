@@ -286,8 +286,9 @@
     const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
     const stars = Array.from({length:205}, () => ({x:random(),y:random(),size:.3+random()*1.3,alpha:.15+random()*.7,phase:random()*TAU}));
     const strands = Array.from({length:260}, () => ({angle:random()*TAU,start:1.09+random()*.45,end:3+random()*5,phase:random()*TAU,alpha:.025+random()*.07,thickness:.25+random()*.65}));
+    const rushes = Array.from({length:24}, () => ({angle:random()*TAU,delay:.10+random()*.36,duration:.65+random()*.42,tail:.075+random()*.07,sweep:.12+random()*.18,alpha:.07+random()*.09,width:.35+random()*.5}));
     const formulas = ['E = mc²','iℏ ∂ψ/∂t = Ĥψ','Rμν − ½Rgμν = 8πG Tμν / c⁴','S = kB A / 4ℓp²','rₛ = 2GM / c²','∇ · E = ρ / ε₀','Gμν + Λgμν = 8πG Tμν','P(B|A) = P(A|B) P(B) / P(A)','∫ e⁻ˣ² dx = √π','Δx Δp ≥ ℏ / 2','∂²ψ/∂t² = c²∇²ψ','∮ B · dl = μ₀I','F = Gm₁m₂ / r²','eⁱπ + 1 = 0','dτ² = dt² − dx²/c²'];
-    const symbols = Array.from({length:150}, () => ({outer:4.2+random()*3.6,offset:random(),duration:44+random()*24,angle:random()*TAU,text:formulas[Math.floor(random()*formulas.length)],alpha:.14+random()*.45,size:8+random()*9,phase:random()*TAU}));
+    const symbols = Array.from({length:150}, () => ({outer:4.2+random()*3.6,offset:random()*.72,duration:44+random()*24,angle:random()*TAU,text:formulas[Math.floor(random()*formulas.length)],alpha:.14+random()*.45,size:8+random()*9,phase:random()*TAU,delay:random()*.7,entryDuration:.8+random()*.6,entrySweep:.18+random()*.24}));
 
     function resize() {
       width = innerWidth; height = innerHeight; ratio = Math.min(devicePixelRatio || 1, 1.65);
@@ -346,6 +347,38 @@
         const px = x * perspective, py = (z * st + y * ct) * perspective;
         return disturb({x:cx + px * cr - py * sr,y:cy + px * sr + py * cr,depth,scale:perspective});
       }
+      function screenEdgeDistance(angle,padding=0) {
+        const x=Math.cos(angle),y=Math.sin(angle);
+        const horizontal=(x>=0 ? width-cx : cx)/Math.max(.001,Math.abs(x));
+        const vertical=(y>=0 ? height-cy : cy)/Math.max(.001,Math.abs(y));
+        return Math.min(horizontal,vertical)+padding;
+      }
+      // A few short, tapered streaks accelerate inward only while the page collapses.
+      if (!reduced && elapsed < ABSORPTION_MS) {
+        ctx.save(); ctx.lineCap='round';
+        for (const rush of rushes) {
+          const progress=(seconds-rush.delay)/rush.duration;
+          if (progress<=0 || progress>=1) continue;
+          const outer=screenEdgeDistance(rush.angle,170);
+          function rushPoint(t) {
+            const pull=ease(t),r=mix(outer,radius*.9,pull),a=rush.angle+pull*rush.sweep;
+            return {x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r};
+          }
+          const tail=Math.max(0,progress-rush.tail),from=rushPoint(tail),to=rushPoint(progress);
+          const alpha=rush.alpha*ease(progress/.12)*ease((1-progress)/.22);
+          const gradient=ctx.createLinearGradient(from.x,from.y,to.x,to.y);
+          gradient.addColorStop(0,'rgba(244,227,183,0)');
+          gradient.addColorStop(.7,`rgba(244,227,183,${alpha})`);
+          gradient.addColorStop(1,'rgba(244,227,183,0)');
+          ctx.strokeStyle=gradient; ctx.lineWidth=rush.width; ctx.beginPath();
+          for (let i=0;i<=10;i++) {
+            const p=rushPoint(mix(tail,progress,i/10));
+            if(i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+          }
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
       const projected = strands.map(s => {
         const points = [];
         for (let i = 0; i < 32; i++) {
@@ -355,9 +388,12 @@
         }
         return {strand:s,points};
       });
-      // Each formula follows an inward spiral, then fades before returning at the outer edge.
+      // Each cycle begins beyond the screen, joins the disk, then drifts into the core.
       const flowingSymbols = symbols.map(symbol => {
-        const progress = (symbol.offset + seconds / symbol.duration) % 1;
+        const age=seconds-symbol.delay;
+        const cycle=Math.max(0,age)%(symbol.entryDuration+symbol.duration);
+        const entry=reduced ? 1 : clamp(cycle/symbol.entryDuration);
+        const progress=reduced ? symbol.offset : mix(symbol.offset,1,clamp((cycle-symbol.entryDuration)/symbol.duration));
         const r = Math.pow(mix(Math.pow(symbol.outer,1.5),Math.pow(.38,1.5),progress),2/3);
         const angle = symbol.angle + Math.log(r) * 2.1 - seconds * .07;
         const lift = Math.sin(symbol.phase + seconds * .06) * .025;
@@ -365,9 +401,25 @@
         const nextR = r * .994;
         const tangent = project(nextR,angle + Math.log(nextR/r) * 2.1,lift);
         let rotation = Math.atan2(tangent.y-p.y,tangent.x-p.x);
+        const arrival=ease(entry);
+        if (entry<1) {
+          const distance=Math.hypot(p.x-cx,p.y-cy);
+          const direction=Math.atan2(p.y-cy,p.x-cx);
+          const outside=screenEdgeDistance(direction+symbol.entrySweep,260+symbol.text.length*symbol.size*.5);
+          function incoming(t) {
+            const a=direction+symbol.entrySweep*(1-t)*(1-t),d=mix(outside,distance,t);
+            return {x:cx+Math.cos(a)*d,y:cy+Math.sin(a)*d};
+          }
+          const point=incoming(arrival),ahead=incoming(Math.min(1,arrival+.002));
+          const heading=Math.atan2(ahead.y-point.y,ahead.x-point.x);
+          const blend=ease((entry-.55)/.45);
+          rotation=heading+Math.atan2(Math.sin(rotation-heading),Math.cos(rotation-heading))*blend;
+          p.x=point.x; p.y=point.y;
+        }
         if (Math.cos(rotation) < 0) rotation += Math.PI;
-        const fade = ease(progress/.07) * ease((r-.38)/1.05);
-        const shrink = .22 + .78 * Math.pow(r/symbol.outer,.65);
+        const fade = (reduced ? 1 : age>=0 ? ease(entry/.12) : 0) * ease((r-.38)/1.05);
+        const shrink = mix(1,.22+.78*Math.pow(r/symbol.outer,.65),arrival);
+        p.scale=mix(1,p.scale,arrival);
         return {symbol,p,rotation,fade,shrink};
       });
       function drawDisk(front) {
