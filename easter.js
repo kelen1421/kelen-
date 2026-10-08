@@ -285,10 +285,9 @@
     let seed = 1421;
     const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
     const stars = Array.from({length:205}, () => ({x:random(),y:random(),size:.3+random()*1.3,alpha:.15+random()*.7,phase:random()*TAU}));
-    const strands = Array.from({length:260}, () => ({angle:random()*TAU,start:1.09+random()*.45,end:3+random()*5,phase:random()*TAU,alpha:.025+random()*.07,thickness:.25+random()*.65}));
     const rushes = Array.from({length:24}, () => ({angle:random()*TAU,delay:.10+random()*.36,duration:.65+random()*.42,tail:.075+random()*.07,sweep:.12+random()*.18,alpha:.07+random()*.09,width:.35+random()*.5}));
     const formulas = ['E = mc²','iℏ ∂ψ/∂t = Ĥψ','Rμν − ½Rgμν = 8πG Tμν / c⁴','S = kB A / 4ℓp²','rₛ = 2GM / c²','∇ · E = ρ / ε₀','Gμν + Λgμν = 8πG Tμν','P(B|A) = P(A|B) P(B) / P(A)','∫ e⁻ˣ² dx = √π','Δx Δp ≥ ℏ / 2','∂²ψ/∂t² = c²∇²ψ','∮ B · dl = μ₀I','F = Gm₁m₂ / r²','eⁱπ + 1 = 0','dτ² = dt² − dx²/c²'];
-    const symbols = Array.from({length:150}, () => ({outer:4.2+random()*3.6,offset:random()*.72,duration:44+random()*24,angle:random()*TAU,text:formulas[Math.floor(random()*formulas.length)],alpha:.14+random()*.45,size:8+random()*9,phase:random()*TAU,delay:random()*.7,entryDuration:.8+random()*.6,entrySweep:.18+random()*.24}));
+    const symbols = Array.from({length:150}, () => ({outer:4.2+random()*3.6,offset:random()*.72,duration:34+random()*54,angle:random()*TAU,text:formulas[Math.floor(random()*formulas.length)],alpha:.12+random()*.47,size:8+random()*12,phase:random()*TAU,delay:random()*.9,entryDuration:.75+random()*.9,entrySweep:.12+random()*.48,winding:1.4+random()*1.7,turnRate:.035+random()*.065,layer:(random()-.5)*.8,sway:.06+random()*.18,bank:(random()-.5)*.86,meander:.025+random()*.055}));
 
     function resize() {
       width = innerWidth; height = innerHeight; ratio = Math.min(devicePixelRatio || 1, 1.65);
@@ -379,27 +378,19 @@
         }
         ctx.restore();
       }
-      const projected = strands.map(s => {
-        const points = [];
-        for (let i = 0; i < 32; i++) {
-          const r = mix(s.start,s.end,i/31);
-          const a = s.angle + Math.log(r) * 2.1 - seconds * .07;
-          points.push(project(r,a,Math.sin(a * 3 + s.phase) * .024 / r));
-        }
-        return {strand:s,points};
-      });
-      // Each cycle begins beyond the screen, joins the disk, then drifts into the core.
+      // Uneven layers and separate winding rates keep the formulas from forming neat rows.
       const flowingSymbols = symbols.map(symbol => {
         const age=seconds-symbol.delay;
         const cycle=Math.max(0,age)%(symbol.entryDuration+symbol.duration);
         const entry=reduced ? 1 : clamp(cycle/symbol.entryDuration);
         const progress=reduced ? symbol.offset : mix(symbol.offset,1,clamp((cycle-symbol.entryDuration)/symbol.duration));
-        const r = Math.pow(mix(Math.pow(symbol.outer,1.5),Math.pow(.38,1.5),progress),2/3);
-        const angle = symbol.angle + Math.log(r) * 2.1 - seconds * .07;
-        const lift = Math.sin(symbol.phase + seconds * .06) * .025;
+        const nominalR = Math.pow(mix(Math.pow(symbol.outer,1.5),Math.pow(.38,1.5),progress),2/3);
+        const r = nominalR*(1+symbol.meander*Math.sin(symbol.phase+seconds*.14)*ease((nominalR-.38)/1.05));
+        const angle = symbol.angle + Math.log(r) * symbol.winding - seconds * symbol.turnRate;
+        const lift = (symbol.layer+Math.sin(symbol.phase+seconds*.08)*symbol.sway)*Math.sqrt(r)*ease((r-.38)/1.05);
         const p = project(r,angle,lift);
         const nextR = r * .994;
-        const tangent = project(nextR,angle + Math.log(nextR/r) * 2.1,lift);
+        const tangent = project(nextR,angle + Math.log(nextR/r) * symbol.winding,lift);
         let rotation = Math.atan2(tangent.y-p.y,tangent.x-p.x);
         const arrival=ease(entry);
         if (entry<1) {
@@ -416,24 +407,15 @@
           rotation=heading+Math.atan2(Math.sin(rotation-heading),Math.cos(rotation-heading))*blend;
           p.x=point.x; p.y=point.y;
         }
+        rotation += symbol.bank + Math.sin(symbol.phase+seconds*.12)*.08;
         if (Math.cos(rotation) < 0) rotation += Math.PI;
         const fade = (reduced ? 1 : age>=0 ? ease(entry/.12) : 0) * ease((r-.38)/1.05);
         const shrink = mix(1,.22+.78*Math.pow(r/symbol.outer,.65),arrival);
         p.scale=mix(1,p.scale,arrival);
         return {symbol,p,rotation,fade,shrink};
       });
-      function drawDisk(front) {
+      function drawFormulas(front) {
         ctx.globalCompositeOperation = 'screen';
-        for (const {strand:s,points} of projected) {
-          ctx.strokeStyle = `rgba(197,168,104,${s.alpha * visible})`; ctx.lineWidth = s.thickness;
-          ctx.beginPath(); let joined = false;
-          for (const p of points) {
-            if ((p.depth > 0) !== front) { joined = false; continue; }
-            if (joined) ctx.lineTo(p.x,p.y); else ctx.moveTo(p.x,p.y);
-            joined = true;
-          }
-          ctx.stroke();
-        }
         for (const {symbol,p,rotation,fade,shrink} of flowingSymbols) {
           if ((p.depth > 0) !== front || p.x < -200 || p.x > width + 200 || p.y < -100 || p.y > height + 100) continue;
           ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(rotation);
@@ -445,7 +427,7 @@
         }
         ctx.globalCompositeOperation = 'source-over';
       }
-      drawDisk(false);
+      drawFormulas(false);
       // The photon ring stays visible above the far side of the accretion disk.
       ctx.save(); ctx.translate(cx,cy);
       const oval = .96;
@@ -469,7 +451,7 @@
       ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(0,0,radius*.975,0,TAU); ctx.fill();
       ctx.strokeStyle = '#fff7dd'; ctx.lineWidth = Math.max(1,radius*.017); ctx.stroke();
       ctx.restore();
-      drawDisk(true);
+      drawFormulas(true);
       // Bright, thin foreground arcs travel across the dark core, as in the reference.
       ctx.save(); ctx.translate(cx,cy); ctx.rotate(roll);
       ctx.scale(1,Math.max(.11,tilt*.56));
