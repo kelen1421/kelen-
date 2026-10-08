@@ -92,7 +92,7 @@
     portal.className = 'vortex-portal';
     portal.setAttribute('role', 'dialog'); portal.setAttribute('aria-modal', 'true');
     portal.setAttribute('aria-label', '隐藏彩蛋：公式与黑洞。按 Escape 返回个人档案。');
-    portal.innerHTML = '<svg class="vortex-liquid-defs" width="0" height="0" aria-hidden="true"><defs><filter id="vortex-liquid-filter" x="-50%" y="-100%" width="200%" height="300%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".008 .013" numOctaves="2" seed="11" result="flow"/><feDisplacementMap in="SourceGraphic" in2="flow" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg><canvas class="vortex-canvas" aria-hidden="true"></canvas><div class="vortex-caption">KELEN / EVENT HORIZON<span>SECRET ARCHIVE · 002</span></div><button class="vortex-exit" type="button" aria-label="退出彩蛋，返回网页"><kbd>ESC</kbd> 返回档案 ↗</button><div class="vortex-note">你找到了另一个宇宙。<small>移动鼠标，扰动引力场 · ESC 返回档案</small></div>';
+    portal.innerHTML = '<svg class="vortex-liquid-defs" width="0" height="0" aria-hidden="true"><defs><filter id="vortex-liquid-filter" x="-50%" y="-100%" width="200%" height="300%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".008 .013" numOctaves="2" seed="11" result="flow"/><feDisplacementMap in="SourceGraphic" in2="flow" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg><canvas class="vortex-canvas" aria-hidden="true"></canvas><div class="vortex-caption">KELEN / EVENT HORIZON<span>SECRET ARCHIVE · 002</span></div><button class="vortex-exit" type="button" aria-label="退出彩蛋，返回网页"><kbd>ESC</kbd> 返回档案 ↗</button><div class="vortex-note">你找到了另一个宇宙。<small>移动鼠标，拨动水面 · ESC 返回档案</small></div>';
     document.body.append(portal);
     frame.inert = true; root.classList.add('vortex-open');
     const exit = portal.querySelector('.vortex-exit');
@@ -191,12 +191,129 @@
     motion.addEventListener('change', onMotion);
   }
 
+  function createWaterSurface(source) {
+    // A damped height field refracts the scene as the cursor presses into its surface.
+    const context = source.getContext('2d');
+    const output = document.createElement('canvas');
+    const gl = output.getContext('webgl',{alpha:true,antialias:false,depth:false,stencil:false,preserveDrawingBuffer:true});
+    const fallback = {
+      canvas:source,context,refracts:false,
+      resize(w,h,ratio) { source.width=Math.round(w*ratio); source.height=Math.round(h*ratio); context.setTransform(ratio,0,0,ratio,0,0); },
+      touch() {},render() {},dispose() {}
+    };
+    if (!gl) return fallback;
+    const vertexSource = `attribute vec2 position; varying vec2 uv; void main(){uv=position*.5+.5;gl_Position=vec4(position,0.,1.);}`;
+    const fragmentSource = `
+      precision highp float;
+      varying vec2 uv;
+      uniform sampler2D scene,water;
+      uniform vec2 dimensions,pointer;
+      uniform float strength,coreRadius;
+      void main(){
+        vec2 normal=(texture2D(water,vec2(uv.x,1.-uv.y)).rg*255.-128.)/127.;
+        vec2 distance=(uv-pointer)*vec2(dimensions.x/dimensions.y,1.);
+        float pressure=exp(-dot(distance,distance)/(.072*.072))*strength;
+        vec2 push=distance/vec2(dimensions.x/dimensions.y,1.)*pressure*.32;
+        float freeSurface=smoothstep(coreRadius*.96,coreRadius*1.4,length((uv-vec2(.5,.52))*dimensions));
+        vec2 refraction=(vec2(normal.x,-normal.y)*18./dimensions-push)*freeSurface;
+        vec4 color=texture2D(scene,clamp(uv+refraction,vec2(.001),vec2(.999)));
+        float light=clamp((normal.x-normal.y)*.025,-.035,.035)*freeSurface;
+        color.rgb=clamp(color.rgb+vec3(light*color.a),vec3(0.),vec3(color.a));
+        gl_FragColor=color;
+      }`;
+    let program;
+    function shader(type,code) {
+      const value=gl.createShader(type); gl.shaderSource(value,code); gl.compileShader(value);
+      if (!gl.getShaderParameter(value,gl.COMPILE_STATUS)) { gl.deleteShader(value); throw new Error('Water shader unavailable'); }
+      return value;
+    }
+    try {
+      const vertex=shader(gl.VERTEX_SHADER,vertexSource),fragment=shader(gl.FRAGMENT_SHADER,fragmentSource);
+      program=gl.createProgram(); gl.attachShader(program,vertex); gl.attachShader(program,fragment); gl.linkProgram(program);
+      gl.deleteShader(vertex); gl.deleteShader(fragment);
+      if (!gl.getProgramParameter(program,gl.LINK_STATUS)) throw new Error('Water surface unavailable');
+    } catch (_) { if (program) gl.deleteProgram(program); return fallback; }
+    gl.useProgram(program);
+    const buffer=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+    const position=gl.getAttribLocation(program,'position'); gl.enableVertexAttribArray(position); gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
+    function texture(unit,name) {
+      const value=gl.createTexture(); gl.activeTexture(gl.TEXTURE0+unit); gl.bindTexture(gl.TEXTURE_2D,value);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+      gl.uniform1i(gl.getUniformLocation(program,name),unit); return value;
+    }
+    const sceneTexture=texture(0,'scene'),waterTexture=texture(1,'water');
+    const dimensions=gl.getUniformLocation(program,'dimensions'),cursor=gl.getUniformLocation(program,'pointer');
+    const strength=gl.getUniformLocation(program,'strength'),coreRadius=gl.getUniformLocation(program,'coreRadius');
+    let width,height,columns,rows,current,previous,next,normals,lastTouch,lastTime,accumulator=0,pending=[];
+    output.className=source.className+' vortex-water-surface'; output.setAttribute('aria-hidden','true'); source.replaceWith(output);
+    return {
+      canvas:output,context,refracts:true,
+      resize(w,h,ratio) {
+        width=w; height=h; source.width=output.width=Math.round(w*ratio); source.height=output.height=Math.round(h*ratio);
+        context.setTransform(ratio,0,0,ratio,0,0); gl.viewport(0,0,output.width,output.height);
+        columns=Math.max(96,Math.min(176,Math.round(w/8))); rows=Math.max(48,Math.min(144,Math.round(columns*h/w)));
+        current=new Float32Array(columns*rows); previous=new Float32Array(columns*rows); next=new Float32Array(columns*rows);
+        normals=new Uint8Array(columns*rows*4); pending=[]; lastTouch=undefined; lastTime=undefined; accumulator=0;
+        for(let i=0;i<columns*rows;i++){normals[i*4]=128;normals[i*4+1]=128;normals[i*4+3]=255;}
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,sceneTexture);
+        gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,source.width,source.height,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+        gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,waterTexture);
+        gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,columns,rows,0,gl.RGBA,gl.UNSIGNED_BYTE,normals);
+        gl.uniform2f(dimensions,w,h);
+      },
+      touch(x,y) {
+        if (!width) return;
+        const from=lastTouch ?? {x,y}; const distance=Math.hypot(x-from.x,y-from.y);
+        const steps=Math.max(1,Math.min(8,Math.ceil(distance/12)));
+        for(let i=1;i<=steps;i++) pending.push({x:mix(from.x,x,i/steps)/width,y:mix(from.y,y,i/steps)/height,force:Math.min(3.5,1.2+distance*.025)});
+        if(pending.length>20) pending.splice(0,pending.length-20);
+        lastTouch={x,y};
+      },
+      render(now,pointer,radius) {
+        for(const touch of pending) {
+          const x=Math.round(touch.x*(columns-1)),y=Math.round(touch.y*(rows-1));
+          for(let dy=-4;dy<=4;dy++) for(let dx=-4;dx<=4;dx++) {
+            const px=x+dx,py=y+dy; if(px<1||px>=columns-1||py<1||py>=rows-1) continue;
+            const i=py*columns+px,force=touch.force*Math.exp(-(dx*dx+dy*dy)/5);
+            current[i]=clamp(current[i]-force,-32,32); previous[i]=clamp(previous[i]-force*.85,-32,32);
+          }
+        }
+        pending=[]; accumulator+=Math.min(64,now-(lastTime ?? now)); lastTime=now;
+        while(accumulator>=16.67) {
+          for(let y=1;y<rows-1;y++) for(let x=1;x<columns-1;x++) {
+            const i=y*columns+x;
+            next[i]=((current[i-1]+current[i+1]+current[i-columns]+current[i+columns])*.5-previous[i])*.987;
+          }
+          const old=previous;previous=current;current=next;next=old; accumulator-=16.67;
+        }
+        for(let y=1;y<rows-1;y++) for(let x=1;x<columns-1;x++) {
+          const i=y*columns+x;
+          normals[i*4]=clamp(128+(current[i-1]-current[i+1])*24,0,255);
+          normals[i*4+1]=clamp(128+(current[i-columns]-current[i+columns])*24,0,255);
+        }
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,sceneTexture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);
+        gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,gl.RGBA,gl.UNSIGNED_BYTE,source);
+        gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,waterTexture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+        gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,columns,rows,gl.RGBA,gl.UNSIGNED_BYTE,normals);
+        gl.uniform2f(cursor,pointer.x/width,1-pointer.y/height); gl.uniform1f(strength,pointer.strength); gl.uniform1f(coreRadius,radius);
+        gl.drawArrays(gl.TRIANGLES,0,6);
+      },
+      dispose() {gl.deleteTexture(sceneTexture);gl.deleteTexture(waterTexture);gl.deleteBuffer(buffer);gl.deleteProgram(program);pending=[];}
+    };
+  }
+
   function createUniverse(canvas, started, reduced) {
-    const ctx = canvas.getContext('2d');
+    const surface = createWaterSurface(canvas);
+    canvas = surface.canvas;
+    const ctx = surface.context;
     let width, height, ratio, raf, disposed = false, lastDraw;
     const pointer = {x:0,y:0,strength:0};
     const targetPointer = {x:0,y:0,moved:-Infinity};
-    let pointerSeen = false, lastWake = 0, wakes = [];
+    let pointerSeen = false;
     let seed = 1421;
     const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
     const stars = Array.from({length:205}, () => ({x:random(),y:random(),size:.3+random()*1.3,alpha:.15+random()*.7,phase:random()*TAU}));
@@ -206,22 +323,16 @@
 
     function resize() {
       width = innerWidth; height = innerHeight; ratio = Math.min(devicePixelRatio || 1, 1.65);
-      canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
-      ctx.setTransform(ratio,0,0,ratio,0,0);
+      surface.resize(width,height,ratio);
       if (reduced) draw(performance.now());
     }
     function onPointer(event) {
       if (reduced || event.pointerType !== 'mouse') return;
       const now = performance.now();
-      const distance = Math.hypot(event.clientX-targetPointer.x,event.clientY-targetPointer.y);
       targetPointer.x = event.clientX; targetPointer.y = event.clientY;
       targetPointer.moved = now;
       if (!pointerSeen) { pointer.x = targetPointer.x; pointer.y = targetPointer.y; pointerSeen = true; }
-      if (distance > 4 && now-lastWake > 110 && now-started > ABSORPTION_MS) {
-        wakes.push({x:event.clientX,y:event.clientY,born:now,phase:random()*TAU});
-        if (wakes.length > 9) wakes.shift();
-        lastWake = now;
-      }
+      surface.touch(event.clientX,event.clientY);
     }
     function draw(now) {
       if (disposed) return;
@@ -248,13 +359,13 @@
       const roll = -.32;
       const cr = Math.cos(roll), sr = Math.sin(roll), ct = Math.cos(tilt), st = Math.sin(tilt);
       function disturb(p) {
-        if (pointer.strength < .005) return p;
+        if (surface.refracts || pointer.strength < .005) return p;
         const dx = p.x-pointer.x, dy = p.y-pointer.y;
         const distance = Math.hypot(dx,dy);
         const outsideCore = ease((Math.hypot(p.x-cx,p.y-cy)-radius*1.08)/(radius*.65));
         const falloff = Math.exp(-distance*distance/(2*125*125))*outsideCore*pointer.strength;
-        const ripple = Math.sin(distance*.042-seconds*4.2)*17*falloff;
-        return {...p,x:p.x + dx/Math.max(1,distance)*ripple*.45,y:p.y + ripple + dy/Math.max(1,distance)*falloff*8};
+        const ripple = Math.sin(distance*.042-seconds*4.2)*8*falloff;
+        return {...p,x:p.x + dx/Math.max(1,distance)*falloff*20,y:p.y + dy/Math.max(1,distance)*falloff*20+ripple};
       }
       function project(r, angle, lift = 0) {
         const a = angle + yaw, x = Math.cos(a) * r * radius, z = Math.sin(a) * r * radius;
@@ -344,33 +455,7 @@
         ctx.strokeStyle = `rgba(250,234,191,${visible * .065 * (1-i/22)})`; ctx.lineWidth = .75; ctx.stroke();
       }
       ctx.restore();
-      // The cursor leaves short gold ripples and sparks in the disk, never displacing the core.
-      wakes = wakes.filter(wake => now-wake.born < 1800);
-      ctx.save(); ctx.globalCompositeOperation = 'screen';
-      if (pointer.strength > .02 && Math.hypot(pointer.x-cx,pointer.y-cy) > radius*1.45) {
-        const light = ctx.createRadialGradient(pointer.x,pointer.y,0,pointer.x,pointer.y,58);
-        light.addColorStop(0,`rgba(254,234,171,${pointer.strength*.13})`);
-        light.addColorStop(1,'rgba(216,179,93,0)');
-        ctx.fillStyle = light; ctx.fillRect(pointer.x-58,pointer.y-58,116,116);
-      }
-      for (const wake of wakes) {
-        if (Math.hypot(wake.x-cx,wake.y-cy) < radius*1.45) continue;
-        const age = (now-wake.born)/1800;
-        const alpha = (1-age)*(1-age)*visible;
-        const spread = 10+age*75;
-        ctx.strokeStyle = `rgba(242,221,160,${alpha*.45})`; ctx.lineWidth = .8;
-        ctx.beginPath(); ctx.ellipse(wake.x,wake.y,spread,spread*.34,roll,0,TAU); ctx.stroke();
-        for (let i=0;i<5;i++) {
-          const angle = wake.phase+i*TAU/5;
-          const x = mix(wake.x,cx,age*.12)+Math.cos(angle)*spread*.35;
-          const y = mix(wake.y,cy,age*.12)+Math.sin(angle)*spread*.18;
-          if (Math.hypot(x-cx,y-cy) < radius*1.05) continue;
-          ctx.shadowColor = '#fbe9b4'; ctx.shadowBlur = 8;
-          ctx.strokeStyle = `rgba(255,242,197,${alpha*.75})`; ctx.lineWidth = 1.2;
-          ctx.beginPath(); ctx.moveTo(x-3,y+2); ctx.lineTo(x+3,y-2); ctx.stroke();
-        }
-      }
-      ctx.restore();
+      surface.render(now,pointer,radius);
       if (!reduced && !document.hidden) raf = requestAnimationFrame(draw);
     }
     function visibility() { cancelAnimationFrame(raf); if (!document.hidden) draw(performance.now()); }
@@ -383,6 +468,7 @@
         disposed = true; cancelAnimationFrame(raf);
         window.removeEventListener('resize',resize); document.removeEventListener('visibilitychange',visibility);
         canvas.removeEventListener('pointermove',onPointer);
+        surface.dispose();
       }
     };
   }
