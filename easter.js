@@ -4,7 +4,8 @@
   const root = document.documentElement;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const TAU = Math.PI * 2;
-  const ABSORPTION_MS = 1720;
+  const APPEAR_MS = 620;
+  const ABSORPTION_MS = 2120;
   const clamp = (n, a = 0, b = 1) => Math.min(b, Math.max(a, n));
   const ease = n => { const p = clamp(n); return p * p * (3 - 2 * p); };
   const mix = (a, b, p) => a + (b - a) * p;
@@ -24,7 +25,7 @@
     const step = Math.max(1, Math.floor(samples.length / 36));
     for (let start = 0; start <= samples.length - 30; start += step) {
       const hole = circleCandidate(samples.slice(start));
-      if (hole) { openPortal(hole); return; }
+      if (hole) { openPortal(); return; }
     }
   }
 
@@ -79,11 +80,12 @@
   window.addEventListener('blur', () => { if (!active) resetGesture(); });
   window.addEventListener('scroll', () => { if (!active) resetGesture(); }, {passive:true});
 
-  function openPortal(hole) {
+  function openPortal() {
     if (active || triggered) return;
     // A new page visit gets one discovery; Escape never rearms the gesture.
     triggered = true;
     resetGesture();
+    const hole = {x:innerWidth*.5,y:innerHeight*.48};
     const previousFocus = document.activeElement;
     const wasInert = frame.inert;
     const scrollPosition = {left:scrollX, top:scrollY, behavior:'instant'};
@@ -91,7 +93,7 @@
     portal.className = 'vortex-portal';
     portal.setAttribute('role', 'dialog'); portal.setAttribute('aria-modal', 'true');
     portal.setAttribute('aria-label', '隐藏彩蛋：公式与黑洞。按 Escape 返回个人档案。');
-    portal.innerHTML = '<svg class="vortex-liquid-defs" width="0" height="0" aria-hidden="true"><defs><filter id="vortex-liquid-filter" x="-50%" y="-100%" width="200%" height="300%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".008 .013" numOctaves="2" seed="11" result="flow"/><feDisplacementMap in="SourceGraphic" in2="flow" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg><canvas class="vortex-canvas" aria-hidden="true"></canvas><div class="vortex-caption">KELEN / EVENT HORIZON<span>SECRET ARCHIVE · 002</span></div><button class="vortex-exit" type="button" aria-label="退出彩蛋，返回网页"><kbd>ESC</kbd> 返回档案 ↗</button><div class="vortex-note">你找到了另一个宇宙。<small>STAY CURIOUS. THE UNKNOWN IS STILL OPEN.</small></div>';
+    portal.innerHTML = '<svg class="vortex-liquid-defs" width="0" height="0" aria-hidden="true"><defs><filter id="vortex-liquid-filter" x="-50%" y="-100%" width="200%" height="300%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".008 .013" numOctaves="2" seed="11" result="flow"/><feDisplacementMap in="SourceGraphic" in2="flow" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg><canvas class="vortex-canvas" aria-hidden="true"></canvas><div class="vortex-caption">KELEN / EVENT HORIZON<span>SECRET ARCHIVE · 002</span></div><button class="vortex-exit" type="button" aria-label="退出彩蛋，返回网页"><kbd>ESC</kbd> 返回档案 ↗</button><div class="vortex-note">你找到了另一个宇宙。<small>移动鼠标，扰动引力场 · ESC 返回档案</small></div>';
     document.body.append(portal);
     frame.inert = true; root.classList.add('vortex-open');
     const exit = portal.querySelector('.vortex-exit');
@@ -99,7 +101,7 @@
     const started = performance.now();
     let liquidFrame;
     active = {portal, animations};
-    const scene = createUniverse(portal.querySelector('canvas'), hole, started, motion.matches);
+    const scene = createUniverse(portal.querySelector('canvas'), started, motion.matches);
     const duration = motion.matches ? 180 : ABSORPTION_MS;
 
     if (!motion.matches) {
@@ -121,13 +123,13 @@
           {transform:`translate(${dx * .2 - dy * .1 * bend}px,${dy * .2 + dx * .1 * bend}px) rotate(18deg) rotate(${direction}deg) scale(1.35,.63) skewX(${bend * 12}deg) rotate(${-direction}deg) ${original}`, filter:`${liquid} blur(.35px)`, opacity:1, offset:.5},
           {transform:`translate(${dx * .66 - dy * .07 * bend}px,${dy * .66 + dx * .07 * bend}px) rotate(105deg) rotate(${direction}deg) scale(.85,.16) skewX(${bend * 28}deg) rotate(${-direction}deg) ${original}`, filter:`${liquid} blur(.7px)`, opacity:.75, offset:.79},
           {transform:`translate(${dx}px,${dy}px) rotate(${240 + index * 9}deg) scale(.001) ${original}`, filter:`${liquid} blur(1px)`, opacity:0, offset:1}
-        ], {duration:1450, delay:Math.min(index * 17, 180), easing:'cubic-bezier(.4,.06,.76,.48)', fill:'both'}));
+        ], {duration:1320, delay:APPEAR_MS + Math.min(index * 17, 140), easing:'cubic-bezier(.4,.06,.76,.48)', fill:'both'}));
         index++;
       }
       const displacement = portal.querySelector('feDisplacementMap');
       const turbulence = portal.querySelector('feTurbulence');
       function liquefy(now) {
-        const t = clamp((now-started)/1350);
+        const t = clamp((now-started-APPEAR_MS)/1100);
         displacement.setAttribute('scale', String(120 * ease(t)));
         turbulence.setAttribute('baseFrequency', `${.008 + t * .0015} ${.013 + t * .003}`);
         if (now-started < duration) liquidFrame = requestAnimationFrame(liquefy);
@@ -138,8 +140,8 @@
     const origin = `${hole.x - bounds.left}px ${hole.y - bounds.top}px`;
     animations.push(frame.animate(motion.matches ? [{opacity:1},{opacity:0}] : [
       {transform:'none', transformOrigin:origin, opacity:1, offset:0},
-      {transform:'none', transformOrigin:origin, opacity:1, offset:.3},
-      {transform:'rotate(8deg) scale(.98)', transformOrigin:origin, opacity:1, offset:.52},
+      {transform:'none', transformOrigin:origin, opacity:1, offset:.34},
+      {transform:'rotate(8deg) scale(.98)', transformOrigin:origin, opacity:1, offset:.58},
       {transform:'rotate(62deg) scale(.65)', transformOrigin:origin, opacity:.9, offset:.8},
       {transform:'rotate(170deg) scale(.002)', transformOrigin:origin, opacity:0, offset:1}
     ], {duration, easing:'cubic-bezier(.55,.03,.77,.43)', fill:'both'}));
@@ -170,15 +172,18 @@
     motion.addEventListener('change', onMotion);
   }
 
-  function createUniverse(canvas, initial, started, reduced) {
+  function createUniverse(canvas, started, reduced) {
     const ctx = canvas.getContext('2d');
-    let width, height, ratio, raf, disposed = false, pointer = {x:0,y:0};
+    let width, height, ratio, raf, disposed = false, lastDraw;
+    const pointer = {x:0,y:0,strength:0};
+    const targetPointer = {x:0,y:0,moved:-Infinity};
+    let pointerSeen = false, lastWake = 0, wakes = [];
     let seed = 1421;
     const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
     const stars = Array.from({length:205}, () => ({x:random(),y:random(),size:.3+random()*1.3,alpha:.15+random()*.7,phase:random()*TAU}));
     const strands = Array.from({length:260}, () => ({angle:random()*TAU,start:1.09+random()*.45,end:3+random()*5,phase:random()*TAU,alpha:.025+random()*.07,thickness:.25+random()*.65}));
     const formulas = ['E = mc²','iℏ ∂ψ/∂t = Ĥψ','Rμν − ½Rgμν = 8πG Tμν / c⁴','S = kB A / 4ℓp²','rₛ = 2GM / c²','∇ · E = ρ / ε₀','Gμν + Λgμν = 8πG Tμν','P(B|A) = P(A|B) P(B) / P(A)','∫ e⁻ˣ² dx = √π','Δx Δp ≥ ℏ / 2','∂²ψ/∂t² = c²∇²ψ','∮ B · dl = μ₀I','F = Gm₁m₂ / r²','eⁱπ + 1 = 0','dτ² = dt² − dx²/c²'];
-    const symbols = Array.from({length:150}, () => ({outer:4.2+random()*3.6,offset:random(),duration:44+random()*24,angle:random()*TAU,text:formulas[Math.floor(random()*formulas.length)],alpha:.14+random()*.45,size:8+random()*9,phase:random()*TAU}));
+    const symbols = Array.from({length:108}, () => ({outer:4.2+random()*3.6,offset:random(),duration:44+random()*24,angle:random()*TAU,text:formulas[Math.floor(random()*formulas.length)],alpha:.26+random()*.38,size:12+random()*8,phase:random()*TAU}));
 
     function resize() {
       width = innerWidth; height = innerHeight; ratio = Math.min(devicePixelRatio || 1, 1.65);
@@ -187,35 +192,57 @@
       if (reduced) draw(performance.now());
     }
     function onPointer(event) {
-      pointer.x = (event.clientX / width - .5) * 2;
-      pointer.y = (event.clientY / height - .5) * 2;
+      if (reduced || event.pointerType !== 'mouse') return;
+      const now = performance.now();
+      const distance = Math.hypot(event.clientX-targetPointer.x,event.clientY-targetPointer.y);
+      targetPointer.x = event.clientX; targetPointer.y = event.clientY;
+      targetPointer.moved = now;
+      if (!pointerSeen) { pointer.x = targetPointer.x; pointer.y = targetPointer.y; pointerSeen = true; }
+      if (distance > 4 && now-lastWake > 110 && now-started > ABSORPTION_MS) {
+        wakes.push({x:event.clientX,y:event.clientY,born:now,phase:random()*TAU});
+        if (wakes.length > 9) wakes.shift();
+        lastWake = now;
+      }
     }
     function draw(now) {
       if (disposed) return;
       const elapsed = now - started;
       const seconds = reduced ? 2 : elapsed / 1000;
-      const arrival = reduced ? 1 : ease(elapsed / ABSORPTION_MS);
-      const settle = reduced ? 1 : ease((elapsed - ABSORPTION_MS) / 1100);
-      const cx = mix(initial.x, width * .52, settle), cy = mix(initial.y, height * .47, settle);
-      const radius = mix(7, Math.min(width,height) * .137, arrival);
-      const visible = reduced ? 1 : ease((elapsed - 1100) / 1100);
+      const delta = Math.min(64,now-(lastDraw ?? now)); lastDraw = now;
+      const follow = 1-Math.exp(-delta/100);
+      pointer.x = mix(pointer.x,targetPointer.x,follow); pointer.y = mix(pointer.y,targetPointer.y,follow);
+      pointer.strength = mix(pointer.strength,clamp(1-(now-targetPointer.moved)/1800),follow);
+      // The core and its axis stay anchored; only the surrounding matter moves.
+      const cx = width*.5, cy = height*.48;
+      const fullRadius = Math.min(width,height)*.137;
+      const radius = reduced ? fullRadius : Math.max(.1,fullRadius*ease(elapsed/380)*mix(.58,1,ease((elapsed-APPEAR_MS)/1160)));
+      const visible = reduced ? 1 : ease((elapsed - APPEAR_MS) / 1500);
       ctx.clearRect(0,0,width,height);
-      ctx.fillStyle = `rgba(0,0,0,${reduced ? 1 : ease((elapsed - 600) / (ABSORPTION_MS - 600))})`; ctx.fillRect(0,0,width,height);
+      ctx.fillStyle = `rgba(0,0,0,${reduced ? 1 : ease((elapsed - 680) / (ABSORPTION_MS - 680))})`; ctx.fillRect(0,0,width,height);
       for (const star of stars) {
         const glint = .77 + Math.sin(seconds * .6 + star.phase) * .23;
         ctx.fillStyle = `rgba(235,230,209,${star.alpha * visible * glint})`;
         ctx.beginPath(); ctx.arc(star.x * width, star.y * height, star.size,0,TAU); ctx.fill();
       }
-      const yaw = seconds * .025 + pointer.x * .1;
-      const tilt = .36 + Math.sin(seconds * .045) * .09 + pointer.y * .06;
-      const roll = -.3 + seconds * .012 + pointer.x * .05;
+      const yaw = seconds * .018;
+      const tilt = .43;
+      const roll = -.32;
       const cr = Math.cos(roll), sr = Math.sin(roll), ct = Math.cos(tilt), st = Math.sin(tilt);
+      function disturb(p) {
+        if (pointer.strength < .005) return p;
+        const dx = p.x-pointer.x, dy = p.y-pointer.y;
+        const distance = Math.hypot(dx,dy);
+        const outsideCore = ease((Math.hypot(p.x-cx,p.y-cy)-radius*1.08)/(radius*.65));
+        const falloff = Math.exp(-distance*distance/(2*125*125))*outsideCore*pointer.strength;
+        const ripple = Math.sin(distance*.042-seconds*4.2)*17*falloff;
+        return {...p,x:p.x + dx/Math.max(1,distance)*ripple*.45,y:p.y + ripple + dy/Math.max(1,distance)*falloff*8};
+      }
       function project(r, angle, lift = 0) {
         const a = angle + yaw, x = Math.cos(a) * r * radius, z = Math.sin(a) * r * radius;
         const y = lift * radius, depth = z * ct - y * st;
         const perspective = 11 * radius / (11 * radius - depth);
         const px = x * perspective, py = (z * st + y * ct) * perspective;
-        return {x:cx + px * cr - py * sr,y:cy + px * sr + py * cr,depth,scale:perspective};
+        return disturb({x:cx + px * cr - py * sr,y:cy + px * sr + py * cr,depth,scale:perspective});
       }
       const projected = strands.map(s => {
         const points = [];
@@ -237,10 +264,26 @@
         const tangent = project(nextR,angle + Math.log(nextR/r) * 2.1,lift);
         let rotation = Math.atan2(tangent.y-p.y,tangent.x-p.x);
         if (Math.cos(rotation) < 0) rotation += Math.PI;
+        // Follow the flow without turning formula baselines sideways or compressing the glyphs.
+        rotation = clamp(rotation,-.17,.17);
         const fade = ease(progress/.07) * ease((r-.38)/1.05);
-        const shrink = .22 + .78 * Math.pow(r/symbol.outer,.65);
-        return {symbol,p,rotation,fade,shrink};
+        const shrink = .4 + .6 * Math.pow(r/symbol.outer,.4);
+        const fontSize = Math.max(10,symbol.size*clamp(p.scale,.8,1.5)*shrink);
+        return {symbol,p,rotation,fade,fontSize};
       });
+      // Keep a little clear space around readable labels; fade overlaps instead of popping them away.
+      const labelBounds = [];
+      for (const item of flowingSymbols) {
+        const {symbol,p,fontSize,fade} = item;
+        ctx.font = `${fontSize}px Georgia,serif`;
+        const labelWidth = ctx.measureText(symbol.text).width;
+        const bounds = {left:p.x-labelWidth/2-9,right:p.x+labelWidth/2+9,top:p.y-fontSize-8,bottom:p.y+8};
+        const behindCore = p.depth <= 0 && Math.hypot(p.x-cx,p.y-cy) < radius*1.08;
+        const overlaps = labelBounds.some(b => bounds.left < b.right && bounds.right > b.left && bounds.top < b.bottom && bounds.bottom > b.top);
+        const readable = !behindCore && !overlaps && fade > .12;
+        if (readable) labelBounds.push(bounds);
+        symbol.readability = reduced ? Number(readable) : mix(symbol.readability ?? 0,readable ? 1 : 0,1-Math.exp(-delta/200));
+      }
       function drawDisk(front) {
         ctx.globalCompositeOperation = 'screen';
         for (const {strand:s,points} of projected) {
@@ -253,21 +296,20 @@
           }
           ctx.stroke();
         }
-        for (const {symbol,p,rotation,fade,shrink} of flowingSymbols) {
+        for (const {symbol,p,rotation,fade,fontSize} of flowingSymbols) {
           if ((p.depth > 0) !== front || p.x < -200 || p.x > width + 200 || p.y < -100 || p.y > height + 100) continue;
           ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(rotation);
-          ctx.scale(p.scale * shrink,p.scale * shrink * (.52 + tilt));
-          ctx.font = `${symbol.size}px Georgia,serif`;
+          ctx.font = `${fontSize}px Georgia,serif`;
           ctx.textAlign = 'center';
-          ctx.fillStyle = `rgba(231,217,173,${symbol.alpha * visible * fade})`;
+          ctx.fillStyle = `rgba(231,217,173,${symbol.alpha * visible * fade * symbol.readability})`;
           ctx.fillText(symbol.text,0,0); ctx.restore();
         }
         ctx.globalCompositeOperation = 'source-over';
       }
       drawDisk(false);
       // The photon ring stays visible above the far side of the accretion disk.
-      ctx.save(); ctx.translate(cx,cy); ctx.rotate(roll * .34);
-      const oval = .92 + Math.sin(seconds * .045) * .045;
+      ctx.save(); ctx.translate(cx,cy);
+      const oval = .96;
       ctx.scale(1,oval);
       const glow = ctx.createRadialGradient(0,0,radius*.85,0,0,radius*1.65);
       glow.addColorStop(0,'rgba(255,250,229,0)'); glow.addColorStop(.18,'rgba(255,244,204,.9)');
@@ -296,6 +338,33 @@
       for (let i = 0; i < 18; i++) {
         ctx.beginPath(); ctx.ellipse(0,radius*.55,radius*(1.15+i*.055),radius*(.73+i*.027),0,0,Math.PI);
         ctx.strokeStyle = `rgba(250,234,191,${visible * .065 * (1-i/22)})`; ctx.lineWidth = .75; ctx.stroke();
+      }
+      ctx.restore();
+      // The cursor leaves short gold ripples and sparks in the disk, never displacing the core.
+      wakes = wakes.filter(wake => now-wake.born < 1800);
+      ctx.save(); ctx.globalCompositeOperation = 'screen';
+      if (pointer.strength > .02 && Math.hypot(pointer.x-cx,pointer.y-cy) > radius*1.45) {
+        const light = ctx.createRadialGradient(pointer.x,pointer.y,0,pointer.x,pointer.y,58);
+        light.addColorStop(0,`rgba(254,234,171,${pointer.strength*.13})`);
+        light.addColorStop(1,'rgba(216,179,93,0)');
+        ctx.fillStyle = light; ctx.fillRect(pointer.x-58,pointer.y-58,116,116);
+      }
+      for (const wake of wakes) {
+        if (Math.hypot(wake.x-cx,wake.y-cy) < radius*1.45) continue;
+        const age = (now-wake.born)/1800;
+        const alpha = (1-age)*(1-age)*visible;
+        const spread = 10+age*75;
+        ctx.strokeStyle = `rgba(242,221,160,${alpha*.45})`; ctx.lineWidth = .8;
+        ctx.beginPath(); ctx.ellipse(wake.x,wake.y,spread,spread*.34,roll,0,TAU); ctx.stroke();
+        for (let i=0;i<5;i++) {
+          const angle = wake.phase+i*TAU/5;
+          const x = mix(wake.x,cx,age*.12)+Math.cos(angle)*spread*.35;
+          const y = mix(wake.y,cy,age*.12)+Math.sin(angle)*spread*.18;
+          if (Math.hypot(x-cx,y-cy) < radius*1.05) continue;
+          ctx.shadowColor = '#fbe9b4'; ctx.shadowBlur = 8;
+          ctx.strokeStyle = `rgba(255,242,197,${alpha*.75})`; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(x-3,y+2); ctx.lineTo(x+3,y-2); ctx.stroke();
+        }
       }
       ctx.restore();
       if (!reduced && !document.hidden) raf = requestAnimationFrame(draw);
