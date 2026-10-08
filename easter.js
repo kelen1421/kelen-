@@ -158,7 +158,7 @@
     const stars = Array.from({length:205}, () => ({x:random(),y:random(),size:.3+random()*1.3,alpha:.15+random()*.7,phase:random()*TAU}));
     const strands = Array.from({length:260}, () => ({angle:random()*TAU,start:1.09+random()*.45,end:3+random()*5,phase:random()*TAU,alpha:.025+random()*.07,thickness:.25+random()*.65}));
     const formulas = ['E = mc²','iℏ ∂ψ/∂t = Ĥψ','Rμν − ½Rgμν = 8πG Tμν / c⁴','S = kB A / 4ℓp²','rₛ = 2GM / c²','∇ · E = ρ / ε₀','Gμν + Λgμν = 8πG Tμν','P(B|A) = P(A|B) P(B) / P(A)','∫ e⁻ˣ² dx = √π','Δx Δp ≥ ℏ / 2','∂²ψ/∂t² = c²∇²ψ','∮ B · dl = μ₀I','F = Gm₁m₂ / r²','eⁱπ + 1 = 0','dτ² = dt² − dx²/c²'];
-    const symbols = Array.from({length:150}, () => ({r:1.45+random()*5.8,angle:random()*TAU,text:formulas[Math.floor(random()*formulas.length)],alpha:.14+random()*.45,size:8+random()*9,phase:random()*TAU}));
+    const symbols = Array.from({length:150}, () => ({outer:4.2+random()*3.6,offset:random(),duration:44+random()*24,angle:random()*TAU,text:formulas[Math.floor(random()*formulas.length)],alpha:.14+random()*.45,size:8+random()*9,phase:random()*TAU}));
 
     function resize() {
       width = innerWidth; height = innerHeight; ratio = Math.min(devicePixelRatio || 1, 1.65);
@@ -186,9 +186,9 @@
         ctx.fillStyle = `rgba(235,230,209,${star.alpha * visible * glint})`;
         ctx.beginPath(); ctx.arc(star.x * width, star.y * height, star.size,0,TAU); ctx.fill();
       }
-      const yaw = seconds * .105 + pointer.x * .14;
-      const tilt = .22 + (Math.sin(seconds * .28) + 1) * .16 + pointer.y * .08;
-      const roll = -.3 + Math.sin(seconds * .19) * .47 + pointer.x * .08;
+      const yaw = seconds * .025 + pointer.x * .1;
+      const tilt = .36 + Math.sin(seconds * .045) * .09 + pointer.y * .06;
+      const roll = -.3 + seconds * .012 + pointer.x * .05;
       const cr = Math.cos(roll), sr = Math.sin(roll), ct = Math.cos(tilt), st = Math.sin(tilt);
       function project(r, angle, lift = 0) {
         const a = angle + yaw, x = Math.cos(a) * r * radius, z = Math.sin(a) * r * radius;
@@ -201,10 +201,25 @@
         const points = [];
         for (let i = 0; i < 32; i++) {
           const r = mix(s.start,s.end,i/31);
-          const a = s.angle + Math.log(r) * 2.1 - seconds * .36 / Math.sqrt(r);
+          const a = s.angle + Math.log(r) * 2.1 - seconds * .07;
           points.push(project(r,a,Math.sin(a * 3 + s.phase) * .024 / r));
         }
         return {strand:s,points};
+      });
+      // Each formula follows an inward spiral, then fades before returning at the outer edge.
+      const flowingSymbols = symbols.map(symbol => {
+        const progress = (symbol.offset + seconds / symbol.duration) % 1;
+        const r = Math.pow(mix(Math.pow(symbol.outer,1.5),Math.pow(.38,1.5),progress),2/3);
+        const angle = symbol.angle + Math.log(r) * 2.1 - seconds * .07;
+        const lift = Math.sin(symbol.phase + seconds * .06) * .025;
+        const p = project(r,angle,lift);
+        const nextR = r * .994;
+        const tangent = project(nextR,angle + Math.log(nextR/r) * 2.1,lift);
+        let rotation = Math.atan2(tangent.y-p.y,tangent.x-p.x);
+        if (Math.cos(rotation) < 0) rotation += Math.PI;
+        const fade = ease(progress/.07) * ease((r-.38)/1.05);
+        const shrink = .22 + .78 * Math.pow(r/symbol.outer,.65);
+        return {symbol,p,rotation,fade,shrink};
       });
       function drawDisk(front) {
         ctx.globalCompositeOperation = 'screen';
@@ -218,17 +233,13 @@
           }
           ctx.stroke();
         }
-        for (const symbol of symbols) {
-          const angle = symbol.angle + Math.log(symbol.r) * 1.9 - seconds * .3 / Math.sqrt(symbol.r);
-          const p = project(symbol.r,angle,Math.sin(symbol.phase+seconds*.2)*.025);
+        for (const {symbol,p,rotation,fade,shrink} of flowingSymbols) {
           if ((p.depth > 0) !== front || p.x < -200 || p.x > width + 200 || p.y < -100 || p.y > height + 100) continue;
-          const tangent = project(symbol.r,angle + .008);
-          let rotation = Math.atan2(tangent.y-p.y,tangent.x-p.x);
-          if (Math.cos(rotation) < 0) rotation += Math.PI;
           ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(rotation);
-          ctx.scale(p.scale,p.scale * (.52 + tilt));
+          ctx.scale(p.scale * shrink,p.scale * shrink * (.52 + tilt));
           ctx.font = `${symbol.size}px Georgia,serif`;
-          ctx.fillStyle = `rgba(231,217,173,${symbol.alpha * visible})`;
+          ctx.textAlign = 'center';
+          ctx.fillStyle = `rgba(231,217,173,${symbol.alpha * visible * fade})`;
           ctx.fillText(symbol.text,0,0); ctx.restore();
         }
         ctx.globalCompositeOperation = 'source-over';
@@ -236,7 +247,7 @@
       drawDisk(false);
       // The photon ring stays visible above the far side of the accretion disk.
       ctx.save(); ctx.translate(cx,cy); ctx.rotate(roll * .34);
-      const oval = .92 + Math.sin(seconds * .24) * .045;
+      const oval = .92 + Math.sin(seconds * .045) * .045;
       ctx.scale(1,oval);
       const glow = ctx.createRadialGradient(0,0,radius*.85,0,0,radius*1.65);
       glow.addColorStop(0,'rgba(255,250,229,0)'); glow.addColorStop(.18,'rgba(255,244,204,.9)');
