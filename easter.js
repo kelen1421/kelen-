@@ -4,10 +4,11 @@
   const root = document.documentElement;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const TAU = Math.PI * 2;
+  const ABSORPTION_MS = 1720;
   const clamp = (n, a = 0, b = 1) => Math.min(b, Math.max(a, n));
   const ease = n => { const p = clamp(n); return p * p * (3 - 2 * p); };
   const mix = (a, b, p) => a + (b - a) * p;
-  let samples = [], lastPoint, gestureFrame, coolingUntil = 0, active;
+  let samples = [], lastPoint, gestureFrame, triggered = false, active;
 
   function resetGesture() {
     samples = []; lastPoint = undefined;
@@ -65,8 +66,8 @@
   }
 
   document.addEventListener('pointermove', event => {
-    if (active || event.pointerType !== 'mouse' || document.hidden || root.classList.contains('intro-pending') ||
-        performance.now() < coolingUntil || document.querySelector('dialog[open]')) return;
+    if (triggered || active || event.pointerType !== 'mouse' || document.hidden || root.classList.contains('intro-pending') ||
+        document.querySelector('dialog[open]')) return;
     const now = performance.now();
     if (lastPoint && now - lastPoint.t > 1100) resetGesture();
     const point = {x:event.clientX, y:event.clientY, t:now};
@@ -79,7 +80,9 @@
   window.addEventListener('scroll', () => { if (!active) resetGesture(); }, {passive:true});
 
   function openPortal(hole) {
-    if (active) return;
+    if (active || triggered) return;
+    // A new page visit gets one discovery; Escape never rearms the gesture.
+    triggered = true;
     resetGesture();
     const previousFocus = document.activeElement;
     const wasInert = frame.inert;
@@ -88,15 +91,16 @@
     portal.className = 'vortex-portal';
     portal.setAttribute('role', 'dialog'); portal.setAttribute('aria-modal', 'true');
     portal.setAttribute('aria-label', '隐藏彩蛋：公式与黑洞。按 Escape 返回个人档案。');
-    portal.innerHTML = '<canvas class="vortex-canvas" aria-hidden="true"></canvas><div class="vortex-caption">KELEN / EVENT HORIZON<span>SECRET ARCHIVE · 002</span></div><button class="vortex-exit" type="button" aria-label="退出彩蛋，返回网页"><kbd>ESC</kbd> 返回档案 ↗</button><div class="vortex-note">你找到了另一个宇宙。<small>STAY CURIOUS. THE UNKNOWN IS STILL OPEN.</small></div>';
+    portal.innerHTML = '<svg class="vortex-liquid-defs" width="0" height="0" aria-hidden="true"><defs><filter id="vortex-liquid-filter" x="-50%" y="-100%" width="200%" height="300%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".008 .013" numOctaves="2" seed="11" result="flow"/><feDisplacementMap in="SourceGraphic" in2="flow" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg><canvas class="vortex-canvas" aria-hidden="true"></canvas><div class="vortex-caption">KELEN / EVENT HORIZON<span>SECRET ARCHIVE · 002</span></div><button class="vortex-exit" type="button" aria-label="退出彩蛋，返回网页"><kbd>ESC</kbd> 返回档案 ↗</button><div class="vortex-note">你找到了另一个宇宙。<small>STAY CURIOUS. THE UNKNOWN IS STILL OPEN.</small></div>';
     document.body.append(portal);
     frame.inert = true; root.classList.add('vortex-open');
     const exit = portal.querySelector('.vortex-exit');
     const animations = [];
     const started = performance.now();
+    let liquidFrame;
     active = {portal, animations};
     const scene = createUniverse(portal.querySelector('canvas'), hole, started, motion.matches);
-    const duration = motion.matches ? 180 : 1460;
+    const duration = motion.matches ? 180 : ABSORPTION_MS;
 
     if (!motion.matches) {
       const parts = frame.querySelectorAll('.identity,.rail-rule,.rail-meta,.side-nav a,.rail-bottom,.micro-head,.scene-topline,.scene-visual,.scene-intro,.scene-link,.scene-bottomline,.hero-footer,.page-head,.profile-stamp,.profile-copy,.archive-topbar,.archive-stage,.archive-footer,.notes-layout,.contact-top,.contact-main,.contact-bottom,footer');
@@ -108,29 +112,45 @@
         const base = getComputedStyle(node).transform;
         const original = base === 'none' ? '' : base;
         const bend = index % 2 ? 1 : -1;
+        const direction = Math.atan2(dy,dx) * 180 / Math.PI;
+        const priorFilter = getComputedStyle(node).filter;
+        const liquid = `url(#vortex-liquid-filter) ${priorFilter === 'none' ? '' : priorFilter}`;
         animations.push(node.animate([
-          {transform:original || 'none', opacity:1, offset:0},
-          {transform:`translate(${dx * .2 - dy * .18 * bend}px,${dy * .2 + dx * .18 * bend}px) rotate(38deg) scale(.82) ${original}`, opacity:1, offset:.36},
-          {transform:`translate(${dx}px,${dy}px) rotate(${460 + index * 19}deg) scale(.001) ${original}`, opacity:0, offset:1}
-        ], {duration:1120, delay:Math.min(index * 17, 180), easing:'cubic-bezier(.55,.03,.77,.43)', fill:'both'}));
+          {transform:original || 'none', filter:`${liquid} blur(0px)`, opacity:1, offset:0},
+          {transform:`translate(${dx * .025}px,${dy * .025}px) rotate(${direction}deg) scale(1.08,.97) rotate(${-direction}deg) ${original}`, filter:`${liquid} blur(.15px)`, opacity:1, offset:.22},
+          {transform:`translate(${dx * .2 - dy * .1 * bend}px,${dy * .2 + dx * .1 * bend}px) rotate(18deg) rotate(${direction}deg) scale(1.35,.63) skewX(${bend * 12}deg) rotate(${-direction}deg) ${original}`, filter:`${liquid} blur(.35px)`, opacity:1, offset:.5},
+          {transform:`translate(${dx * .66 - dy * .07 * bend}px,${dy * .66 + dx * .07 * bend}px) rotate(105deg) rotate(${direction}deg) scale(.85,.16) skewX(${bend * 28}deg) rotate(${-direction}deg) ${original}`, filter:`${liquid} blur(.7px)`, opacity:.75, offset:.79},
+          {transform:`translate(${dx}px,${dy}px) rotate(${240 + index * 9}deg) scale(.001) ${original}`, filter:`${liquid} blur(1px)`, opacity:0, offset:1}
+        ], {duration:1450, delay:Math.min(index * 17, 180), easing:'cubic-bezier(.4,.06,.76,.48)', fill:'both'}));
         index++;
       }
+      const displacement = portal.querySelector('feDisplacementMap');
+      const turbulence = portal.querySelector('feTurbulence');
+      function liquefy(now) {
+        const t = clamp((now-started)/1350);
+        displacement.setAttribute('scale', String(120 * ease(t)));
+        turbulence.setAttribute('baseFrequency', `${.008 + t * .0015} ${.013 + t * .003}`);
+        if (now-started < duration) liquidFrame = requestAnimationFrame(liquefy);
+      }
+      liquidFrame = requestAnimationFrame(liquefy);
     }
     const bounds = frame.getBoundingClientRect();
     const origin = `${hole.x - bounds.left}px ${hole.y - bounds.top}px`;
     animations.push(frame.animate(motion.matches ? [{opacity:1},{opacity:0}] : [
       {transform:'none', transformOrigin:origin, opacity:1, offset:0},
-      {transform:'rotate(12deg) scale(.97)', transformOrigin:origin, opacity:1, offset:.35},
-      {transform:'rotate(420deg) scale(.002)', transformOrigin:origin, opacity:0, offset:1}
+      {transform:'none', transformOrigin:origin, opacity:1, offset:.3},
+      {transform:'rotate(8deg) scale(.98)', transformOrigin:origin, opacity:1, offset:.52},
+      {transform:'rotate(62deg) scale(.65)', transformOrigin:origin, opacity:.9, offset:.8},
+      {transform:'rotate(170deg) scale(.002)', transformOrigin:origin, opacity:0, offset:1}
     ], {duration, easing:'cubic-bezier(.55,.03,.77,.43)', fill:'both'}));
     const readyTimer = setTimeout(() => { portal.classList.add('vortex-ready'); exit.focus({preventScroll:true}); }, duration);
 
     function closePortal(restoreFocus = true) {
       if (!active) return;
-      clearTimeout(readyTimer); scene.dispose();
+      clearTimeout(readyTimer); cancelAnimationFrame(liquidFrame); scene.dispose();
       animations.forEach(a => a.cancel());
       frame.inert = wasInert; root.classList.remove('vortex-open');
-      portal.remove(); active = undefined; coolingUntil = performance.now() + 1300;
+      portal.remove(); active = undefined;
       window.scrollTo(scrollPosition);
       document.removeEventListener('keydown', onKey, true);
       window.removeEventListener('pagehide', onHide);
@@ -174,13 +194,13 @@
       if (disposed) return;
       const elapsed = now - started;
       const seconds = reduced ? 2 : elapsed / 1000;
-      const arrival = reduced ? 1 : ease(elapsed / 1460);
-      const settle = reduced ? 1 : ease((elapsed - 1150) / 1100);
+      const arrival = reduced ? 1 : ease(elapsed / ABSORPTION_MS);
+      const settle = reduced ? 1 : ease((elapsed - ABSORPTION_MS) / 1100);
       const cx = mix(initial.x, width * .52, settle), cy = mix(initial.y, height * .47, settle);
       const radius = mix(7, Math.min(width,height) * .137, arrival);
-      const visible = reduced ? 1 : ease((elapsed - 900) / 1100);
+      const visible = reduced ? 1 : ease((elapsed - 1100) / 1100);
       ctx.clearRect(0,0,width,height);
-      ctx.fillStyle = `rgba(0,0,0,${reduced ? 1 : ease((elapsed - 350) / 1000)})`; ctx.fillRect(0,0,width,height);
+      ctx.fillStyle = `rgba(0,0,0,${reduced ? 1 : ease((elapsed - 600) / (ABSORPTION_MS - 600))})`; ctx.fillRect(0,0,width,height);
       for (const star of stars) {
         const glint = .77 + Math.sin(seconds * .6 + star.phase) * .23;
         ctx.fillStyle = `rgba(235,230,209,${star.alpha * visible * glint})`;

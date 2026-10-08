@@ -4,6 +4,7 @@ html.vortex-open{overflow:hidden}
 .vortex-open .archive-scene,.vortex-open .scene-visual{overflow:visible}
 .vortex-portal{position:fixed;inset:0;z-index:2000;isolation:isolate;color:#e3d5af;overflow:hidden;touch-action:none}
 .vortex-canvas{display:block;width:100%;height:100%;position:absolute;inset:0}
+.vortex-liquid-defs{position:absolute;pointer-events:none;overflow:visible}
 .vortex-caption,.vortex-exit,.vortex-note{position:absolute;z-index:1;opacity:0;transition:opacity .7s;color:#cfbf95;font-family:var(--mono,monospace)}
 .vortex-caption{left:4.2%;top:36px;font-size:9px;letter-spacing:.16em;line-height:1.9}
 .vortex-caption span{display:block;font-size:7px;color:#7d735c;letter-spacing:.22em}
