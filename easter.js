@@ -192,33 +192,31 @@
   }
 
   function createWaterSurface(source) {
-    // A damped height field refracts the scene as the cursor presses into its surface.
+    // A local depression bends the scene without storing a wake behind the cursor.
     const context = source.getContext('2d');
     const output = document.createElement('canvas');
     const gl = output.getContext('webgl',{alpha:true,antialias:false,depth:false,stencil:false,preserveDrawingBuffer:true});
     const fallback = {
       canvas:source,context,refracts:false,
       resize(w,h,ratio) { source.width=Math.round(w*ratio); source.height=Math.round(h*ratio); context.setTransform(ratio,0,0,ratio,0,0); },
-      touch() {},render() {},dispose() {}
+      render() {},dispose() {}
     };
     if (!gl) return fallback;
     const vertexSource = `attribute vec2 position; varying vec2 uv; void main(){uv=position*.5+.5;gl_Position=vec4(position,0.,1.);}`;
     const fragmentSource = `
       precision highp float;
       varying vec2 uv;
-      uniform sampler2D scene,water;
+      uniform sampler2D scene;
       uniform vec2 dimensions,pointer;
       uniform float strength,coreRadius;
       void main(){
-        vec2 normal=(texture2D(water,vec2(uv.x,1.-uv.y)).rg*255.-128.)/127.;
-        vec2 distance=(uv-pointer)*vec2(dimensions.x/dimensions.y,1.);
-        float pressure=exp(-dot(distance,distance)/(.072*.072))*strength;
-        vec2 push=distance/vec2(dimensions.x/dimensions.y,1.)*pressure*.32;
+        vec2 distance=(uv-pointer)*dimensions;
+        float contactRadius=clamp(min(dimensions.x,dimensions.y)*.12,64.,92.);
+        float pressure=exp(-dot(distance,distance)/(2.*contactRadius*contactRadius))*strength;
+        vec2 push=distance/dimensions*pressure*.36;
         float freeSurface=smoothstep(coreRadius*.96,coreRadius*1.4,length((uv-vec2(.5,.52))*dimensions));
-        vec2 refraction=(vec2(normal.x,-normal.y)*18./dimensions-push)*freeSurface;
+        vec2 refraction=-push*freeSurface;
         vec4 color=texture2D(scene,clamp(uv+refraction,vec2(.001),vec2(.999)));
-        float light=clamp((normal.x-normal.y)*.025,-.035,.035)*freeSurface;
-        color.rgb=clamp(color.rgb+vec3(light*color.a),vec3(0.),vec3(color.a));
         gl_FragColor=color;
       }`;
     let program;
@@ -243,66 +241,28 @@
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
       gl.uniform1i(gl.getUniformLocation(program,name),unit); return value;
     }
-    const sceneTexture=texture(0,'scene'),waterTexture=texture(1,'water');
+    const sceneTexture=texture(0,'scene');
     const dimensions=gl.getUniformLocation(program,'dimensions'),cursor=gl.getUniformLocation(program,'pointer');
     const strength=gl.getUniformLocation(program,'strength'),coreRadius=gl.getUniformLocation(program,'coreRadius');
-    let width,height,columns,rows,current,previous,next,normals,lastTouch,lastTime,accumulator=0,pending=[];
+    let width,height;
     output.className=source.className+' vortex-water-surface'; output.setAttribute('aria-hidden','true'); source.replaceWith(output);
     return {
       canvas:output,context,refracts:true,
       resize(w,h,ratio) {
         width=w; height=h; source.width=output.width=Math.round(w*ratio); source.height=output.height=Math.round(h*ratio);
         context.setTransform(ratio,0,0,ratio,0,0); gl.viewport(0,0,output.width,output.height);
-        columns=Math.max(96,Math.min(176,Math.round(w/8))); rows=Math.max(48,Math.min(144,Math.round(columns*h/w)));
-        current=new Float32Array(columns*rows); previous=new Float32Array(columns*rows); next=new Float32Array(columns*rows);
-        normals=new Uint8Array(columns*rows*4); pending=[]; lastTouch=undefined; lastTime=undefined; accumulator=0;
-        for(let i=0;i<columns*rows;i++){normals[i*4]=128;normals[i*4+1]=128;normals[i*4+3]=255;}
         gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,sceneTexture);
         gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,source.width,source.height,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
-        gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,waterTexture);
-        gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,columns,rows,0,gl.RGBA,gl.UNSIGNED_BYTE,normals);
         gl.uniform2f(dimensions,w,h);
       },
-      touch(x,y) {
-        if (!width) return;
-        const from=lastTouch ?? {x,y}; const distance=Math.hypot(x-from.x,y-from.y);
-        const steps=Math.max(1,Math.min(8,Math.ceil(distance/12)));
-        for(let i=1;i<=steps;i++) pending.push({x:mix(from.x,x,i/steps)/width,y:mix(from.y,y,i/steps)/height,force:Math.min(3.5,1.2+distance*.025)});
-        if(pending.length>20) pending.splice(0,pending.length-20);
-        lastTouch={x,y};
-      },
       render(now,pointer,radius) {
-        for(const touch of pending) {
-          const x=Math.round(touch.x*(columns-1)),y=Math.round(touch.y*(rows-1));
-          for(let dy=-4;dy<=4;dy++) for(let dx=-4;dx<=4;dx++) {
-            const px=x+dx,py=y+dy; if(px<1||px>=columns-1||py<1||py>=rows-1) continue;
-            const i=py*columns+px,force=touch.force*Math.exp(-(dx*dx+dy*dy)/5);
-            current[i]=clamp(current[i]-force,-32,32); previous[i]=clamp(previous[i]-force*.85,-32,32);
-          }
-        }
-        pending=[]; accumulator+=Math.min(64,now-(lastTime ?? now)); lastTime=now;
-        while(accumulator>=16.67) {
-          for(let y=1;y<rows-1;y++) for(let x=1;x<columns-1;x++) {
-            const i=y*columns+x;
-            next[i]=((current[i-1]+current[i+1]+current[i-columns]+current[i+columns])*.5-previous[i])*.987;
-          }
-          const old=previous;previous=current;current=next;next=old; accumulator-=16.67;
-        }
-        for(let y=1;y<rows-1;y++) for(let x=1;x<columns-1;x++) {
-          const i=y*columns+x;
-          normals[i*4]=clamp(128+(current[i-1]-current[i+1])*24,0,255);
-          normals[i*4+1]=clamp(128+(current[i-columns]-current[i+columns])*24,0,255);
-        }
         gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,sceneTexture);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,true);
         gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,gl.RGBA,gl.UNSIGNED_BYTE,source);
-        gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,waterTexture);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
-        gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,columns,rows,gl.RGBA,gl.UNSIGNED_BYTE,normals);
         gl.uniform2f(cursor,pointer.x/width,1-pointer.y/height); gl.uniform1f(strength,pointer.strength); gl.uniform1f(coreRadius,radius);
         gl.drawArrays(gl.TRIANGLES,0,6);
       },
-      dispose() {gl.deleteTexture(sceneTexture);gl.deleteTexture(waterTexture);gl.deleteBuffer(buffer);gl.deleteProgram(program);pending=[];}
+      dispose() {gl.deleteTexture(sceneTexture);gl.deleteBuffer(buffer);gl.deleteProgram(program);}
     };
   }
 
@@ -332,16 +292,20 @@
       targetPointer.x = event.clientX; targetPointer.y = event.clientY;
       targetPointer.moved = now;
       if (!pointerSeen) { pointer.x = targetPointer.x; pointer.y = targetPointer.y; pointerSeen = true; }
-      surface.touch(event.clientX,event.clientY);
+    }
+    function releasePointer() {
+      targetPointer.moved = -Infinity;
+      pointerSeen = false;
     }
     function draw(now) {
       if (disposed) return;
       const elapsed = now - started;
       const seconds = reduced ? 2 : elapsed / 1000;
       const delta = Math.min(64,now-(lastDraw ?? now)); lastDraw = now;
-      const follow = 1-Math.exp(-delta/100);
+      const follow = 1-Math.exp(-delta/24);
       pointer.x = mix(pointer.x,targetPointer.x,follow); pointer.y = mix(pointer.y,targetPointer.y,follow);
-      pointer.strength = mix(pointer.strength,clamp(1-(now-targetPointer.moved)/1800),follow);
+      const pressure = ease(1-(now-targetPointer.moved)/300);
+      pointer.strength = mix(pointer.strength,pressure,1-Math.exp(-delta/40));
       // The core and its axis stay anchored; only the surrounding matter moves.
       const cx = width*.5, cy = height*.48;
       const fullRadius = Math.min(width,height)*.137;
@@ -363,9 +327,9 @@
         const dx = p.x-pointer.x, dy = p.y-pointer.y;
         const distance = Math.hypot(dx,dy);
         const outsideCore = ease((Math.hypot(p.x-cx,p.y-cy)-radius*1.08)/(radius*.65));
-        const falloff = Math.exp(-distance*distance/(2*125*125))*outsideCore*pointer.strength;
-        const ripple = Math.sin(distance*.042-seconds*4.2)*8*falloff;
-        return {...p,x:p.x + dx/Math.max(1,distance)*falloff*20,y:p.y + dy/Math.max(1,distance)*falloff*20+ripple};
+        const contactRadius = clamp(Math.min(width,height)*.12,64,92);
+        const falloff = Math.exp(-distance*distance/(2*contactRadius*contactRadius))*outsideCore*pointer.strength;
+        return {...p,x:p.x + dx*falloff*.36,y:p.y + dy*falloff*.36};
       }
       function project(r, angle, lift = 0) {
         const a = angle + yaw, x = Math.cos(a) * r * radius, z = Math.sin(a) * r * radius;
@@ -458,16 +422,20 @@
       surface.render(now,pointer,radius);
       if (!reduced && !document.hidden) raf = requestAnimationFrame(draw);
     }
-    function visibility() { cancelAnimationFrame(raf); if (!document.hidden) draw(performance.now()); }
+    function visibility() { cancelAnimationFrame(raf); releasePointer(); if (!document.hidden) draw(performance.now()); }
     resize(); draw(performance.now());
     window.addEventListener('resize',resize); document.addEventListener('visibilitychange',visibility);
     canvas.addEventListener('pointermove',onPointer,{passive:true});
+    canvas.addEventListener('pointerleave',releasePointer);
+    window.addEventListener('blur',releasePointer);
     return {
       setReduced(value) { reduced = value; cancelAnimationFrame(raf); draw(performance.now()); },
       dispose() {
         disposed = true; cancelAnimationFrame(raf);
         window.removeEventListener('resize',resize); document.removeEventListener('visibilitychange',visibility);
         canvas.removeEventListener('pointermove',onPointer);
+        canvas.removeEventListener('pointerleave',releasePointer);
+        window.removeEventListener('blur',releasePointer);
         surface.dispose();
       }
     };
