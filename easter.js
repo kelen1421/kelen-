@@ -98,6 +98,9 @@
     const exit = portal.querySelector('.vortex-exit');
     const animations = [];
     const liquidFields = [];
+    const edgeFeather = frame.style.getPropertyValue('--vortex-edge-feather');
+    const edgePriority = frame.style.getPropertyPriority('--vortex-edge-feather');
+    const featherWidth = clamp(Math.min(innerWidth,innerHeight)*.28,120,240);
     const started = performance.now();
     let liquidFrame;
     active = {portal, animations};
@@ -145,6 +148,9 @@
         index++;
       }
       function liquefy(now) {
+        // Soften the page silhouette before its rotating paper plane becomes visible.
+        const dissolve = ease((now-started)/duration/.52);
+        frame.style.setProperty('--vortex-edge-feather',`${featherWidth*dissolve}px`);
         for (const field of liquidFields) {
           const t = clamp((now-started-field.delay)/field.duration);
           field.displacement.setAttribute('scale',String(field.amount*ease(t)*(.85+.15*Math.sin(t*Math.PI))));
@@ -170,6 +176,8 @@
       if (!active) return;
       clearTimeout(readyTimer); cancelAnimationFrame(liquidFrame); scene.dispose();
       animations.forEach(a => a.cancel());
+      if (edgeFeather) frame.style.setProperty('--vortex-edge-feather',edgeFeather,edgePriority);
+      else frame.style.removeProperty('--vortex-edge-feather');
       frame.inert = wasInert; root.classList.remove('vortex-open');
       portal.remove(); active = undefined;
       window.scrollTo(scrollPosition);

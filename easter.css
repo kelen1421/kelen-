@@ -1,6 +1,17 @@
 /* A hidden clockwise gesture opens the other side of the archive. */
 html.vortex-open{overflow:hidden}
 .vortex-open .site-frame{pointer-events:none;will-change:transform,opacity}
+.vortex-open .site-frame{
+  --vortex-edge-feather:0px;
+  --vortex-edge-x:linear-gradient(to right,transparent,#00000028 calc(var(--vortex-edge-feather)*.25),#00000080 calc(var(--vortex-edge-feather)*.5),#000000d7 calc(var(--vortex-edge-feather)*.75),#000 var(--vortex-edge-feather),#000 calc(100% - var(--vortex-edge-feather)),#000000d7 calc(100% - var(--vortex-edge-feather)*.75),#00000080 calc(100% - var(--vortex-edge-feather)*.5),#00000028 calc(100% - var(--vortex-edge-feather)*.25),transparent);
+  --vortex-edge-y:linear-gradient(to bottom,transparent,#00000028 calc(var(--vortex-edge-feather)*.25),#00000080 calc(var(--vortex-edge-feather)*.5),#000000d7 calc(var(--vortex-edge-feather)*.75),#000 var(--vortex-edge-feather),#000 calc(100% - var(--vortex-edge-feather)),#000000d7 calc(100% - var(--vortex-edge-feather)*.75),#00000080 calc(100% - var(--vortex-edge-feather)*.5),#00000028 calc(100% - var(--vortex-edge-feather)*.25),transparent);
+  -webkit-mask-image:var(--vortex-edge-x),var(--vortex-edge-y);
+  mask-image:var(--vortex-edge-x),var(--vortex-edge-y);
+  -webkit-mask-composite:source-in;
+  mask-composite:intersect;
+  mask-repeat:no-repeat;
+  mask-size:100% 100%;
+}
 .vortex-open .archive-scene,.vortex-open .scene-visual{overflow:visible}
 .vortex-portal{position:fixed;inset:0;z-index:2000;isolation:isolate;color:#e3d5af;overflow:hidden;touch-action:none}
 .vortex-canvas{display:block;width:100%;height:100%;position:absolute;inset:0}
