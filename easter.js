@@ -4,8 +4,7 @@
   const root = document.documentElement;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const TAU = Math.PI * 2;
-  const APPEAR_MS = 620;
-  const ABSORPTION_MS = 2120;
+  const ABSORPTION_MS = 1540;
   const clamp = (n, a = 0, b = 1) => Math.min(b, Math.max(a, n));
   const ease = n => { const p = clamp(n); return p * p * (3 - 2 * p); };
   const mix = (a, b, p) => a + (b - a) * p;
@@ -98,6 +97,7 @@
     frame.inert = true; root.classList.add('vortex-open');
     const exit = portal.querySelector('.vortex-exit');
     const animations = [];
+    const liquidFields = [];
     const started = performance.now();
     let liquidFrame;
     active = {portal, animations};
@@ -106,6 +106,7 @@
 
     if (!motion.matches) {
       const parts = frame.querySelectorAll('.identity,.rail-rule,.rail-meta,.side-nav a,.rail-bottom,.micro-head,.scene-topline,.scene-visual,.scene-intro,.scene-link,.scene-bottomline,.hero-footer,.page-head,.profile-stamp,.profile-copy,.archive-topbar,.archive-stage,.archive-footer,.notes-layout,.contact-top,.contact-main,.contact-bottom,footer');
+      const baseFilter = portal.querySelector('#vortex-liquid-filter');
       let index = 0;
       for (const node of parts) {
         const r = node.getBoundingClientRect();
@@ -113,25 +114,43 @@
         const dx = hole.x - r.left - r.width / 2, dy = hole.y - r.top - r.height / 2;
         const base = getComputedStyle(node).transform;
         const original = base === 'none' ? '' : base;
-        const bend = index % 2 ? 1 : -1;
+        const bend = Math.random()*2-1;
+        const spin = 300+Math.random()*220;
+        const stretch = 1.1+Math.random()*.65;
+        const compress = .4+Math.random()*.4;
+        const delay = Math.random()*70;
+        const partDuration = 1250+Math.random()*120;
         const direction = Math.atan2(dy,dx) * 180 / Math.PI;
         const priorFilter = getComputedStyle(node).filter;
-        const liquid = `url(#vortex-liquid-filter) ${priorFilter === 'none' ? '' : priorFilter}`;
+        const filter = baseFilter.cloneNode(true);
+        filter.id = `vortex-liquid-part-${index}`;
+        const turbulence = filter.querySelector('feTurbulence');
+        const displacement = filter.querySelector('feDisplacementMap');
+        const erosion = document.createElementNS('http://www.w3.org/2000/svg','feMorphology');
+        erosion.setAttribute('in','SourceGraphic'); erosion.setAttribute('operator','erode');
+        erosion.setAttribute('radius','0'); erosion.setAttribute('result','melt');
+        filter.insertBefore(erosion,displacement); displacement.setAttribute('in','melt');
+        displacement.setAttribute('yChannelSelector','B');
+        turbulence.setAttribute('seed',String(1+Math.floor(Math.random()*1000)));
+        baseFilter.parentNode.append(filter);
+        liquidFields.push({turbulence,displacement,erosion,delay,duration:partDuration,amount:90+Math.random()*130,fx:.006+Math.random()*.008,fy:.009+Math.random()*.013,phase:Math.random()*TAU,erode:.35+Math.random()*.9});
+        const liquid = `url(#${filter.id}) ${priorFilter === 'none' ? '' : priorFilter}`;
         animations.push(node.animate([
           {transform:original || 'none', filter:`${liquid} blur(0px)`, opacity:1, offset:0},
           {transform:`translate(${dx * .025}px,${dy * .025}px) rotate(${direction}deg) scale(1.08,.97) rotate(${-direction}deg) ${original}`, filter:`${liquid} blur(.15px)`, opacity:1, offset:.22},
-          {transform:`translate(${dx * .2 - dy * .1 * bend}px,${dy * .2 + dx * .1 * bend}px) rotate(18deg) rotate(${direction}deg) scale(1.35,.63) skewX(${bend * 12}deg) rotate(${-direction}deg) ${original}`, filter:`${liquid} blur(.35px)`, opacity:1, offset:.5},
-          {transform:`translate(${dx * .66 - dy * .07 * bend}px,${dy * .66 + dx * .07 * bend}px) rotate(105deg) rotate(${direction}deg) scale(.85,.16) skewX(${bend * 28}deg) rotate(${-direction}deg) ${original}`, filter:`${liquid} blur(.7px)`, opacity:.75, offset:.79},
-          {transform:`translate(${dx}px,${dy}px) rotate(${240 + index * 9}deg) scale(.001) ${original}`, filter:`${liquid} blur(1px)`, opacity:0, offset:1}
-        ], {duration:1320, delay:APPEAR_MS + Math.min(index * 17, 140), easing:'cubic-bezier(.4,.06,.76,.48)', fill:'both'}));
+          {transform:`translate(${dx * .2 - dy * .18 * bend}px,${dy * .2 + dx * .18 * bend}px) rotate(${10+bend*27}deg) rotate(${direction}deg) scale(${stretch},${compress}) skew(${bend*31}deg,${bend*8}deg) rotate(${-direction}deg) ${original}`, filter:`${liquid} blur(.35px)`, opacity:1, offset:.46+Math.random()*.08},
+          {transform:`translate(${dx * .66 - dy * .14 * bend}px,${dy * .66 + dx * .14 * bend}px) rotate(${100+bend*85}deg) rotate(${direction}deg) scale(${.45+Math.random()*.7},${.05+Math.random()*.16}) skewX(${bend*43}deg) rotate(${-direction}deg) ${original}`, filter:`${liquid} blur(.7px)`, opacity:.65+Math.random()*.2, offset:.76+Math.random()*.08},
+          {transform:`translate(${dx}px,${dy}px) rotate(${spin}deg) scale(.001) ${original}`, filter:`${liquid} blur(1px)`, opacity:0, offset:1}
+        ], {duration:partDuration,delay,easing:'cubic-bezier(.4,.06,.76,.48)',fill:'both'}));
         index++;
       }
-      const displacement = portal.querySelector('feDisplacementMap');
-      const turbulence = portal.querySelector('feTurbulence');
       function liquefy(now) {
-        const t = clamp((now-started-APPEAR_MS)/1100);
-        displacement.setAttribute('scale', String(120 * ease(t)));
-        turbulence.setAttribute('baseFrequency', `${.008 + t * .0015} ${.013 + t * .003}`);
+        for (const field of liquidFields) {
+          const t = clamp((now-started-field.delay)/field.duration);
+          field.displacement.setAttribute('scale',String(field.amount*ease(t)*(.85+.15*Math.sin(t*Math.PI))));
+          field.turbulence.setAttribute('baseFrequency',`${field.fx*(1+.18*Math.sin(t*5+field.phase))} ${field.fy*(1+.16*Math.cos(t*4+field.phase))}`);
+          field.erosion.setAttribute('radius',String(field.erode*ease((t-.4)/.6)));
+        }
         if (now-started < duration) liquidFrame = requestAnimationFrame(liquefy);
       }
       liquidFrame = requestAnimationFrame(liquefy);
@@ -142,8 +161,8 @@
       {transform:'none', transformOrigin:origin, opacity:1, offset:0},
       {transform:'none', transformOrigin:origin, opacity:1, offset:.34},
       {transform:'rotate(8deg) scale(.98)', transformOrigin:origin, opacity:1, offset:.58},
-      {transform:'rotate(62deg) scale(.65)', transformOrigin:origin, opacity:.9, offset:.8},
-      {transform:'rotate(170deg) scale(.002)', transformOrigin:origin, opacity:0, offset:1}
+      {transform:'rotate(38deg) scale(.65)', transformOrigin:origin, opacity:.65, offset:.8},
+      {transform:'rotate(75deg) scale(.002)', transformOrigin:origin, opacity:0, offset:1}
     ], {duration, easing:'cubic-bezier(.55,.03,.77,.43)', fill:'both'}));
     const readyTimer = setTimeout(() => { portal.classList.add('vortex-ready'); exit.focus({preventScroll:true}); }, duration);
 
@@ -183,7 +202,7 @@
     const stars = Array.from({length:205}, () => ({x:random(),y:random(),size:.3+random()*1.3,alpha:.15+random()*.7,phase:random()*TAU}));
     const strands = Array.from({length:260}, () => ({angle:random()*TAU,start:1.09+random()*.45,end:3+random()*5,phase:random()*TAU,alpha:.025+random()*.07,thickness:.25+random()*.65}));
     const formulas = ['E = mc²','iℏ ∂ψ/∂t = Ĥψ','Rμν − ½Rgμν = 8πG Tμν / c⁴','S = kB A / 4ℓp²','rₛ = 2GM / c²','∇ · E = ρ / ε₀','Gμν + Λgμν = 8πG Tμν','P(B|A) = P(A|B) P(B) / P(A)','∫ e⁻ˣ² dx = √π','Δx Δp ≥ ℏ / 2','∂²ψ/∂t² = c²∇²ψ','∮ B · dl = μ₀I','F = Gm₁m₂ / r²','eⁱπ + 1 = 0','dτ² = dt² − dx²/c²'];
-    const symbols = Array.from({length:108}, () => ({outer:4.2+random()*3.6,offset:random(),duration:44+random()*24,angle:random()*TAU,text:formulas[Math.floor(random()*formulas.length)],alpha:.26+random()*.38,size:12+random()*8,phase:random()*TAU}));
+    const symbols = Array.from({length:150}, () => ({outer:4.2+random()*3.6,offset:random(),duration:44+random()*24,angle:random()*TAU,text:formulas[Math.floor(random()*formulas.length)],alpha:.14+random()*.45,size:8+random()*9,phase:random()*TAU}));
 
     function resize() {
       width = innerWidth; height = innerHeight; ratio = Math.min(devicePixelRatio || 1, 1.65);
@@ -215,8 +234,8 @@
       // The core and its axis stay anchored; only the surrounding matter moves.
       const cx = width*.5, cy = height*.48;
       const fullRadius = Math.min(width,height)*.137;
-      const radius = reduced ? fullRadius : Math.max(.1,fullRadius*ease(elapsed/380)*mix(.58,1,ease((elapsed-APPEAR_MS)/1160)));
-      const visible = reduced ? 1 : ease((elapsed - APPEAR_MS) / 1500);
+      const radius = reduced ? fullRadius : Math.max(.1,fullRadius*ease(elapsed/380)*mix(.58,1,ease(elapsed/1160)));
+      const visible = reduced ? 1 : ease(elapsed / 1500);
       ctx.clearRect(0,0,width,height);
       ctx.fillStyle = `rgba(0,0,0,${reduced ? 1 : ease((elapsed - 680) / (ABSORPTION_MS - 680))})`; ctx.fillRect(0,0,width,height);
       for (const star of stars) {
@@ -264,26 +283,10 @@
         const tangent = project(nextR,angle + Math.log(nextR/r) * 2.1,lift);
         let rotation = Math.atan2(tangent.y-p.y,tangent.x-p.x);
         if (Math.cos(rotation) < 0) rotation += Math.PI;
-        // Follow the flow without turning formula baselines sideways or compressing the glyphs.
-        rotation = clamp(rotation,-.17,.17);
         const fade = ease(progress/.07) * ease((r-.38)/1.05);
-        const shrink = .4 + .6 * Math.pow(r/symbol.outer,.4);
-        const fontSize = Math.max(10,symbol.size*clamp(p.scale,.8,1.5)*shrink);
-        return {symbol,p,rotation,fade,fontSize};
+        const shrink = .22 + .78 * Math.pow(r/symbol.outer,.65);
+        return {symbol,p,rotation,fade,shrink};
       });
-      // Keep a little clear space around readable labels; fade overlaps instead of popping them away.
-      const labelBounds = [];
-      for (const item of flowingSymbols) {
-        const {symbol,p,fontSize,fade} = item;
-        ctx.font = `${fontSize}px Georgia,serif`;
-        const labelWidth = ctx.measureText(symbol.text).width;
-        const bounds = {left:p.x-labelWidth/2-9,right:p.x+labelWidth/2+9,top:p.y-fontSize-8,bottom:p.y+8};
-        const behindCore = p.depth <= 0 && Math.hypot(p.x-cx,p.y-cy) < radius*1.08;
-        const overlaps = labelBounds.some(b => bounds.left < b.right && bounds.right > b.left && bounds.top < b.bottom && bounds.bottom > b.top);
-        const readable = !behindCore && !overlaps && fade > .12;
-        if (readable) labelBounds.push(bounds);
-        symbol.readability = reduced ? Number(readable) : mix(symbol.readability ?? 0,readable ? 1 : 0,1-Math.exp(-delta/200));
-      }
       function drawDisk(front) {
         ctx.globalCompositeOperation = 'screen';
         for (const {strand:s,points} of projected) {
@@ -296,12 +299,13 @@
           }
           ctx.stroke();
         }
-        for (const {symbol,p,rotation,fade,fontSize} of flowingSymbols) {
+        for (const {symbol,p,rotation,fade,shrink} of flowingSymbols) {
           if ((p.depth > 0) !== front || p.x < -200 || p.x > width + 200 || p.y < -100 || p.y > height + 100) continue;
           ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(rotation);
-          ctx.font = `${fontSize}px Georgia,serif`;
+          ctx.scale(p.scale * shrink,p.scale * shrink * (.52 + tilt));
+          ctx.font = `${symbol.size}px Georgia,serif`;
           ctx.textAlign = 'center';
-          ctx.fillStyle = `rgba(231,217,173,${symbol.alpha * visible * fade * symbol.readability})`;
+          ctx.fillStyle = `rgba(231,217,173,${symbol.alpha * visible * fade})`;
           ctx.fillText(symbol.text,0,0); ctx.restore();
         }
         ctx.globalCompositeOperation = 'source-over';
