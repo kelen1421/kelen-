@@ -294,20 +294,6 @@
       winding:1.4+random()*1.7,turnRate:.035+random()*.065,layer:(random()-.5)*.8,sway:.06+random()*.18,
       orbitRoll:(random()-.5)*.5,meander:.025+random()*.055,orbitTilt:(random()-.5)*.28
     }));
-    function formulaSprite(symbol) {
-      if (symbol.sprite) return symbol.sprite;
-      const atlas=document.createElement('canvas'),ink=atlas.getContext('2d'),density=2,padding=3;
-      ink.font=`${symbol.size}px Georgia,serif`;
-      const metrics=ink.measureText(symbol.text);
-      const ascent=metrics.actualBoundingBoxAscent || symbol.size;
-      const descent=metrics.actualBoundingBoxDescent || symbol.size*.25;
-      const width=Math.ceil(metrics.width+padding*2),height=Math.ceil(ascent+descent+padding*2);
-      atlas.width=width*density; atlas.height=height*density;
-      ink.scale(density,density); ink.font=`${symbol.size}px Georgia,serif`;
-      ink.fillStyle='rgb(231,217,173)'; ink.fillText(symbol.text,padding,padding+ascent);
-      symbol.sprite={canvas:atlas,width,height,left:-metrics.width/2-padding,top:-ascent-padding,density};
-      return symbol.sprite;
-    }
 
     function resize() {
       width = innerWidth; height = innerHeight; ratio = Math.min(devicePixelRatio || 1, 1.65);
@@ -398,7 +384,7 @@
         }
         ctx.restore();
       }
-      // Each formula moves on its own path while keeping its lettering orientation fixed.
+      // Position and lettering direction are sampled from the same independent path.
       function formulaAt(symbol,time) {
         const age=time-symbol.delay;
         const cycle=Math.max(0,age)%(symbol.entryDuration+symbol.duration);
@@ -424,55 +410,19 @@
         const fade = (reduced ? 1 : age>=0 ? ease(entry/.12) : 0) * ease((r-.38)/1.05);
         const shrink = mix(1,.22+.78*Math.pow(r/symbol.outer,.65),arrival);
         p.scale=mix(1,p.scale,arrival);
-        return {p,fade,shrink};
+        return {p,fade,shrink,cycle};
       }
       const flowingSymbols = symbols.map(symbol => {
         const current=formulaAt(symbol,seconds);
-        if (symbol.rotation===undefined) {
-          const joinedAt=symbol.delay+symbol.entryDuration+.02;
-          const joined=formulaAt(symbol,joinedAt),ahead=formulaAt(symbol,joinedAt+.035);
-          symbol.rotation=Math.atan2(ahead.p.y-joined.p.y,ahead.p.x-joined.p.x);
-        }
-        return {symbol,...current,rotation:symbol.rotation};
+        const remaining=symbol.entryDuration+symbol.duration-current.cycle;
+        const ahead=formulaAt(symbol,seconds+Math.min(.035,Math.max(.000001,remaining-.000001)));
+        const rotation=Math.atan2(ahead.p.y-current.p.y,ahead.p.x-current.p.x);
+        return {symbol,...current,rotation};
       });
-      function drawTidalFormula(item,opacity) {
-        const {symbol,p,rotation,shrink}=item;
-        const sprite=formulaSprite(symbol),scaleX=p.scale*shrink,scaleY=scaleX*(.52+tilt+symbol.orbitTilt);
-        const c=Math.cos(rotation),s=Math.sin(rotation),half=sprite.width*scaleX*.5;
-        const along=clamp((cx-p.x)*c+(cy-p.y)*s,-half,half);
-        const closest=Math.hypot(p.x+c*along-cx,p.y+s*along-cy)-sprite.height*scaleY*.5;
-        if (closest>=radius*1.9) return false;
-        function warp(x,y) {
-          const dx=x-cx,dy=y-cy,d=Math.hypot(dx,dy);
-          const force=ease((1.9-d/radius)/.9),strain=force*force;
-          const pulled=Math.max(radius*.45,d-radius*.5*strain);
-          const angle=Math.atan2(dy,dx)-strain*.18;
-          return {x:cx+Math.cos(angle)*pulled,y:cy+Math.sin(angle)*pulled,alpha:ease((pulled/radius-.87)/.24)};
-        }
-        function point(x,y) {
-          const dx=x*scaleX,dy=y*scaleY;
-          return warp(p.x+dx*c-dy*s,p.y+dx*s+dy*c);
-        }
-        // Warp the actual glyph pixels: nearby slices stretch more than their far edge.
-        const columns=Math.min(120,Math.max(10,Math.ceil(sprite.width/2))),columnWidth=sprite.width/columns;
-        for(let i=0;i<columns;i++) {
-          const left=sprite.left+i*columnWidth;
-          const a=point(left,sprite.top),b=point(left+columnWidth,sprite.top),d=point(left,sprite.top+sprite.height);
-          const middle=point(left+columnWidth*.5,sprite.top+sprite.height*.5);
-          if (middle.alpha<.003) continue;
-          ctx.save(); ctx.globalAlpha=opacity*middle.alpha;
-          ctx.transform((b.x-a.x)/columnWidth,(b.y-a.y)/columnWidth,(d.x-a.x)/sprite.height,(d.y-a.y)/sprite.height,a.x,a.y);
-          ctx.drawImage(sprite.canvas,i*columnWidth*sprite.density,0,columnWidth*sprite.density,sprite.canvas.height,0,0,columnWidth+.08,sprite.height);
-          ctx.restore();
-        }
-        return true;
-      }
       function drawFormulas(front) {
         ctx.globalCompositeOperation = 'screen';
-        for (const item of flowingSymbols) {
-          const {symbol,p,rotation,fade,shrink}=item;
-          if ((p.depth > 0) !== front || fade<.003 || p.x < -200 || p.x > width + 200 || p.y < -100 || p.y > height + 100) continue;
-          if (drawTidalFormula(item,symbol.alpha*visible*fade)) continue;
+        for (const {symbol,p,rotation,fade,shrink} of flowingSymbols) {
+          if ((p.depth > 0) !== front || p.x < -200 || p.x > width + 200 || p.y < -100 || p.y > height + 100) continue;
           ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(rotation);
           ctx.scale(p.scale * shrink,p.scale * shrink * (.52 + tilt + symbol.orbitTilt));
           ctx.font = `${symbol.size}px Georgia,serif`;
@@ -533,7 +483,6 @@
         canvas.removeEventListener('pointermove',onPointer);
         canvas.removeEventListener('pointerleave',releasePointer);
         window.removeEventListener('blur',releasePointer);
-        for (const symbol of symbols) if (symbol.sprite) { symbol.sprite.canvas.width=0; delete symbol.sprite; }
         surface.dispose();
       }
     };
