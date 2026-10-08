@@ -290,7 +290,7 @@
     const symbols = Array.from({length:150}, () => ({
       outer:4.2+random()*3.6,offset:random()*.72,duration:34+random()*54,angle:random()*TAU,
       text:formulas[Math.floor(random()*formulas.length)],alpha:.12+random()*.47,size:8+random()*12,
-      phase:random()*TAU,delay:random()*.9,entryDuration:.75+random()*.9,entrySweep:.12+random()*.48,
+      phase:random()*TAU,delay:random()*.9,entryDuration:.75+random()*.9,entryWinding:.8+random()*.5,
       winding:1.4+random()*1.7,turnRate:.035+random()*.065,layer:(random()-.5)*.8,sway:.06+random()*.18,
       orbitRoll:(random()-.5)*.5,meander:.025+random()*.055,orbitTilt:(random()-.5)*.28
     }));
@@ -399,13 +399,14 @@
         if (entry<1) {
           const distance=Math.hypot(p.x-cx,p.y-cy);
           const direction=Math.atan2(p.y-cy,p.x-cx);
-          const outside=screenEdgeDistance(direction+symbol.entrySweep,260+symbol.text.length*symbol.size*.5);
-          function incoming(t) {
-            const a=direction+symbol.entrySweep*(1-t)*(1-t),d=mix(outside,distance,t);
-            return {x:cx+Math.cos(a)*d,y:cy+Math.sin(a)*d};
-          }
-          const point=incoming(arrival);
-          p.x=point.x; p.y=point.y;
+          // Start beyond every screen corner, then extend this file's inward spiral.
+          // A stable anchor avoids extra turns while the core is still growing.
+          const anchor=Math.max(distance,fullRadius*.7);
+          const outside=Math.hypot(Math.max(cx,width-cx),Math.max(cy,height-cy))+260+symbol.text.length*symbol.size*.5;
+          const spread=Math.log(outside/anchor)*(1-arrival);
+          const d=mix(anchor,distance,arrival)*Math.exp(spread);
+          const a=direction+spread*symbol.winding*symbol.entryWinding;
+          p.x=cx+Math.cos(a)*d; p.y=cy+Math.sin(a)*d;
         }
         const fade = (reduced ? 1 : age>=0 ? ease(entry/.12) : 0) * ease((r-.38)/1.05);
         const shrink = mix(1,.22+.78*Math.pow(r/symbol.outer,.65),arrival);
