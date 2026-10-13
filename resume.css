@@ -1,0 +1,87 @@
+/* Résumé content and the reference's panoramic editing journey. */
+.resume-column{border-top:1px solid var(--line);padding-top:34px;padding-bottom:50px;scroll-margin-top:28px;container:resume-column / inline-size}
+.resume-heading{display:flex;align-items:center;justify-content:space-between;gap:28px;padding:42px 0 30px}
+.resume-heading h2{margin:0;font:600 clamp(32px,3.6vw,47px)/1.25 "Noto Sans SC",sans-serif;letter-spacing:-.04em}
+.resume-heading h2 small{display:block;font:9px var(--mono);letter-spacing:.16em;color:#808879;margin-top:12px}
+.resume-motto{font:13px/1.8 "Noto Sans SC",sans-serif;color:#5f7257;border-bottom:1px solid #9daa8e;padding:7px 0}
+.resume-experience{display:grid;grid-template-columns:230px minmax(0,1fr);gap:38px;border-top:1px solid var(--line);padding:28px 0}
+.resume-project>span,.resume-project>small{font:9px/1.8 var(--mono);color:#7f8977;display:block}
+.resume-project h3{font:600 25px/1.5 "Noto Sans SC",sans-serif;letter-spacing:-.04em;margin:18px 0 5px}
+.resume-project>p{font-size:13px;margin:0 0 12px;color:#4f5b48}
+.resume-topics{display:flex;flex-wrap:wrap;gap:6px;margin-top:20px}
+.resume-topics span{border:1px solid #c8cdbf;padding:4px 7px;font-size:9px;color:#73816a}
+.resume-role h3{font:500 24px/1.5 "Noto Sans SC",sans-serif;margin:8px 0 13px;letter-spacing:-.03em}
+.resume-role>p:not(.overline){color:#727a6a;font-size:12px;line-height:2;margin:8px 0}
+.resume-craft{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid #c8cdbe;border-left:1px solid #c8cdbe}
+.resume-craft details{border-right:1px solid #c8cdbe;border-bottom:1px solid #c8cdbe;padding:17px 18px;background:#f1f2e9;min-width:0}
+.resume-craft summary{list-style:none;cursor:pointer;position:relative;font-size:12px;padding-right:16px}
+.resume-craft summary::-webkit-details-marker{display:none}
+.resume-craft summary span{display:block;font:7px var(--mono);letter-spacing:.08em;color:#7f8d70;margin-bottom:10px}
+.resume-craft summary b{position:absolute;right:0;bottom:0;font:13px var(--mono);color:#7e916e;transition:transform .2s}
+.resume-craft details[open] summary b{transform:rotate(45deg)}
+.resume-craft details p{font-size:11px;line-height:1.9;color:#75806b;margin:17px 0 0}
+.resume-process-heading{padding:36px 0 24px}
+.resume-process-heading h3{font:500 27px/1.5 "Noto Sans SC",sans-serif;letter-spacing:-.04em;margin:8px 0}
+.resume-process-heading>p:last-child{font-size:12px;line-height:1.8;color:#7c8870;margin:0}
+.resume-column .journey{position:relative;overflow:hidden;isolation:isolate;border:1px solid #c8d2bf;background:linear-gradient(160deg,#f8faf3,#e5eddf 75%,#f3f5ee)}
+.resume-column .journey-topline{display:flex;gap:22px;align-items:center;padding:17px 22px;font:8px var(--mono);letter-spacing:.08em;color:#7c9272;border-bottom:1px solid #cfdbc3}
+.resume-column .journey-topline>span:last-child{margin-left:auto;font-size:6px}
+.resume-column .journey-mini{display:flex;gap:17px;position:relative}
+.resume-column .journey-mini:before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:#b7c7ac}
+.resume-column .journey-mini i{position:relative;width:4px;height:4px;border-radius:50%;background:#a1b696}
+.resume-column .journey-mini i.selected{background:#789966;box-shadow:0 0 0 4px #b9cbb366}
+.resume-column .journey-viewport{height:340px;position:relative;overflow:hidden;touch-action:pan-y;outline-offset:-5px;user-select:none}
+.resume-column .journey-world{position:absolute;left:0;top:-12px;width:1980px;height:520px;will-change:transform}
+.resume-column .journey-landscape{position:absolute;width:1980px;height:520px;transform:scale(var(--scene-scale,.85));transform-origin:0 0;pointer-events:none}
+.resume-column .depth-far{transform:translateX(var(--far-drift,0px))}
+.resume-column .depth-near{transform:translateX(var(--near-drift,0px))}
+.resume-column .journey-node{position:absolute;display:flex;align-items:center;gap:9px;transform:translate(-6px,-6px);white-space:nowrap;pointer-events:none}
+.resume-column .node-dot{display:block;width:12px;height:12px;border:2px solid #edf4e5;border-radius:50%;background:#96b38c;box-shadow:0 0 0 1px #a9c49b}
+.resume-column .node-label{display:flex;align-items:center;gap:9px;padding:8px 11px;background:#f9fcf2cf;border:1px solid #c4d2b8;color:#75866b;font-size:10px;clip-path:polygon(0 0,100% 0,100% 80%,94% 100%,0 100%)}
+.resume-column .node-label small{font:6px var(--mono);opacity:.65}
+.resume-column .journey-node.is-active .node-label{background:#304332;color:#f3f6ee;border-color:#607952}
+.resume-column .journey-node.is-active .node-dot{background:#789b69;box-shadow:0 0 0 3px #bacfaa,0 0 0 6px #f5f9ef}
+.resume-column .journey-route.completed{stroke:#92ad7b;stroke-width:1.7;stroke-dasharray:10 7}
+.resume-column .journey-corner{position:absolute;left:24px;bottom:20px;color:#93a388;pointer-events:none}
+.resume-column .journey-corner>span{font:58px/.9 Georgia,serif;opacity:.3}
+.resume-column .journey-corner small{display:block;font:6px var(--mono);letter-spacing:.12em;margin-top:10px}
+.resume-column .journey-compass{position:absolute;right:25px;bottom:16px;font:36px var(--mono);color:#9dad91;opacity:.35}
+.resume-column .journey-panel{position:relative;display:grid;grid-template-columns:160px minmax(0,1fr) 220px;gap:12px 25px;padding:21px 23px 24px;border-top:1px solid #cbd7c1;background:#f8faf1dc;color:#567049}
+.resume-column .journey-panel-head{grid-column:1/-1;display:flex;justify-content:space-between;font:8px var(--mono);letter-spacing:.08em;color:#79926b}
+.resume-column .journey-panel-visual{display:none}
+.resume-column .journey-panel h3{font:500 16px/1.8 "Noto Sans SC",sans-serif;margin:0}
+.resume-column .journey-panel>p{font-size:11px;line-height:2;margin:0;color:#748369}
+.resume-column .journey-check{border-left:1px solid #cbd7c1;padding-left:20px}
+.resume-column .journey-check>span{font:7px var(--mono);letter-spacing:.1em;color:#97a78a}
+.resume-column .journey-check>p{font-size:10px;line-height:1.9;margin:9px 0 0;color:#70815f}
+.resume-column .journey-controls{display:flex;gap:20px;align-items:center;justify-content:space-between;padding:14px 22px;border-top:1px solid #cbd7c1;background:#eef3e5}
+.resume-column .journey-controls>div:first-child{display:flex;align-items:center;gap:15px}
+.resume-column .wheel-symbol{font-size:17px;color:#89a07a}
+.resume-column #cv-journey-count{font:9px var(--mono);color:#7c906f}
+.resume-column .journey-track{width:90px;height:2px;background:#c3d3b5}
+.resume-column .journey-track i{display:block;width:100%;height:100%;transform:scaleX(0);transform-origin:left;background:#88a172}
+.resume-column .journey-hint{font-size:9px;color:#8b9c7b}
+.resume-column .resume-step-arrows{display:flex;gap:8px}
+.resume-column .resume-step-arrows button{width:30px;height:27px;border:1px solid #bcccae;background:transparent;color:#6c8759;cursor:pointer}
+.resume-column .resume-step-arrows button:disabled{opacity:.35;cursor:default}
+.resume-column .panel-arriving h3,.resume-column .panel-arriving>p{animation:resume-stage-in .32s ease-out both}
+.resume-stages{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-left:1px solid #c8cdbe;margin-top:16px}
+.resume-stages button{display:flex;align-items:center;justify-content:center;gap:12px;font:11px "Noto Sans SC",sans-serif;padding:14px 8px;border:1px solid #c8cdbe;border-left:0;background:transparent;color:#7b896d;cursor:pointer}
+.resume-stages button span{font:8px var(--mono);opacity:.65}
+.resume-stages button[aria-pressed="true"]{background:#304332;border-color:#304332;color:#f4f7ee}
+.resume-column button:focus-visible,.resume-craft summary:focus-visible{outline:2px solid #76945b;outline-offset:3px}
+.resume-footnote{font-size:10px;line-height:1.8;color:#93988b;margin-top:20px}
+@keyframes resume-stage-in{from{opacity:.45;transform:translateY(6px)}to{opacity:1;transform:none}}
+@container resume-column (max-width:700px){
+ .resume-experience{grid-template-columns:1fr;gap:22px}.resume-project h3{margin-top:10px}.resume-topics{margin-top:12px}
+ .resume-craft{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .resume-column .journey-panel{grid-template-columns:1fr;gap:14px}.resume-column .journey-check{border-left:0;border-top:1px solid #cbd7c1;padding:14px 0 0}
+ .resume-column .journey-panel h3{font-size:17px}.resume-column .journey-panel>p{font-size:12px}
+ .resume-column .journey-topline{gap:14px;padding:16px;font-size:6px}.resume-column .journey-topline>span:last-child{display:none}
+ .resume-column .journey-viewport{height:295px}.resume-column .journey-world{top:-22px}
+ .resume-column .journey-controls{padding:14px 16px;gap:12px}.resume-column .journey-hint{display:none}
+ .resume-heading{align-items:flex-start;gap:20px}.resume-motto{font-size:11px}
+ .resume-stages button{gap:6px;font-size:10px;padding:13px 5px}
+}
+@media(max-width:680px){.resume-column{padding:28px 5% 35px;scroll-margin-top:63px}.resume-heading{padding:30px 0}.resume-role h3{font-size:22px}.resume-craft details{padding:15px 13px}.resume-process-heading h3{font-size:25px}.resume-column .journey-panel{padding:18px}.resume-stages button{flex-direction:column;gap:7px}}
+@media(prefers-reduced-motion:reduce){.resume-column *{animation:none!important;transition:none!important}}

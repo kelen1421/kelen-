@@ -167,20 +167,22 @@
         rib.position.set(Math.sin(a)*5.38,1.92,-Math.cos(a)*5.38);rib.rotation.y=-a;gallery.add(rib);ribs.push(rib);
       }
     }
-    const shelfMaterial=new T.MeshStandardMaterial({color:0x8c9183,metalness:.4,roughness:.48,side:T.DoubleSide});
+    // Open curved rails keep the separate files visible; no opaque cylinder shell.
     for(const y of [.04,3.86]) {
-      const rail=mesh(gallery,new T.TorusGeometry(5.65,.04,8,112),metal,0,y,0);rail.rotation.x=Math.PI/2;rail.castShadow=false;
-      const ledge=mesh(gallery,new T.CylinderGeometry(5.95,5.95,.12,96),shelfMaterial,0,y+ (y>2 ? .08 : -.1),0);ledge.castShadow=false;
+      const points=Array.from({length:65},(_,i)=>{
+        const angle=-1.15+i/64*2.3;
+        return new T.Vector3(Math.sin(angle)*5.5,y,-Math.cos(angle)*5.5);
+      });
+      const rail=mesh(gallery,new T.TubeGeometry(new T.CatmullRomCurve3(points),96,.027,8,false),metal);
+      rail.castShadow=false;
     }
-    const backWall=new T.Mesh(new T.CylinderGeometry(6.15,6.15,4.1,96,1,true),new T.MeshBasicMaterial({color:0x7b8072,side:T.BackSide,transparent:true,opacity:.22,depthWrite:false}));
-    backWall.position.y=1.95;gallery.add(backWall);
     gallery.visible=false;
     const raycaster=new T.Raycaster(),pointer=new T.Vector2();
     let current=0,view='overview',mix=0,selectedAngle=-1.5*step;
     let visible=false,raf,lastFrame,introStart,introDone=motion.matches,disposed=false;
     const eye=new T.Vector3(),target=new T.Vector3();
     const overviewEye=new T.Vector3(6.6,7.9,9.6),overviewTarget=new T.Vector3(-.85,.55,0);
-    const galleryEye=new T.Vector3(0,1.95,2.05),galleryTarget=new T.Vector3(1.7,1.92,-5.1);
+    const galleryEye=new T.Vector3(0,2.45,5),galleryTarget=new T.Vector3(1.5,1.92,-5.1);
     const smooth=p=>{const t=Math.max(0,Math.min(1,p));return t*t*(3-2*t);};
     const ready=()=>!root.classList.contains('intro-pending')&&!root.classList.contains('vortex-open');
     const start=()=>{if(!raf&&!disposed&&visible&&!document.hidden&&ready())raf=requestAnimationFrame(draw);};
@@ -228,7 +230,12 @@
     function resize() {
       const bounds=host.getBoundingClientRect();
       if(bounds.width<1||bounds.height<1)return;
-      renderer.setSize(bounds.width,bounds.height,false);camera.aspect=bounds.width/bounds.height;camera.updateProjectionMatrix();
+      renderer.setSize(bounds.width,bounds.height,false);
+      camera.aspect=bounds.width/bounds.height;
+      camera.fov=camera.aspect<1.25 ? 44 : 35;
+      galleryTarget.x=bounds.width<680 ? 0 : 1.5;
+      overviewTarget.x=bounds.width<680 ? 0 : -.85;
+      camera.updateProjectionMatrix();
       start();if(motion.matches && visible)draw(performance.now());
     }
     function hit(event) {
@@ -272,6 +279,7 @@
       event.preventDefault();disposed=true;cancelAnimationFrame(raf);host.remove();archive.classList.remove('has-depth','program-opening');
       archive.querySelector('.plugin-stations').hidden=false;
       archive.querySelector('.plugin-cylinder').hidden=false;
+      callbacks.onUnavailable?.();
     });
     archive.classList.add('has-depth');
     if(!motion.matches)archive.classList.add('program-opening');

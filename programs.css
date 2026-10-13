@@ -119,3 +119,31 @@
 @media(max-width:680px){.plugin-depth-stage{top:46px;height:490px}.has-depth[data-view="records"] .plugin-depth-stage{height:550px}.has-depth .plugin-overview-copy{top:16px}.program-opening .plugin-overview-copy{transform:translateY(8px)}}
 @media(max-width:950px){.program-card-top{padding:12px 14px}.program-copy{padding:18px 16px 15px}.program-actions{padding:0 16px 17px}.program-primary{gap:14px}.program-version{font-size:6px}.program-art{height:150px}}
 @media(max-width:680px){.programs{padding:28px 5% 35px;scroll-margin-top:63px}.programs-heading{padding:32px 0 28px;gap:20px}.programs-heading h2{font-size:32px}.programs-intro{font-size:11px}.programs-stamp{width:84px;min-width:84px;height:104px}.programs-stamp b{font-size:48px}.program-grid{grid-template-columns:1fr;gap:18px}.program-art{height:180px}.program-copy h3{font-size:22px}.program-copy p{font-size:12px}.program-card-top{padding:13px 18px}.program-copy{padding:20px 20px 16px}.program-actions{padding:0 20px 20px}.program-primary{gap:30px}.program-version{font-size:8px}.program-help summary{padding:12px 20px}.programs-footer{font-size:7px;flex-wrap:wrap}.side-nav a{padding-left:6px;padding-right:6px}}
+
+/* Size the gallery by its own column, including windows with a visible sidebar. */
+.program-archive.is-enhanced{container:program-gallery / inline-size;--plugin-scene-height:clamp(320px,54cqw,470px);min-height:0}
+.is-enhanced .plugin-overview,.is-enhanced .plugin-panel-stage,.plugin-depth-stage{height:var(--plugin-scene-height)}
+.plugin-depth-stage canvas{max-width:100%;aspect-ratio:auto}
+.is-enhanced .plugin-directory{padding-top:12px;border-top:1px solid #c6c9bd80}
+.program-opening .plugin-overview-copy{opacity:.55;pointer-events:auto}
+@container program-gallery (max-width:680px){
+ .is-enhanced .plugin-overview-copy{left:18px;top:17px;bottom:auto;width:calc(100% - 36px);display:grid;grid-template-columns:minmax(0,1fr) 105px;gap:6px 12px}
+ .is-enhanced .plugin-active-number{grid-column:1/-1}
+ .is-enhanced .plugin-overview-copy h3{margin:0;font-size:21px}
+ .is-enhanced .plugin-overview-copy p{grid-column:1;max-width:24em;margin:0;font-size:10px}
+ .is-enhanced .plugin-read{grid-column:2;grid-row:2/4;align-self:center;margin:0;max-width:105px}
+ .is-enhanced[data-view="records"] .program-grid{position:relative;top:auto;left:auto;right:auto;width:auto;margin:0 16px 16px;z-index:3}
+ .is-enhanced[data-view="records"] .program-copy{padding:16px 18px}
+ .is-enhanced[data-view="records"] .program-copy p{font-size:12px;max-width:none}
+ .is-enhanced[data-view="records"] .program-actions{padding:0 18px 16px}
+ .is-enhanced[data-view="records"] .program-help[open]{max-height:none;overflow:visible}
+ .is-enhanced .plugin-directory{gap:10px;padding:12px 16px 17px}
+ .is-enhanced .plugin-directory button{grid-template-columns:1fr;gap:5px}
+ .is-enhanced .plugin-directory b{font-size:10px;white-space:normal}
+ .is-enhanced .plugin-directory i{display:none}
+ .is-enhanced .plugin-directory small{display:none}
+ .is-enhanced .plugin-stage-label{bottom:14px;font-size:6px}
+}
+.has-depth[data-view="records"] .plugin-depth-stage{height:var(--plugin-scene-height)}
+.is-enhanced .plugin-vault-top{height:52px;min-height:52px;box-sizing:border-box}
+.plugin-depth-stage{top:52px}

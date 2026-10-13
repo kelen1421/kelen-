@@ -14,6 +14,13 @@
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   let current = 0, focusTimer, depth;
 
+  function useStaticArchive() {
+    depth = null;
+    archive.querySelector('.plugin-depth-stage')?.remove();
+    archive.classList.remove('is-enhanced','has-depth','program-opening');
+    cards.forEach(card => {card.hidden = false;});
+  }
+
   function select(index) {
     current = (index + cards.length) % cards.length;
     archive.dataset.selected = String(current);
@@ -29,7 +36,7 @@
       leaf.setAttribute('aria-pressed',String(i === current));
     });
     cards.forEach((card,i) => {
-      card.hidden = archive.dataset.view !== 'records' || i !== current;
+      card.hidden = archive.classList.contains('is-enhanced') && (archive.dataset.view !== 'records' || i !== current);
       if (i !== current) card.querySelector('details').open = false;
     });
     archive.querySelector('.plugin-active-number').textContent = `PROGRAM / 0${current+1} — 04`;
@@ -84,6 +91,12 @@
     }
   });
   archive.classList.add('is-enhanced');
-  depth = window.createProgramDepth?.(archive,{onSelect:select,onOpen:open});
+  try {
+    depth = window.createProgramDepth?.(archive,{onSelect:select,onOpen:open,onUnavailable:useStaticArchive});
+    if (!depth) useStaticArchive();
+  } catch (error) {
+    useStaticArchive();
+    console.warn('Program gallery unavailable; using the accessible archive.',error);
+  }
   select(0);
 })();
