@@ -1,8 +1,35 @@
-.about.profile-reveal-ready:not(.profile-revealed) .profile-copy>*{opacity:0}
-.about.profile-reveal-ready:not(.profile-revealed) .profile-stamp{transform:translateX(var(--profile-center-shift,0px)) rotate(-5deg)}
-.profile-copy>*{transform-origin:center center}
-.profile-stamp{background:transparent;color:inherit;padding:0;cursor:pointer;appearance:none}
-.profile-stamp:focus-visible{outline:2px solid var(--ink);outline-offset:5px}
-.profile-reveal-running .profile-copy>*{will-change:transform,opacity}
-.profile-reveal-running .profile-stamp{will-change:transform}
-@media(prefers-reduced-motion:reduce){.about.profile-reveal-ready .profile-copy>*{opacity:1!important;transform:none!important}.about.profile-reveal-ready .profile-stamp{transform:rotate(-5deg)!important}}
+/* A compact closed mark unfolds into the profile, then can assemble back again. */
+.about.profile-reveal-ready{container:profile-panel / inline-size;--profile-card-size:clamp(140px,22cqw,185px);padding-bottom:34px;overflow-anchor:none}
+html.profile-layout-changing{overflow-anchor:none}
+html.profile-layout-changing body{overflow-anchor:none}
+.about.profile-reveal-ready .profile-layout{position:relative;isolation:isolate;grid-template-columns:minmax(150px,.58fr) minmax(0,1.42fr);grid-template-rows:max-content;align-content:start;gap:6%;padding:32px 3% 14px;align-items:center;min-height:0}
+.about.profile-reveal-ready:not(.profile-revealed) .profile-layout{grid-template-columns:1fr;justify-items:center;gap:0;padding-bottom:40px}
+.about.profile-reveal-ready:not(.profile-revealed) .profile-copy:not(.profile-copy-ghost){display:none}
+.about.profile-reveal-ready .profile-stamp{width:var(--profile-card-size);height:var(--profile-card-size);margin:0;transform:rotate(-5deg);background:transparent;color:inherit;padding:0;cursor:pointer;appearance:none;flex-shrink:0}
+.about.profile-reveal-ready .profile-stamp b{font-size:calc(var(--profile-card-size)*.47)}
+.about.profile-reveal-ready .profile-copy{min-width:0;max-width:590px}
+.about.profile-reveal-ready .profile-copy h2{font-size:clamp(30px,5cqw,43px);line-height:1.4;margin-bottom:18px}
+.profile-stamp:focus-visible{outline:2px solid var(--ink);outline-offset:6px}
+.profile-stamp .profile-trigger-hint{position:absolute;bottom:-25px;left:50%;transform:translateX(-50%);white-space:nowrap;font:7px var(--mono);letter-spacing:.1em;color:#879077}
+.profile-revealed .profile-trigger-hint{color:#8e9486}
+.profile-reveal-running .profile-layout{overflow:clip;will-change:height}
+.profile-reveal-running .profile-copy>*{will-change:transform,opacity,clip-path}
+.profile-fragmenting .profile-stamp:not(.profile-fragment-face){opacity:0;pointer-events:none}
+.profile-heading-fragmenting .profile-layout>.profile-copy:not(.profile-copy-ghost)>h2{opacity:0}
+.profile-fragments{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:visible}
+.profile-fragment{position:absolute;pointer-events:none;transform-origin:center;will-change:transform,opacity}
+.profile-fragment .profile-fragment-face{position:absolute;left:0;top:0;transform:none!important;margin:0!important;cursor:default;pointer-events:none}
+.profile-copy-fragment{position:absolute;pointer-events:none;transform-origin:center;will-change:transform,opacity}
+.profile-copy-fragment .profile-copy{position:absolute;inset:0;display:block!important;max-width:none!important}
+.profile-copy-fragment h2{margin:0!important}
+.profile-copy-ghost{position:absolute;max-width:none!important;pointer-events:none;z-index:2}
+.profile-copy-ghost>*{transform-origin:center}
+@container profile-panel (max-width:540px){
+ .about.profile-reveal-ready .profile-layout{grid-template-columns:1fr;gap:28px;padding:27px 3% 10px;justify-items:start}
+ .about.profile-reveal-ready:not(.profile-revealed) .profile-layout{justify-items:center;gap:0;padding-bottom:38px}
+ .about.profile-reveal-ready .profile-copy h2{font-size:clamp(28px,6cqw,36px)}
+ .about.profile-reveal-ready .profile-stamp{margin-left:8px}
+ .about.profile-reveal-ready:not(.profile-revealed) .profile-stamp{margin-left:0}
+ .profile-revealed .profile-trigger-hint{display:none}
+}
+@media(prefers-reduced-motion:reduce){.profile-reveal-running *{animation:none!important;transition:none!important}.profile-stamp{will-change:auto!important}.profile-copy>*{will-change:auto!important}}
