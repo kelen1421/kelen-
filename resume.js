@@ -99,5 +99,74 @@
   viewport.addEventListener('touchcancel',() => {touch = null;},{passive:true});
   new ResizeObserver(paint).observe(viewport);
   motion.addEventListener('change',() => move(target));
+  // Stagger the work surfaces on entry, then keep their own diagrams alive in view.
+  const craftCards = $$('.resume-craft details');
+  const animatedParts = [$('.resume-project'),$('.resume-role h3'),...$$('.resume-role>p:not(.overline)'),...craftCards];
+  const visibleMotion = new Set();
+  function syncCraftMotion() {
+    column.classList.toggle('craft-running',visibleMotion.size > 0 && !motion.matches && !document.hidden);
+  }
+  const reveal = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      if (document.documentElement.classList.contains('intro-pending')) continue;
+      const node = entry.target;
+      node.classList.add('craft-revealed');
+      if (!motion.matches) {
+        const index = craftCards.indexOf(node);
+        const card = index >= 0;
+        node.animate([
+          {opacity:0,transform:card ? `translateY(38px) rotateX(16deg) rotateZ(${index%2 ? 3 : -3}deg) scale(.94)` : 'translateX(32px) translateY(10px)'},
+          {opacity:1,transform:'none'}
+        ],{duration:card ? 780 : 650,delay:card ? (index%3)*95 : Math.max(0,animatedParts.indexOf(node))*80,easing:'cubic-bezier(.2,.8,.2,1)'});
+      }
+      reveal.unobserve(node);
+    }
+  },{threshold:.08,rootMargin:'0px 0px -18px 0px'});
+  animatedParts.forEach(node => {if(node)reveal.observe(node);});
+  column.classList.add('resume-motion-ready');
+  if (document.documentElement.classList.contains('intro-pending')) {
+    const arrivalWait = new MutationObserver(() => {
+      if (document.documentElement.classList.contains('intro-pending')) return;
+      animatedParts.forEach(node => {
+        if (node && !node.classList.contains('craft-revealed')) {reveal.unobserve(node);reveal.observe(node);}
+      });
+      arrivalWait.disconnect();
+    });
+    arrivalWait.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+  }
+  const activity = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting)visibleMotion.add(entry.target);else visibleMotion.delete(entry.target);
+    });
+    syncCraftMotion();
+  },{threshold:0});
+  activity.observe($('.resume-experience'));
+  activity.observe($('.resume-craft'));
+  document.addEventListener('visibilitychange',syncCraftMotion);
+  motion.addEventListener('change',() => {
+    if (motion.matches) animatedParts.forEach(node => {node.classList.add('craft-revealed');node.getAnimations().forEach(animation => animation.cancel());});
+    syncCraftMotion();
+  });
+  craftCards.forEach(card => {
+    let pointerFrame = 0, point;
+    card.addEventListener('pointermove',event => {
+      if (event.pointerType !== 'mouse' || motion.matches) return;
+      point = {x:event.clientX,y:event.clientY};
+      if(pointerFrame)return;
+      pointerFrame = requestAnimationFrame(() => {
+        pointerFrame = 0;
+        const bounds = card.getBoundingClientRect();
+        const x = Math.max(-.5,Math.min(.5,(point.x-bounds.left)/bounds.width-.5));
+        const y = Math.max(-.5,Math.min(.5,(point.y-bounds.top)/bounds.height-.5));
+        card.style.setProperty('--craft-tilt-x',`${-y*9}deg`);
+        card.style.setProperty('--craft-tilt-y',`${x*10}deg`);
+      });
+    },{passive:true});
+    card.addEventListener('pointerleave',() => {
+      cancelAnimationFrame(pointerFrame);pointerFrame=0;
+      card.style.setProperty('--craft-tilt-x','0deg');card.style.setProperty('--craft-tilt-y','0deg');
+    });
+  });
   paint();
 })();
