@@ -33,3 +33,9 @@ html.profile-layout-changing body{overflow-anchor:none}
  .profile-revealed .profile-trigger-hint{display:none}
 }
 @media(prefers-reduced-motion:reduce){.profile-reveal-running *{animation:none!important;transition:none!important}.profile-stamp{will-change:auto!important}.profile-copy>*{will-change:auto!important}}
+
+/* Every glyph group has its own cropped text surface and ballistic flight. */
+.profile-text-throwing .profile-layout>.profile-copy>*{opacity:0}
+.profile-text-chip{position:absolute;overflow:hidden;pointer-events:none;transform-origin:center;will-change:transform,opacity;backface-visibility:hidden}
+.profile-text-chip .profile-copy{position:absolute;display:block!important;max-width:none!important;min-width:0}
+.profile-text-chip .profile-copy>*{margin:0!important;opacity:1!important;transform:none!important;clip-path:none!important}

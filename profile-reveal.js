@@ -7,9 +7,8 @@
   const root = document.documentElement;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const items = [...copy.children];
-  const title = copy.querySelector('h2');
   const easing = 'cubic-bezier(.22,.8,.24,1)';
-  let animations = [], layer, ghost, timer, viewFrame = 0, generation = 0;
+  let animations = [], layer, timer, viewFrame = 0, generation = 0;
   let visible = false, autoOpened = motion.matches;
   const polygons = [
     '0% 0%,54% 0%,44% 45%,0% 52%',
@@ -55,10 +54,9 @@
     cancelAnimationFrame(viewFrame);viewFrame = 0;
     animations.forEach(animation => animation.cancel());animations = [];
     layer?.remove();layer = undefined;
-    ghost?.remove();ghost = undefined;
     layout.style.removeProperty('height');
     root.classList.remove('profile-layout-changing');
-    section.classList.remove('profile-reveal-running','profile-fragmenting','profile-heading-fragmenting');
+    section.classList.remove('profile-reveal-running','profile-fragmenting','profile-heading-fragmenting','profile-text-throwing');
     stamp.removeAttribute('aria-busy');
   }
   function play(node,keyframes,options) {
@@ -88,31 +86,90 @@
       part.append(face);layer.append(part);
       const [dx,dy,rotation] = bursts[index];
       const travelX = to.x-from.x, travelY = to.y-from.y;
-      play(part,[
-        {transform:'translate(0px,0px) rotate(-5deg) scale(1)',offset:0,opacity:1},
-        {transform:`translate(${dx}px,${dy}px) rotate(${rotation}deg) scale(.98)`,offset:opening ? .28 : .23,opacity:1},
-        {transform:`translate(${travelX+dx*.3}px,${travelY+dy*.25}px) rotate(${rotation*.4}deg) scale(1)`,offset:.68,opacity:1},
-        {transform:`translate(${travelX}px,${travelY}px) rotate(-5deg) scale(1)`,offset:1,opacity:1}
-      ],{duration:opening ? 1090 : 870,delay:index*22});
+      if (opening) {
+        play(part,[
+          {transform:'translate(0px,0px) rotate(-5deg) scale(1)',offset:0,opacity:1},
+          {transform:`translate(${dx}px,${dy}px) rotate(${rotation}deg) scale(.98)`,offset:.12,opacity:1},
+          {transform:'translate(0px,0px) rotate(-5deg) scale(1.04)',offset:.28,opacity:1},
+          {transform:'translate(0px,0px) rotate(-5deg) scale(1)',offset:.55,opacity:1,easing},
+          {transform:`translate(${travelX}px,${travelY}px) rotate(-5deg) scale(1)`,offset:1,opacity:1}
+        ],{duration:1650,delay:index*12,easing:'linear'});
+      } else {
+        play(part,[
+          {transform:'translate(0px,0px) rotate(-5deg) scale(1)',offset:0,opacity:1},
+          {transform:`translate(${dx}px,${dy}px) rotate(${rotation}deg) scale(.98)`,offset:.2,opacity:1},
+          {transform:`translate(${travelX+dx*.25}px,${travelY+dy*.25}px) rotate(${rotation*.4}deg) scale(1)`,offset:.7,opacity:1},
+          {transform:`translate(${travelX}px,${travelY}px) rotate(-5deg) scale(1)`,offset:1,opacity:1}
+        ],{duration:1080,delay:index*15});
+      }
     });
   }
-  function headingFragments(rect,mark,opening,bounds) {
-    const target = center(rect);
-    const x = mark.x-target.x, y = mark.y-target.y;
-    const offsets = [[-18,-16,-7],[15,0,6],[-8,18,-4]];
-    for (let index = 0;index < 3;index++) {
-      const part = document.createElement('div');
-      part.className = 'profile-copy-fragment';
-      part.style.cssText = `left:${rect.left-bounds.left}px;top:${rect.top-bounds.top}px;width:${rect.width}px;height:${rect.height}px;clip-path:inset(${index*100/3}% 0 ${(2-index)*100/3}% 0)`;
-      const wrapper = document.createElement('div');wrapper.className = 'profile-copy';
-      const heading = title.cloneNode(true);
-      heading.removeAttribute('id');wrapper.append(heading);part.append(wrapper);layer.append(part);
-      const [dx,dy,angle] = offsets[index];
-      const assembled = {transform:'translate(0px,0px) rotate(0deg) scale(1)',opacity:1};
-      const condensed = {transform:`translate(${x+dx}px,${y+dy}px) rotate(${angle}deg) scale(.18)`,opacity:0};
-      const split = {transform:`translate(${opening ? dx : x*.48+dx}px,${opening ? dy : y*.48+dy}px) rotate(${angle}deg) scale(${opening ? .92 : .65})`,opacity:1};
-      play(part,opening ? [condensed,{...split,offset:.6},assembled] : [assembled,{...split,offset:.4},condensed],{duration:opening ? 800 : 650,delay:opening ? 300+index*55 : index*35});
-    }
+  // Snapshot the actual glyph locations so the pieces reassemble on the same baselines.
+  function textSnapshot() {
+    return items.map((node,blockIndex) => {
+      const bounds = pageRect(node), pieces = [];
+      const walker = document.createTreeWalker(node,NodeFilter.SHOW_TEXT);
+      let text, order = 0;
+      while ((text = walker.nextNode())) {
+        if (!text.textContent.trim()) continue;
+        const value = text.textContent;
+        let start = 0;
+        while (start < value.length) {
+          const small = node.tagName === 'H2';
+          const size = small ? 1 + (order%3 === 1 ? 1 : 0) : 4 + (order*7)%4;
+          let end = Math.min(value.length,start+size);
+          // Keep UTF-16 pairs intact if a future introduction contains emoji.
+          const code = value.charCodeAt(end-1);
+          if (code >= 0xd800 && code <= 0xdbff && end < value.length) end++;
+          const range = document.createRange();
+          range.setStart(text,start);range.setEnd(text,end);
+          if (value.slice(start,end).trim()) {
+            for (const rect of range.getClientRects()) {
+              if (rect.width < 1 || rect.height < 1) continue;
+              pieces.push({left:rect.left+scrollX,top:rect.top+scrollY,width:rect.width,height:rect.height,order});
+            }
+          }
+          range.detach();start = end;order++;
+        }
+      }
+      return {node,bounds,pieces,blockIndex};
+    });
+  }
+  function throwText(snapshot,origin,opening,bounds) {
+    let count = 0;
+    snapshot.forEach(({node,bounds:nodeBounds,pieces,blockIndex}) => {
+      pieces.forEach(piece => {
+        const index = count++, landing = center(piece);
+        const part = document.createElement('div');part.className = 'profile-text-chip';
+        part.dataset.block = String(blockIndex);
+        part.style.cssText = `left:${piece.left-bounds.left}px;top:${piece.top-bounds.top}px;width:${piece.width}px;height:${piece.height}px`;
+        const wrapper = document.createElement('div');wrapper.className = 'profile-copy';
+        wrapper.style.cssText = `left:${nodeBounds.left-piece.left}px;top:${nodeBounds.top-piece.top}px;width:${nodeBounds.width}px`;
+        const clone = node.cloneNode(true);
+        clone.removeAttribute('id');clone.querySelectorAll('[id]').forEach(child => child.removeAttribute('id'));
+        clone.style.margin = '0';clone.style.opacity = '1';clone.style.transform = 'none';
+        wrapper.append(clone);part.append(wrapper);layer.append(part);
+        const launch = {x:origin.x+((index*11)%15)-7,y:origin.y+((index*7)%11)-5};
+        const from = opening ? launch : landing, to = opening ? landing : launch;
+        const ceiling = Math.max(28,piece.height*.55);
+        const requestedArc = Math.max((blockIndex === 1 ? 112 : 62) + (index*17)%53,Math.abs(to.y-from.y)/4+18);
+        const room = (from.y+to.y)/2-bounds.top-ceiling;
+        const arc = Math.max(12,Math.min(requestedArc,room));
+        const spin = ((index*43)%137)-68;
+        const frames = Array.from({length:41},(_,frame) => {
+          const t = frame/40;
+          // Constant horizontal velocity and quadratic vertical motion form a real parabola.
+          const x = from.x+(to.x-from.x)*t-landing.x;
+          const y = from.y+(to.y-from.y)*t-4*arc*t*(1-t)-landing.y;
+          const scale = opening ? .18+.82*Math.pow(t,.72) : 1-.84*Math.pow(t,.8);
+          const rotation = opening ? spin*(1-t)*(1-t) : -spin*t*t;
+          const opacity = opening ? Math.min(1,t/.08) : t>.87 ? Math.max(0,(1-t)/.13) : 1;
+          return {offset:t,transform:`translate(${x}px,${y}px) rotate(${rotation}deg) scale(${scale})`,opacity};
+        });
+        const stagger = (piece.order%6)*21+Math.floor(piece.order/6)*10;
+        play(part,frames,{duration:opening ? 800+(index*37)%170 : 660+(index*29)%120,delay:opening ? 480+blockIndex*60+stagger : blockIndex*35+stagger*.5,easing:'linear'});
+      });
+    });
   }
   function finish(ticket) {
     Promise.allSettled(animations.map(animation => animation.finished)).then(() => {
@@ -134,25 +191,19 @@
     const newHeight = layout.offsetHeight;
     const bounds = pageRect(layout);
     const target = center(pageRect(stamp));
-    const headingRect = pageRect(title);
-    const poses = items.filter(node => node !== title).map((node,index) => {
-      const box = pageRect(node), point = center(box);
-      return {node,index,x:source.x-point.x,y:source.y-point.y};
-    });
+    const snapshot = textSnapshot();
     makeLayer();
-    section.classList.add('profile-reveal-running','profile-fragmenting','profile-heading-fragmenting');
+    section.classList.add('profile-reveal-running','profile-fragmenting','profile-text-throwing');
     stamp.setAttribute('aria-busy','true');
     layout.style.height = `${newHeight}px`;
-    play(layout,[{height:`${oldHeight}px`},{height:`${newHeight}px`}],{duration:1050});
-    // The real button travels underneath its fragments, retaining one accessible control.
-    play(stamp,[{transform:`translate(${source.x-target.x}px,${source.y-target.y}px) rotate(-5deg)`},{transform:'translate(0px,0px) rotate(-5deg)'}],{duration:1090});
+    play(layout,[{height:`${oldHeight}px`},{height:`${newHeight}px`}],{duration:1270,delay:230});
+    play(stamp,[
+      {transform:`translate(${source.x-target.x}px,${source.y-target.y}px) rotate(-5deg)`,offset:0},
+      {transform:`translate(${source.x-target.x}px,${source.y-target.y}px) rotate(-5deg)`,offset:.55,easing},
+      {transform:'translate(0px,0px) rotate(-5deg)',offset:1}
+    ],{duration:1650,easing:'linear'});
     markFragments(source,target,true,bounds);
-    headingFragments(headingRect,source,true,bounds);
-    poses.forEach(({node,index,x,y}) => play(node,[
-      {transform:`translate(${x*.75}px,${y*.6}px) scale(.3)`,opacity:0,clipPath:'inset(0 70% 0 0)'},
-      {transform:'translate(9px,6px) scale(.98)',opacity:.8,clipPath:'inset(0 8% 0 0)',offset:.68},
-      {transform:'none',opacity:1,clipPath:'inset(0 0 0 0)'}
-    ],{duration:760,delay:350+index*85}));
+    throwText(snapshot,source,true,bounds);
     preserveView(viewport,ticket);
     finish(ticket);
   }
@@ -163,38 +214,22 @@
     const viewport = {x:scrollX,y:scrollY};
     const oldHeight = layout.offsetHeight;
     const source = center(pageRect(stamp));
-    const copyRect = pageRect(copy);
-    const headingRect = pageRect(title);
-    const oldItems = items.map(node => ({rect:pageRect(node)}));
-    ghost = copy.cloneNode(true);
-    ghost.classList.add('profile-copy-ghost');ghost.removeAttribute('id');
-    ghost.setAttribute('aria-hidden','true');ghost.inert = true;
-    ghost.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+    const snapshot = textSnapshot();
     if (!motion.matches) root.classList.add('profile-layout-changing');
     section.classList.remove('profile-revealed');syncControl();
-    if (motion.matches) {ghost = undefined;return;}
+    if (motion.matches) return;
     const ticket = generation;
     const newHeight = layout.offsetHeight;
     const bounds = pageRect(layout);
     const target = center(pageRect(stamp));
-    ghost.style.cssText = `left:${copyRect.left-bounds.left}px;top:${copyRect.top-bounds.top}px;width:${copyRect.width}px`;
-    layout.append(ghost);makeLayer();
-    section.classList.add('profile-reveal-running','profile-fragmenting');
+    makeLayer();
+    section.classList.add('profile-reveal-running','profile-fragmenting','profile-text-throwing');
     stamp.setAttribute('aria-busy','true');
     layout.style.height = `${newHeight}px`;
-    play(layout,[{height:`${oldHeight}px`},{height:`${newHeight}px`}],{duration:980});
-    play(stamp,[{transform:`translate(${source.x-target.x}px,${source.y-target.y}px) rotate(-5deg)`},{transform:'translate(0px,0px) rotate(-5deg)'}],{duration:870});
+    play(layout,[{height:`${oldHeight}px`},{height:`${newHeight}px`}],{duration:1050,delay:140});
+    play(stamp,[{transform:`translate(${source.x-target.x}px,${source.y-target.y}px) rotate(-5deg)`},{transform:'translate(0px,0px) rotate(-5deg)'}],{duration:1080});
     markFragments(source,target,false,bounds);
-    headingFragments(headingRect,target,false,bounds);
-    [...ghost.children].forEach((node,index) => {
-      if (node.tagName === 'H2') {node.style.opacity = '0';return;}
-      const point = center(oldItems[index].rect);
-      play(node,[
-        {transform:'none',opacity:1,clipPath:'inset(0 0 0 0)'},
-        {transform:`translate(${(target.x-point.x)*.8}px,${(target.y-point.y)*.8}px) scale(.25)`,opacity:.55,clipPath:'inset(0 18% 0 0)',offset:.75},
-        {transform:`translate(${target.x-point.x}px,${target.y-point.y}px) scale(.12)`,opacity:0,clipPath:'inset(0 100% 0 0)'}
-      ],{duration:640,delay:index*45});
-    });
+    throwText(snapshot,target,false,bounds);
     preserveView(viewport,ticket);
     finish(ticket);
   }
