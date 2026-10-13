@@ -3,7 +3,7 @@
 html.profile-layout-changing{overflow-anchor:none}
 html.profile-layout-changing body{overflow-anchor:none}
 .about.profile-reveal-ready .profile-layout{position:relative;isolation:isolate;grid-template-columns:minmax(150px,.58fr) minmax(0,1.42fr);grid-template-rows:max-content;align-content:start;gap:6%;padding:32px 3% 14px;align-items:center;min-height:0}
-.about.profile-reveal-ready:not(.profile-revealed) .profile-layout{grid-template-columns:1fr;justify-items:center;gap:0;padding-bottom:40px}
+.about.profile-reveal-ready:not(.profile-revealed) .profile-layout{grid-template-columns:1fr;justify-items:center;gap:0;padding-bottom:74px}
 .about.profile-reveal-ready:not(.profile-revealed) .profile-copy:not(.profile-copy-ghost){display:none}
 .about.profile-reveal-ready .profile-stamp{width:var(--profile-card-size);height:var(--profile-card-size);margin:0;transform:rotate(-5deg);background:transparent;color:inherit;padding:0;cursor:pointer;appearance:none;flex-shrink:0}
 .about.profile-reveal-ready .profile-stamp b{font-size:calc(var(--profile-card-size)*.47)}
@@ -26,7 +26,7 @@ html.profile-layout-changing body{overflow-anchor:none}
 .profile-copy-ghost>*{transform-origin:center}
 @container profile-panel (max-width:540px){
  .about.profile-reveal-ready .profile-layout{grid-template-columns:1fr;gap:28px;padding:27px 3% 10px;justify-items:start}
- .about.profile-reveal-ready:not(.profile-revealed) .profile-layout{justify-items:center;gap:0;padding-bottom:38px}
+ .about.profile-reveal-ready:not(.profile-revealed) .profile-layout{justify-items:center;gap:0;padding-bottom:74px}
  .about.profile-reveal-ready .profile-copy h2{font-size:clamp(28px,6cqw,36px)}
  .about.profile-reveal-ready .profile-stamp{margin-left:8px}
  .about.profile-reveal-ready:not(.profile-revealed) .profile-stamp{margin-left:0}
@@ -39,3 +39,9 @@ html.profile-layout-changing body{overflow-anchor:none}
 .profile-text-chip{position:absolute;overflow:hidden;pointer-events:none;transform-origin:center;will-change:transform,opacity;backface-visibility:hidden}
 .profile-text-chip .profile-copy{position:absolute;display:block!important;max-width:none!important;min-width:0}
 .profile-text-chip .profile-copy>*{margin:0!important;opacity:1!important;transform:none!important;clip-path:none!important}
+
+.profile-loose-mark .profile-layout>.profile-stamp{opacity:0}
+.profile-idle-fragments .profile-fragment{will-change:auto}
+.profile-idle-hint{position:absolute;transform:translateX(-50%);white-space:nowrap;color:#8b927d;font:7px var(--mono);letter-spacing:.1em}
+.profile-loose-mark .profile-layout>.profile-stamp:before{content:'';position:absolute;inset:-65px;cursor:pointer}
+.profile-loose-mark:has(.profile-layout>.profile-stamp:focus-visible) .profile-idle-fragments{outline:1px dashed #879077;outline-offset:-7px}

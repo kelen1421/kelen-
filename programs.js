@@ -12,6 +12,21 @@
   const names = cards.map(card => card.querySelector('h3').textContent);
   const descriptions = cards.map(card => card.querySelector('.program-copy p').textContent);
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  const workspace = document.createElement('div');
+  workspace.className = 'plugin-workspace';
+  const viewport = document.createElement('div');
+  viewport.className = 'plugin-viewport';
+  const inspector = document.createElement('div');
+  inspector.className = 'plugin-inspector';
+  const overviewCopy = archive.querySelector('.plugin-overview-copy');
+  archive.querySelector('.plugin-vault-top').after(workspace);
+  workspace.append(viewport,inspector);
+  viewport.append(overview,stage);
+  inspector.append(overviewCopy,archive.querySelector('.program-grid'));
+  const controls = document.createElement('div');
+  controls.className = 'plugin-scene-controls';
+  controls.innerHTML = '<span>悬停探索 · 点击读取</span><div><button type="button" data-program-prev aria-label="上一个程序">←</button><output aria-live="polite">01 / 04</output><button type="button" data-program-next aria-label="下一个程序">→</button></div>';
+  viewport.append(controls);
   let current = 0, focusTimer, depth;
 
   function useStaticArchive() {
@@ -43,17 +58,21 @@
     archive.querySelector('.plugin-active-title').textContent = names[current];
     archive.querySelector('.plugin-active-description').textContent = descriptions[current];
     read.setAttribute('aria-label',`读取${names[current]}档案`);
+    overviewCopy.hidden = archive.dataset.view === 'records';
+    controls.querySelector('output').textContent = `0${current+1} / 04`;
+    controls.querySelector('span').textContent = archive.dataset.view === 'records' ? '弧形档案 · 左右切换' : '悬停探索 · 点击读取';
     depth?.setState(current,archive.dataset.view);
   }
 
   function open(index) {
     clearTimeout(focusTimer);
+    const entering = archive.dataset.view !== 'records';
     archive.dataset.view = 'records';
     overview.hidden = true;
     stage.hidden = false;
     back.hidden = false;
     select(index);
-    archive.scrollIntoView({behavior:motion.matches ? 'instant' : 'smooth',block:'start'});
+    if (entering && archive.getBoundingClientRect().top < 0) archive.scrollIntoView({behavior:motion.matches ? 'instant' : 'smooth',block:'start'});
     const heading = cards[current].querySelector('h3');
     heading.tabIndex = -1;
     focusTimer = setTimeout(() => heading.focus({preventScroll:true}),motion.matches ? 0 : 450);
@@ -71,6 +90,16 @@
   });
   leaves.forEach((button,i) => button.addEventListener('click',() => select(i)));
   read.addEventListener('click',() => open(current));
+  controls.querySelector('[data-program-prev]').addEventListener('click',() => select(current-1));
+  controls.querySelector('[data-program-next]').addEventListener('click',() => select(current+1));
+  let swipe;
+  viewport.addEventListener('pointerdown',event => {if(event.pointerType !== 'mouse')swipe={x:event.clientX,y:event.clientY};});
+  viewport.addEventListener('pointerup',event => {
+    if(!swipe)return;
+    const dx=event.clientX-swipe.x,dy=event.clientY-swipe.y;swipe=null;
+    if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.4)select(current+(dx<0 ? 1 : -1));
+  });
+  viewport.addEventListener('pointercancel',() => {swipe=null;});
   function showOverview() {
     clearTimeout(focusTimer);
     archive.dataset.view = 'overview';

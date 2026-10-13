@@ -159,3 +159,37 @@
  .resume-mark-face{inset:11px 6px 12px 5px;padding:13px 9px}
  .resume-mark-face small{font-size:4px}.resume-mark-face b{font-size:34px}.resume-mark-face b span{font-size:8px;margin-left:4px}
 }
+
+.resume-san-symbol{display:flex;align-items:flex-end;gap:7px;color:#4a613d;margin:9px 0 7px}
+.resume-san-symbol svg{width:48px;height:44px;display:block}
+.resume-san-symbol span{font:8px var(--mono);color:#889a76;padding-bottom:3px}
+.resume-column .journey-flat{opacity:.9}
+.resume-column .journey-world{top:-8px}
+.resume-column .journey-route.completed{stroke:#668b54;stroke-width:1.7}
+.resume-craft details p{overflow:hidden}
+@container resume-column (max-width:700px){.resume-san-symbol svg{width:40px;height:36px}.resume-san-symbol{margin:8px 0 6px}.resume-column .journey-world{top:-8px}}
+
+/* A compact project header, with the editing structure occupying the spare space. */
+.resume-project-preview{margin:16px 0 0;grid-column:1/-1;border-top:1px solid #c4ceba;padding-top:12px;min-width:0}
+.resume-project-preview figcaption{font:6px var(--mono);letter-spacing:.15em;color:#91a080;margin-bottom:4px}
+.resume-project-preview svg{display:block;width:100%;height:135px}
+.craft-running .project-frame{animation:project-frame-drift 4.8s ease-in-out infinite}
+.craft-running .project-frame-b{animation-delay:-1.4s}.craft-running .project-frame-c{animation-delay:-2.8s}
+.craft-running .project-playhead{animation:project-cut-progress 6s ease-in-out infinite}
+@keyframes project-frame-drift{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes project-cut-progress{0%,100%{transform:translateX(-40px)}65%{transform:translateX(200px)}}
+@container resume-column (min-width:541px) and (max-width:700px){
+ .resume-project{grid-template-columns:105px minmax(145px,.9fr) minmax(180px,1.15fr);column-gap:19px}
+ .resume-project-mark{width:105px;height:117px;grid-column:1;grid-row:1/6}
+ .resume-project-preview{grid-column:3;grid-row:1/6;margin:0;padding:4px 0 0 15px;border-top:0;border-left:1px solid #cbd3c0;align-self:center}
+ .resume-project-preview svg{height:155px}
+ .resume-project h3{font-size:22px}
+ .resume-topics{gap:5px}.resume-topics span{font-size:8px;padding:4px 5px}
+}
+@container resume-column (max-width:540px){
+ .resume-project{grid-template-columns:105px minmax(0,1fr);gap:0 19px}
+ .resume-project-mark{width:105px;height:117px}
+ .resume-project-preview{grid-column:1/-1;margin-top:14px;max-width:340px}
+ .resume-project-preview svg{height:130px}
+ .resume-project h3{font-size:22px}
+}

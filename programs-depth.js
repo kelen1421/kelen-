@@ -7,7 +7,7 @@
     const host = document.createElement('div');
     host.className = 'plugin-depth-stage';
     host.setAttribute('aria-hidden','true');
-    archive.querySelector('.plugin-vault-top').after(host);
+    archive.querySelector('.plugin-viewport').append(host);
     let renderer;
     try {
       renderer = new T.WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});
@@ -181,8 +181,9 @@
     let current=0,view='overview',mix=0,selectedAngle=-1.5*step;
     let visible=false,raf,lastFrame,introStart,introDone=motion.matches,disposed=false;
     const eye=new T.Vector3(),target=new T.Vector3();
-    const overviewEye=new T.Vector3(6.6,7.9,9.6),overviewTarget=new T.Vector3(-.85,.55,0);
-    const galleryEye=new T.Vector3(0,2.45,5),galleryTarget=new T.Vector3(1.5,1.92,-5.1);
+    const overviewEye=new T.Vector3(5.4,6.5,7.7),overviewTarget=new T.Vector3(0,.45,0);
+    const galleryEye=new T.Vector3(0,2.2,3.6),galleryTarget=new T.Vector3(0,1.92,-5.1);
+    const drift=new T.Vector2(),driftTarget=new T.Vector2();
     const smooth=p=>{const t=Math.max(0,Math.min(1,p));return t*t*(3-2*t);};
     const ready=()=>!root.classList.contains('intro-pending')&&!root.classList.contains('vortex-open');
     const start=()=>{if(!raf&&!disposed&&visible&&!document.hidden&&ready())raf=requestAnimationFrame(draw);};
@@ -194,32 +195,39 @@
       const follow=motion.matches ? 1 : 1-Math.exp(-dt/ .19);
       mix += ((view==='records' ? 1 : 0)-mix)*follow;
       if(Math.abs(mix-(view==='records' ? 1 : 0))<.0001)mix=view==='records' ? 1 : 0;
-      const intro=introDone ? 1 : smooth((now-introStart)/1850);
+      const intro=introDone ? 1 : smooth((now-introStart)/1400);
       if(intro>=1)finishIntro();
       overview.visible=mix<.86;gallery.visible=mix>.03;
       overview.scale.setScalar(1-mix*.48);overview.rotation.y=-mix*.36;overview.position.y=-mix*.75;
       const zoom = new T.Vector3(3.7,3.7,5.4).lerp(overviewEye,intro);
       eye.copy(zoom).lerp(galleryEye,mix);
+      drift.lerp(driftTarget,motion.matches ? 1 : follow*.6);
+      if(!motion.matches){eye.x+=drift.x*.28;eye.y+=drift.y*.15;}
       target.set(overviewTarget.x*intro,overviewTarget.y,0).lerp(galleryTarget,mix);
       camera.position.copy(eye);camera.lookAt(target);
       core.rotation.y=-Math.PI/5+(1-intro)*Math.PI*.7;
       core.scale.setScalar(1+.55*(1-intro));
       wires.forEach(line=>line.geometry.setDrawRange(0,Math.round(24*smooth((intro-.15)/.48))));
       stations.forEach(({group,label,index})=>{
-        const born=introDone ? 1 : smooth(((now-introStart)-470-index*115)/900);
+        const born=introDone ? 1 : smooth(((now-introStart)-280-index*90)/750);
         group.visible=born>.001;
         group.scale.setScalar(.62+.38*born);
-        const hover=index===current ? .12 : 0;
+        const hover=index===current ? .3 : 0;
         const desired=-(1-born)*.65+hover;
         group.position.y += (desired-group.position.y)* (introDone ? follow : 1);
-        const labelY=1.72+(index===current ? .18 : 0);
+        const labelY=1.72+(index===current ? .22 : 0);
         label.position.y += (labelY-label.position.y)*follow;
       });
       const goal=(current-1.5)*step;
       selectedAngle += (goal-selectedAngle)*follow;
       gallery.rotation.y=selectedAngle;
-      panels.forEach(({material,ink,borderMaterial,index})=>{
+      panels.forEach(({group,material,ink,borderMaterial,index})=>{
         const active=index===current;
+        group.scale.lerp(new T.Vector3(active ? 1.04 : .93,active ? 1.04 : .93,1),follow);
+        const angle=(index-1.5)*step;
+        const reach=radius-(active ? .38 : 0);
+        group.position.x+=(Math.sin(angle)*reach-group.position.x)*follow;
+        group.position.z+=(-Math.cos(angle)*reach-group.position.z)*follow;
         material.opacity += ((active ? .43 : .19)*mix-material.opacity)*follow;
         ink.opacity += ((active ? .95 : .37)*mix-ink.opacity)*follow;
         borderMaterial.opacity= (active ? .7 : .3)*mix;
@@ -232,9 +240,9 @@
       if(bounds.width<1||bounds.height<1)return;
       renderer.setSize(bounds.width,bounds.height,false);
       camera.aspect=bounds.width/bounds.height;
-      camera.fov=camera.aspect<1.25 ? 44 : 35;
-      galleryTarget.x=bounds.width<680 ? 0 : 1.5;
-      overviewTarget.x=bounds.width<680 ? 0 : -.85;
+      camera.fov=camera.aspect<1.25 ? 44 : 37;
+      galleryTarget.x=0;
+      overviewTarget.x=0;
       camera.updateProjectionMatrix();
       start();if(motion.matches && visible)draw(performance.now());
     }
@@ -252,9 +260,12 @@
     }
     host.addEventListener('pointermove',event=>{
       if(event.pointerType!=='mouse')return;
+      const bounds=host.getBoundingClientRect();
+      driftTarget.set((event.clientX-bounds.left)/bounds.width-.5,-((event.clientY-bounds.top)/bounds.height-.5));
       const index=hit(event);renderer.domElement.style.cursor=index===undefined ? 'default' : 'pointer';
       if(index!==undefined && view==='overview')callbacks.onSelect(index);
     },{passive:true});
+    host.addEventListener('pointerleave',()=>{driftTarget.set(0,0);renderer.domElement.style.cursor='default';});
     host.addEventListener('click',event=>{
       const index=hit(event);if(index!==undefined){if(view==='overview')callbacks.onOpen(index);else callbacks.onSelect(index);}
     });

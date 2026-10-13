@@ -8,7 +8,7 @@
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const items = [...copy.children];
   const easing = 'cubic-bezier(.22,.8,.24,1)';
-  let animations = [], layer, timer, viewFrame = 0, generation = 0;
+  let animations = [], layer, idleLayer, timer, viewFrame = 0, generation = 0;
   let visible = false, autoOpened = motion.matches;
   const polygons = [
     '0% 0%,54% 0%,44% 45%,0% 52%',
@@ -19,6 +19,10 @@
     '48% 71%,76% 70%,100% 74%,100% 100%,0% 100%'
   ];
   const bursts = [[-27,-33,-11],[33,-29,13],[-36,19,-9],[6,9,17],[36,12,-13],[7,36,8]];
+  function looseTransform(index,x=0,y=0) {
+    const [dx,dy,rotation] = bursts[index];
+    return `translate(${x+dx*1.6}px,${y+dy*1.2}px) rotate(${rotation*1.3}deg) scale(.96)`;
+  }
   const center = rect => ({x:rect.left + rect.width/2,y:rect.top + rect.height/2});
   function pageRect(node) {
     const rect = node.getBoundingClientRect();
@@ -44,9 +48,9 @@
   function syncControl() {
     const expanded = section.classList.contains('profile-revealed');
     stamp.setAttribute('aria-expanded',String(expanded));
-    stamp.setAttribute('aria-label',expanded ? '收起个人介绍，重组 K 方格' : '拆开 K 方格，展开个人介绍');
-    stamp.title = expanded ? '点击 K 将介绍合回方格' : '点击 K 拆开并展开介绍';
-    hint.textContent = expanded ? '点击 K · 合回方格' : '点击 K · 展开介绍';
+    stamp.setAttribute('aria-label',expanded ? '收起介绍，回到碎片状态' : '聚合碎片为 K，抛出个人介绍');
+    stamp.title = expanded ? '点击 K 将介绍收回碎片' : '点击碎片聚合成 K，再抛出介绍';
+    hint.textContent = expanded ? '点击 K · 收回碎片' : '点击碎片 · 聚合介绍';
   }
   function cancel() {
     generation++;
@@ -54,9 +58,10 @@
     cancelAnimationFrame(viewFrame);viewFrame = 0;
     animations.forEach(animation => animation.cancel());animations = [];
     layer?.remove();layer = undefined;
+    idleLayer?.remove();idleLayer = undefined;
     layout.style.removeProperty('height');
     root.classList.remove('profile-layout-changing');
-    section.classList.remove('profile-reveal-running','profile-fragmenting','profile-heading-fragmenting','profile-text-throwing');
+    section.classList.remove('profile-reveal-running','profile-fragmenting','profile-heading-fragmenting','profile-text-throwing','profile-loose-mark');
     stamp.removeAttribute('aria-busy');
   }
   function play(node,keyframes,options) {
@@ -71,25 +76,47 @@
     layer.inert = true;
     layout.append(layer);
   }
+  function fragmentFace() {
+    const face = stamp.cloneNode(true);
+    face.classList.add('profile-fragment-face');
+    face.querySelector('.profile-trigger-hint')?.remove();
+    face.removeAttribute('id');face.removeAttribute('aria-controls');face.removeAttribute('aria-expanded');
+    face.setAttribute('aria-hidden','true');face.tabIndex = -1;
+    face.style.width = `${stamp.offsetWidth}px`;face.style.height = `${stamp.offsetHeight}px`;
+    return face;
+  }
+  function showLooseMark() {
+    if (motion.matches || section.classList.contains('profile-revealed')) return;
+    idleLayer?.remove();
+    const bounds = pageRect(layout), point = center(pageRect(stamp));
+    const width = stamp.offsetWidth, height = stamp.offsetHeight;
+    idleLayer = document.createElement('div');
+    idleLayer.className = 'profile-fragments profile-idle-fragments';
+    idleLayer.setAttribute('aria-hidden','true');idleLayer.inert = true;
+    polygons.forEach((polygon,index) => {
+      const piece = document.createElement('div');piece.className = 'profile-fragment';
+      piece.style.cssText = `left:${point.x-bounds.left-width/2}px;top:${point.y-bounds.top-height/2}px;width:${width}px;height:${height}px;clip-path:polygon(${polygon});transform:${looseTransform(index)}`;
+      piece.append(fragmentFace());idleLayer.append(piece);
+    });
+    const label = document.createElement('span');label.className = 'profile-idle-hint';
+    label.textContent = '点击碎片 · 聚合介绍';
+    label.style.cssText = `left:${point.x-bounds.left}px;top:${point.y-bounds.top+height/2+65}px`;
+    idleLayer.append(label);layout.append(idleLayer);
+    section.classList.add('profile-loose-mark');
+  }
   function markFragments(from,to,opening,bounds) {
     const width = stamp.offsetWidth, height = stamp.offsetHeight;
     polygons.forEach((polygon,index) => {
       const part = document.createElement('div');
       part.className = 'profile-fragment';
       part.style.cssText = `left:${from.x-bounds.left-width/2}px;top:${from.y-bounds.top-height/2}px;width:${width}px;height:${height}px;clip-path:polygon(${polygon})`;
-      const face = stamp.cloneNode(true);
-      face.classList.add('profile-fragment-face');
-      face.querySelector('.profile-trigger-hint')?.remove();
-      face.removeAttribute('id');face.removeAttribute('aria-controls');face.removeAttribute('aria-expanded');
-      face.setAttribute('aria-hidden','true');face.tabIndex = -1;
-      face.style.width = `${width}px`;face.style.height = `${height}px`;
+      const face = fragmentFace();
       part.append(face);layer.append(part);
       const [dx,dy,rotation] = bursts[index];
       const travelX = to.x-from.x, travelY = to.y-from.y;
       if (opening) {
         play(part,[
-          {transform:'translate(0px,0px) rotate(-5deg) scale(1)',offset:0,opacity:1},
-          {transform:`translate(${dx}px,${dy}px) rotate(${rotation}deg) scale(.98)`,offset:.12,opacity:1},
+          {transform:looseTransform(index),offset:0,opacity:1,easing},
           {transform:'translate(0px,0px) rotate(-5deg) scale(1.04)',offset:.28,opacity:1},
           {transform:'translate(0px,0px) rotate(-5deg) scale(1)',offset:.55,opacity:1,easing},
           {transform:`translate(${travelX}px,${travelY}px) rotate(-5deg) scale(1)`,offset:1,opacity:1}
@@ -99,7 +126,7 @@
           {transform:'translate(0px,0px) rotate(-5deg) scale(1)',offset:0,opacity:1},
           {transform:`translate(${dx}px,${dy}px) rotate(${rotation}deg) scale(.98)`,offset:.2,opacity:1},
           {transform:`translate(${travelX+dx*.25}px,${travelY+dy*.25}px) rotate(${rotation*.4}deg) scale(1)`,offset:.7,opacity:1},
-          {transform:`translate(${travelX}px,${travelY}px) rotate(-5deg) scale(1)`,offset:1,opacity:1}
+          {transform:looseTransform(index,travelX,travelY),offset:1,opacity:1}
         ],{duration:1080,delay:index*15});
       }
     });
@@ -174,7 +201,7 @@
   function finish(ticket) {
     Promise.allSettled(animations.map(animation => animation.finished)).then(() => {
       if (ticket !== generation) return;
-      cancel();syncControl();
+      cancel();syncControl();showLooseMark();
     });
   }
   function open() {
@@ -251,6 +278,7 @@
   motion.addEventListener('change',() => {
     cancel();autoOpened = true;section.classList.add('profile-revealed');syncControl();
   });
-  addEventListener('resize',() => {if(animations.length)cancel();},{passive:true});
-  syncControl();
+  addEventListener('resize',() => {if(animations.length)cancel();showLooseMark();},{passive:true});
+  new ResizeObserver(() => {if(!animations.length)showLooseMark();}).observe(layout);
+  syncControl();showLooseMark();
 })();

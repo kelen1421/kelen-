@@ -3,7 +3,7 @@
   if (!column) return;
   const $ = selector => column.querySelector(selector);
   const $$ = selector => [...column.querySelectorAll(selector)];
-  const steps = [{"title": "读稿与结构梳理", "text": "标出核心问句、概念顺序、转折与回扣。先确认观众需要哪些前置理解，再判断哪些段落可以压缩。", "check": "检查：删掉这段，下一段还能不能理解？", "code": "READ", "x": 270, "y": 270}, {"title": "分镜与素材准备", "text": "让每段旁白对应具体的画面任务。需要展示关系时用图示，需要认识对象时用实物或素材，并整理来源与署名要求。", "check": "检查：画面是在解释内容，还是只提供气氛？", "code": "STORYBOARD", "x": 580, "y": 265}, {"title": "初剪与节奏搭建", "text": "先搭建完整的解释路径，再处理段落衔接和信息密度。复杂推理之后留出消化空间，转场与重点强调服务于内容推进。", "check": "检查：观众是否知道这一段在解决什么问题？", "code": "ROUGH CUT", "x": 910, "y": 290}, {"title": "声音、字幕与精剪", "text": "整理旁白，安排音乐与音效，平衡音量；核对术语、数字及字幕对应关系，让画面与声音形成一致的解释节奏。", "check": "检查：音乐不遮住旁白，字幕不制造新的歧义。", "code": "FINE CUT", "x": 1260, "y": 268}, {"title": "反馈修改与成片交付", "text": "配合创作者处理内容反馈，逐轮检查逻辑、画面和声音。完成最终输出，并整理工程文件与素材，便于后续修改及系列内容复用。", "check": "检查：版本清晰、素材可追溯、成片播放正常。", "code": "DELIVERY", "x": 1610, "y": 270}];
+  const steps = [{"title": "读稿与结构梳理", "text": "标出核心问句、概念顺序、转折与回扣。先确认观众需要哪些前置理解，再判断哪些段落可以压缩。", "check": "检查：删掉这段，下一段还能不能理解？", "code": "READ", "x": 270, "y": 254}, {"title": "分镜与素材准备", "text": "让每段旁白对应具体的画面任务。需要展示关系时用图示，需要认识对象时用实物或素材，并整理来源与署名要求。", "check": "检查：画面是在解释内容，还是只提供气氛？", "code": "STORYBOARD", "x": 580, "y": 300}, {"title": "初剪与节奏搭建", "text": "先搭建完整的解释路径，再处理段落衔接和信息密度。复杂推理之后留出消化空间，转场与重点强调服务于内容推进。", "check": "检查：观众是否知道这一段在解决什么问题？", "code": "ROUGH CUT", "x": 910, "y": 232}, {"title": "声音、字幕与精剪", "text": "整理旁白，安排音乐与音效，平衡音量；核对术语、数字及字幕对应关系，让画面与声音形成一致的解释节奏。", "check": "检查：音乐不遮住旁白，字幕不制造新的歧义。", "code": "FINE CUT", "x": 1260, "y": 302}, {"title": "反馈修改与成片交付", "text": "配合创作者处理内容反馈，逐轮检查逻辑、画面和声音。完成最终输出，并整理工程文件与素材，便于后续修改及系列内容复用。", "check": "检查：版本清晰、素材可追溯、成片播放正常。", "code": "DELIVERY", "x": 1610, "y": 260}];
   const viewport = $('#cv-journey-viewport');
   const world = $('#cv-journey-world');
   const previous = $('[data-resume-prev]');
@@ -101,6 +101,27 @@
   motion.addEventListener('change',() => move(target));
   // Stagger the work surfaces on entry, then keep their own diagrams alive in view.
   const craftCards = $$('.resume-craft details');
+  // The wheel brings each explanation into the reading band and unfolds it once.
+  const manualCards = new WeakSet();
+  const copyReveal = new IntersectionObserver(entries => {
+    if(document.documentElement.classList.contains('intro-pending'))return;
+    entries.forEach(entry => {
+      if(!entry.isIntersecting || manualCards.has(entry.target))return;
+      const card=entry.target;
+      copyReveal.unobserve(card);
+      if(card.open)return;
+      card.open=true;
+      const paragraph=card.querySelector('p'),height=paragraph.scrollHeight;
+      if(!motion.matches)paragraph.animate([
+        {height:'0px',opacity:0,marginTop:'0px',transform:'translateY(18px)',clipPath:'inset(0 0 100% 0)'},
+        {height:`${height}px`,opacity:1,marginTop:'15px',transform:'none',clipPath:'inset(0)'}
+      ],{duration:680,easing:'cubic-bezier(.22,.8,.24,1)'});
+    });
+  },{threshold:.15,rootMargin:'0px 0px -24% 0px'});
+  craftCards.forEach(card => {
+    copyReveal.observe(card);
+    card.querySelector('summary').addEventListener('click',() => {manualCards.add(card);copyReveal.unobserve(card);});
+  });
   const animatedParts = [$('.resume-project'),$('.resume-role h3'),...$$('.resume-role>p:not(.overline)'),...craftCards];
   const visibleMotion = new Set();
   function syncCraftMotion() {
@@ -131,6 +152,7 @@
       animatedParts.forEach(node => {
         if (node && !node.classList.contains('craft-revealed')) {reveal.unobserve(node);reveal.observe(node);}
       });
+      craftCards.forEach(card => {if(!manualCards.has(card)){copyReveal.unobserve(card);copyReveal.observe(card);}});
       arrivalWait.disconnect();
     });
     arrivalWait.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
