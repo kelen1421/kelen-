@@ -77,7 +77,7 @@
 .contact .return-to-map:hover{color:var(--white)}
 .page-section,.contact{scroll-margin-top:24px}
 [tabindex="-1"]:focus{outline:none}
-.is-arriving .profile-copy,.is-arriving .work-intro,.is-arriving .notes-layout,.is-arriving .contact-main{animation:chapter-appear .65s ease-out both}
+.is-arriving .work-intro,.is-arriving .notes-layout,.is-arriving .contact-main{animation:chapter-appear .65s ease-out both}
 .note-list article{display:grid;grid-template-columns:90px 1fr 20px;gap:13px;align-items:center;padding:17px 0;border-bottom:1px solid var(--line)}
 .note-list article:first-child{border-top:1px solid var(--line)}
 .note-list article span{font:7px var(--mono);color:#878880;letter-spacing:.04em}
