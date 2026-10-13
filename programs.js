@@ -12,7 +12,7 @@
   const names = cards.map(card => card.querySelector('h3').textContent);
   const descriptions = cards.map(card => card.querySelector('.program-copy p').textContent);
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  let current = 0, focusTimer;
+  let current = 0, focusTimer, depth;
 
   function select(index) {
     current = (index + cards.length) % cards.length;
@@ -36,6 +36,7 @@
     archive.querySelector('.plugin-active-title').textContent = names[current];
     archive.querySelector('.plugin-active-description').textContent = descriptions[current];
     read.setAttribute('aria-label',`读取${names[current]}档案`);
+    depth?.setState(current,archive.dataset.view);
   }
 
   function open(index) {
@@ -70,7 +71,7 @@
     stage.hidden = true;
     back.hidden = true;
     select(current);
-    stations[current].focus({preventScroll:true});
+    (depth ? directory : stations)[current].focus({preventScroll:true});
   }
   back.addEventListener('click',showOverview);
   archive.addEventListener('keydown',event => {
@@ -79,9 +80,10 @@
       event.preventDefault();showOverview();
     } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       event.preventDefault();select(current + (event.key === 'ArrowRight' ? 1 : -1));
-      (archive.dataset.view === 'records' ? leaves : stations)[current].focus({preventScroll:true});
+      (depth ? directory : archive.dataset.view === 'records' ? leaves : stations)[current].focus({preventScroll:true});
     }
   });
   archive.classList.add('is-enhanced');
+  depth = window.createProgramDepth?.(archive,{onSelect:select,onOpen:open});
   select(0);
 })();

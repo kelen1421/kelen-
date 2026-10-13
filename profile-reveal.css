@@ -1,6 +1,8 @@
 .about.profile-reveal-ready:not(.profile-revealed) .profile-copy>*{opacity:0}
+.about.profile-reveal-ready:not(.profile-revealed) .profile-stamp{transform:translateX(var(--profile-center-shift,0px)) rotate(-5deg)}
 .profile-copy>*{transform-origin:center center}
 .profile-stamp{background:transparent;color:inherit;padding:0;cursor:pointer;appearance:none}
 .profile-stamp:focus-visible{outline:2px solid var(--ink);outline-offset:5px}
 .profile-reveal-running .profile-copy>*{will-change:transform,opacity}
-@media(prefers-reduced-motion:reduce){.about.profile-reveal-ready .profile-copy>*{opacity:1!important;transform:none!important}}
+.profile-reveal-running .profile-stamp{will-change:transform}
+@media(prefers-reduced-motion:reduce){.about.profile-reveal-ready .profile-copy>*{opacity:1!important;transform:none!important}.about.profile-reveal-ready .profile-stamp{transform:rotate(-5deg)!important}}
