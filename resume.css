@@ -193,3 +193,17 @@
  .resume-project-preview svg{height:130px}
  .resume-project h3{font-size:22px}
 }
+@container resume-column (min-width:701px){
+ .resume-experience{grid-template-columns:1fr;gap:22px;padding:26px 0}
+ .resume-project{grid-template-columns:135px minmax(0,1fr) minmax(235px,.8fr);column-gap:26px}
+ .resume-project-mark{grid-column:1;grid-row:1/6;width:130px;height:139px;margin:0;align-self:center}
+ .resume-project>span,.resume-project h3,.resume-project>p,.resume-project>small,.resume-topics{grid-column:2}
+ .resume-project h3{font-size:27px;margin:8px 0}.resume-topics{margin-top:12px}
+ .resume-mark-face{inset:13px 8px 13px 7px;padding:15px 12px}
+ .resume-san-symbol svg{width:53px;height:48px}.resume-san-symbol{margin:12px 0 9px}
+ .resume-project-preview{grid-column:3;grid-row:1/6;align-self:center;border-top:0;border-left:1px solid #c4ceba;padding:0 0 0 25px;margin:0}
+ .resume-project-preview svg{height:158px}
+ .resume-role{display:grid;grid-template-columns:260px minmax(0,1fr);column-gap:30px;align-items:start;border-top:1px solid #cbd2c1;padding-top:18px}
+ .resume-role>.overline{grid-column:1/-1}.resume-role h3{grid-column:1;grid-row:2/4;margin-top:7px;font-size:24px}
+ .resume-role>p:not(.overline){grid-column:2;margin:5px 0}
+}
