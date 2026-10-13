@@ -93,9 +93,14 @@
 .resume-mark-face b{display:block;font:600 47px/.9 var(--sans);letter-spacing:-.07em;color:#485d3c;margin:10px 0 7px}
 .resume-mark-face b span{font:12px var(--mono);letter-spacing:0;margin-left:7px;font-weight:400;color:#7b8e69}
 .resume-mark-face i{font:7px "Noto Sans SC",sans-serif;font-style:normal;color:#81966d}
-.resume-mark-orbit{position:absolute;inset:0;border:1px solid #aab99855;border-radius:50%;transform:rotate(-25deg) scaleX(1.2) scaleY(.45);pointer-events:none}
-.resume-mark-orbit:after{content:'';position:absolute;top:15%;left:10%;width:5px;height:5px;border-radius:50%;background:#9cab80;box-shadow:0 0 0 4px #b8c6a829}
-.resume-mark-orbit.orbit-two{transform:rotate(51deg) scaleX(1.08) scaleY(.7);opacity:.4}
+.resume-mark-orbit{--orbit-angle:-28deg;--orbit-x:1.16;--orbit-y:.48;--orbit-duration:13s;--orbit-delay:-2s;--orbit-direction:normal;position:absolute;inset:7%;border:1px solid #91a57970;border-radius:50%;transform:rotate(var(--orbit-angle)) scaleX(var(--orbit-x)) scaleY(var(--orbit-y));opacity:.8;pointer-events:none}
+.resume-mark-orbit:after{content:'';position:absolute;top:15%;left:10%;width:3px;height:3px;border-radius:50%;background:#8fa16f;box-shadow:0 0 0 2px #b8c6a829}
+.resume-mark-orbit.orbit-two{--orbit-angle:36deg;--orbit-x:1.08;--orbit-y:.6;--orbit-duration:19s;--orbit-delay:-5s;--orbit-direction:reverse;opacity:.65}
+.resume-mark-orbit.orbit-three{--orbit-angle:84deg;--orbit-x:1.02;--orbit-y:.4;--orbit-duration:23s;--orbit-delay:-3s;opacity:.6}
+.resume-mark-orbit.orbit-four{--orbit-angle:135deg;--orbit-x:.94;--orbit-y:.56;--orbit-duration:17s;--orbit-delay:-8s;--orbit-direction:reverse;opacity:.85}
+.resume-mark-orbit.orbit-five{--orbit-angle:192deg;--orbit-x:1.12;--orbit-y:.34;--orbit-duration:29s;--orbit-delay:-7s;opacity:.5}
+.resume-mark-orbit.orbit-six{--orbit-angle:250deg;--orbit-x:.9;--orbit-y:.64;--orbit-duration:21s;--orbit-delay:-4s;--orbit-direction:reverse;opacity:.7}
+.resume-mark-orbit.orbit-three:after,.resume-mark-orbit.orbit-five:after,.resume-mark-orbit.orbit-six:after{display:none}
 .resume-craft{gap:16px;border:0;perspective:1000px;padding:10px 0}
 .resume-craft details{position:relative;border:1px solid #c6ceba;background:linear-gradient(130deg,#f7f9f0,#e9eede);padding:18px 20px;box-shadow:6px 7px 0 #c3cbb434,0 12px 28px #7a8a6410;transform:perspective(650px) rotateX(var(--craft-tilt-x,0deg)) rotateY(var(--craft-tilt-y,0deg)) translateY(var(--craft-lift,0px));transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s;transform-style:preserve-3d}
 .resume-craft details:before,.resume-craft details:after{content:'';position:absolute;pointer-events:none;width:10px;height:10px;border-color:#91a477;border-style:solid;opacity:.65}
@@ -118,8 +123,7 @@
 .craft-check{stroke:#749356;stroke-width:2;stroke-dasharray:70;stroke-dashoffset:0}
 .craft-indicator{fill:#9dae7e}
 .craft-running .resume-mark-face{animation:resume-mark-float 5s ease-in-out infinite}
-.craft-running .resume-mark-orbit{animation:resume-mark-orbit 13s linear infinite}
-.craft-running .orbit-two{animation-direction:reverse;animation-duration:19s}
+.craft-running .resume-mark-orbit{animation:resume-mark-orbit var(--orbit-duration) linear var(--orbit-delay) infinite;animation-direction:var(--orbit-direction)}
 .craft-running .craft-piece{animation:resume-piece-rise 3.4s ease-in-out infinite}
 .craft-running .piece-b{animation-delay:-.6s}.craft-running .piece-c{animation-delay:-1.2s}
 .craft-running .craft-track{animation:resume-path-flow 5s linear infinite}
@@ -135,7 +139,7 @@
 .craft-running .craft-indicator{animation:resume-indicator 3s ease-in-out infinite}
 .resume-motion-ready .resume-craft details:not(.craft-revealed){opacity:0;transform:translateY(32px) rotateX(10deg)}
 @keyframes resume-mark-float{0%,100%{transform:translateY(0) rotateY(-20deg) rotateX(9deg) rotateZ(-6deg)}50%{transform:translateY(-8px) rotateY(-8deg) rotateX(3deg) rotateZ(-3deg)}}
-@keyframes resume-mark-orbit{from{transform:rotate(-25deg) scaleX(1.2) scaleY(.45)}to{transform:rotate(335deg) scaleX(1.2) scaleY(.45)}}
+@keyframes resume-mark-orbit{from{transform:rotate(var(--orbit-angle)) scaleX(var(--orbit-x)) scaleY(var(--orbit-y))}to{transform:rotate(calc(var(--orbit-angle) + 360deg)) scaleX(var(--orbit-x)) scaleY(var(--orbit-y))}}
 @keyframes resume-piece-rise{0%,100%{transform:translateY(2px)}50%{transform:translateY(-5px)}}
 @keyframes resume-path-flow{to{stroke-dashoffset:-60}}
 @keyframes resume-frame-fan{0%,100%{transform:translateY(1px) rotate(-2deg)}50%{transform:translateY(-6px) rotate(3deg)}}
