@@ -27,6 +27,15 @@
   controls.className = 'plugin-scene-controls';
   controls.innerHTML = '<span>悬停探索 · 点击读取</span><div><button type="button" data-program-prev aria-label="上一个程序">←</button><output aria-live="polite">01 / 04</output><button type="button" data-program-next aria-label="下一个程序">→</button></div>';
   viewport.append(controls);
+  const demoToggle = document.createElement('button');
+  demoToggle.className='plugin-demo-toggle';demoToggle.type='button';
+  demoToggle.textContent='暂停演示';demoToggle.setAttribute('aria-pressed','false');demoToggle.hidden=true;
+  archive.querySelector('.plugin-vault-top').append(demoToggle);
+  let demoPaused=false;
+  demoToggle.addEventListener('click',() => {
+    demoPaused=!demoPaused;demoToggle.setAttribute('aria-pressed',String(demoPaused));
+    demoToggle.textContent=demoPaused ? '播放演示' : '暂停演示';depth?.setDemoPaused(demoPaused);
+  });
   let current = 0, focusTimer, depth;
 
   function useStaticArchive() {
@@ -34,6 +43,14 @@
     archive.querySelector('.plugin-depth-stage')?.remove();
     archive.classList.remove('is-enhanced','has-depth','program-opening');
     cards.forEach(card => {card.hidden = false;});
+    demoToggle.hidden=true;
+    cards.forEach((card,index) => {
+      if(card.querySelector('.program-demo-preview') || !window.createProgramDemo)return;
+      const demo=window.createProgramDemo(index),figure=document.createElement('figure'),caption=document.createElement('figcaption');
+      figure.className='program-demo-preview';caption.textContent=`功能演示 · ${demo.caption}`;
+      demo.canvas.setAttribute('aria-hidden','true');figure.append(demo.canvas,caption);
+      card.querySelector('.program-art').replaceWith(figure);
+    });
   }
 
   function select(index) {
@@ -61,6 +78,7 @@
     overviewCopy.hidden = archive.dataset.view === 'records';
     controls.querySelector('output').textContent = `0${current+1} / 04`;
     controls.querySelector('span').textContent = archive.dataset.view === 'records' ? '弧形档案 · 左右切换' : '悬停探索 · 点击读取';
+    demoToggle.hidden=archive.dataset.view!=='records' || !depth || motion.matches;
     depth?.setState(current,archive.dataset.view);
   }
 
@@ -93,12 +111,14 @@
   controls.querySelector('[data-program-prev]').addEventListener('click',() => select(current-1));
   controls.querySelector('[data-program-next]').addEventListener('click',() => select(current+1));
   let swipe;
+  let swiped=false;
   viewport.addEventListener('pointerdown',event => {if(event.pointerType !== 'mouse')swipe={x:event.clientX,y:event.clientY};});
   viewport.addEventListener('pointerup',event => {
     if(!swipe)return;
     const dx=event.clientX-swipe.x,dy=event.clientY-swipe.y;swipe=null;
-    if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.4)select(current+(dx<0 ? 1 : -1));
+    if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.4){swiped=true;select(current+(dx<0 ? 1 : -1));}
   });
+  viewport.addEventListener('click',event => {if(swiped){swiped=false;event.preventDefault();event.stopPropagation();}},{capture:true});
   viewport.addEventListener('pointercancel',() => {swipe=null;});
   function showOverview() {
     clearTimeout(focusTimer);
@@ -120,6 +140,7 @@
     }
   });
   archive.classList.add('is-enhanced');
+  motion.addEventListener('change',() => select(current));
   try {
     depth = window.createProgramDepth?.(archive,{onSelect:select,onOpen:open,onUnavailable:useStaticArchive});
     if (!depth) useStaticArchive();

@@ -85,6 +85,27 @@
       const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
       texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return texture;
     }
+    function demoTexture(index) {
+      const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=1000;
+      const ctx=canvas.getContext('2d'),demo=window.createProgramDemo(index);
+      ctx.fillStyle='#f1f5e9';ctx.fillRect(0,0,1200,1000);
+      ctx.strokeStyle='#b4c4a8';ctx.lineWidth=2;ctx.strokeRect(21,21,1158,958);
+      ctx.strokeStyle='#d1dcc6';ctx.strokeRect(34,34,1132,932);
+      ctx.fillStyle='#697e60';ctx.font='24px monospace';ctx.fillText(`K-00${index+1} / KELEN`,58,86);
+      ctx.font='21px monospace';ctx.fillText('PERSONAL TOOL / FUNCTION DEMO',630,85);
+      ctx.fillStyle='#354b3c';ctx.font='132px Georgia,serif';ctx.fillText(codes[index],58,251);
+      ctx.font='55px sans-serif';ctx.fillText(names[index],402,186);
+      ctx.fillStyle='#879b78';ctx.font='22px monospace';ctx.fillText(['MATTER / INTERACTION','FRAME / CAPTURE','VOICE / RECORD','TASKS / FOCUS'][index],405,236);
+      ctx.beginPath();ctx.moveTo(58,296);ctx.lineTo(1142,296);ctx.strokeStyle='#aabf9b';ctx.stroke();
+      ctx.fillStyle='#6a855a';ctx.font='24px sans-serif';ctx.fillText('功能演示',58,344);
+      ctx.font='19px monospace';ctx.fillText('FUNCTION / PREVIEW',920,341);
+      ctx.fillStyle='#68835e';ctx.font='26px sans-serif';ctx.fillText(demo.caption,58,909);
+      ctx.fillStyle='#8e9e83';ctx.font='20px monospace';ctx.fillText(`0${index+1} / 04`,58,952);ctx.fillText('IDEAS IN USE / KELEN',902,952);
+      const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
+      texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+      const paint=time=>{demo.paint(time);ctx.drawImage(demo.canvas,58,380,1084,466);texture.needsUpdate=true;};
+      paint(2.4);return {texture,paint};
+    }
     const codes=['PHY','CAP','REC','AI'];
     const names=[...archive.querySelectorAll('.program-card h3')].map(node=>node.textContent);
     const positions=[[-1.65,-1.65],[1.65,-1.65],[-1.65,1.65],[1.65,1.65]];
@@ -147,31 +168,32 @@
     }
 
     const panels=[],ribs=[];
-    const radius=5.1,step=.46;
+    const radius=6.2,step=.76,panelWidth=4.35,panelHeight=3.57;
     for(let i=0;i<4;i++) {
       const angle=(i-1.5)*step;
       const group=new T.Group();group.position.set(Math.sin(angle)*radius,1.92,-Math.cos(angle)*radius);group.rotation.y=-angle;
       group.userData.program=i;gallery.add(group);
       const material=new T.MeshPhysicalMaterial({color:0xf4f1df,roughness:.13,metalness:.04,transparent:true,opacity:.36,transmission:.23,thickness:.12,depthWrite:false,side:T.DoubleSide});
-      const panel=box(group,1.97,3.57,.028,material);
+      const panel=box(group,panelWidth,panelHeight,.055,material);
       panel.castShadow=false;panel.receiveShadow=false;
       const borderMaterial=new T.LineBasicMaterial({color:0xb6b6a1,transparent:true,opacity:.65});
       const border=new T.LineSegments(new T.EdgesGeometry(panel.geometry),borderMaterial);panel.add(border);
-      const ink=new T.MeshBasicMaterial({map:textTexture(codes[i],names[i],i,true),transparent:true,opacity:.9,depthWrite:false,side:T.DoubleSide});
-      const print=new T.Mesh(new T.PlaneGeometry(1.9,3.48),ink);print.position.z=.018;group.add(print);
-      hits.push(group);panels.push({group,material,borderMaterial,ink,index:i});
+      const demo=demoTexture(i);
+      const ink=new T.MeshBasicMaterial({map:demo.texture,transparent:true,opacity:.98,depthWrite:false,side:T.DoubleSide,toneMapped:false});
+      const print=new T.Mesh(new T.PlaneGeometry(panelWidth-.08,panelHeight-.08),ink);print.position.z=.031;group.add(print);
+      hits.push(group);panels.push({group,material,borderMaterial,ink,demo,index:i});
       for(let j=-2;j<=2;j++) {
         if(j===0)continue;
         const a=angle+j*.027;
-        const rib=new T.Mesh(new T.PlaneGeometry(1.98,3.66),new T.MeshBasicMaterial({color:0xf9f9ef,transparent:true,opacity:.075,side:T.DoubleSide,depthWrite:false}));
-        rib.position.set(Math.sin(a)*5.38,1.92,-Math.cos(a)*5.38);rib.rotation.y=-a;gallery.add(rib);ribs.push(rib);
+        const rib=new T.Mesh(new T.PlaneGeometry(panelWidth+.04,3.66),new T.MeshBasicMaterial({color:0xeaf3de,transparent:true,opacity:.075,side:T.DoubleSide,depthWrite:false}));
+        rib.position.set(Math.sin(a)*(radius+.28),1.92,-Math.cos(a)*(radius+.28));rib.rotation.y=-a;gallery.add(rib);ribs.push(rib);
       }
     }
     // Open curved rails keep the separate files visible; no opaque cylinder shell.
     for(const y of [.04,3.86]) {
       const points=Array.from({length:65},(_,i)=>{
-        const angle=-1.15+i/64*2.3;
-        return new T.Vector3(Math.sin(angle)*5.5,y,-Math.cos(angle)*5.5);
+        const angle=-1.62+i/64*3.24;
+        return new T.Vector3(Math.sin(angle)*(radius+.4),y,-Math.cos(angle)*(radius+.4));
       });
       const rail=mesh(gallery,new T.TubeGeometry(new T.CatmullRomCurve3(points),96,.027,8,false),metal);
       rail.castShadow=false;
@@ -180,9 +202,10 @@
     const raycaster=new T.Raycaster(),pointer=new T.Vector2();
     let current=0,view='overview',mix=0,selectedAngle=-1.5*step;
     let visible=false,raf,lastFrame,introStart,introDone=motion.matches,disposed=false;
-    const eye=new T.Vector3(),target=new T.Vector3();
+    let demoTime=2.4,demoLastPaint=-Infinity,demoPaused=false;
+    const eye=new T.Vector3(),target=new T.Vector3(),zoom=new T.Vector3(),panelScale=new T.Vector3();
     const overviewEye=new T.Vector3(5.4,6.5,7.7),overviewTarget=new T.Vector3(0,.45,0);
-    const galleryEye=new T.Vector3(0,2.2,3.6),galleryTarget=new T.Vector3(0,1.92,-5.1);
+    const galleryEye=new T.Vector3(0,2.08,.25),galleryTarget=new T.Vector3(0,1.92,-radius);
     const drift=new T.Vector2(),driftTarget=new T.Vector2();
     const smooth=p=>{const t=Math.max(0,Math.min(1,p));return t*t*(3-2*t);};
     const ready=()=>!root.classList.contains('intro-pending')&&!root.classList.contains('vortex-open');
@@ -193,13 +216,14 @@
       if(introStart===undefined)introStart=now;
       const dt=Math.min(.05,(now-(lastFrame ?? now))/1000);lastFrame=now;
       const follow=motion.matches ? 1 : 1-Math.exp(-dt/ .19);
+      if(!motion.matches && !demoPaused && view==='records')demoTime+=dt;
       mix += ((view==='records' ? 1 : 0)-mix)*follow;
       if(Math.abs(mix-(view==='records' ? 1 : 0))<.0001)mix=view==='records' ? 1 : 0;
       const intro=introDone ? 1 : smooth((now-introStart)/1400);
       if(intro>=1)finishIntro();
       overview.visible=mix<.86;gallery.visible=mix>.03;
       overview.scale.setScalar(1-mix*.48);overview.rotation.y=-mix*.36;overview.position.y=-mix*.75;
-      const zoom = new T.Vector3(3.7,3.7,5.4).lerp(overviewEye,intro);
+      zoom.set(3.7,3.7,5.4).lerp(overviewEye,intro);
       eye.copy(zoom).lerp(galleryEye,mix);
       drift.lerp(driftTarget,motion.matches ? 1 : follow*.6);
       if(!motion.matches){eye.x+=drift.x*.28;eye.y+=drift.y*.15;}
@@ -223,15 +247,18 @@
       gallery.rotation.y=selectedAngle;
       panels.forEach(({group,material,ink,borderMaterial,index})=>{
         const active=index===current;
-        group.scale.lerp(new T.Vector3(active ? 1.04 : .93,active ? 1.04 : .93,1),follow);
+        group.scale.lerp(panelScale.set(active ? 1.04 : .93,active ? 1.04 : .93,1),follow);
         const angle=(index-1.5)*step;
-        const reach=radius-(active ? .38 : 0);
+        const reach=radius-(active ? .22 : 0);
         group.position.x+=(Math.sin(angle)*reach-group.position.x)*follow;
         group.position.z+=(-Math.cos(angle)*reach-group.position.z)*follow;
-        material.opacity += ((active ? .43 : .19)*mix-material.opacity)*follow;
-        ink.opacity += ((active ? .95 : .37)*mix-ink.opacity)*follow;
+        material.opacity += ((active ? .58 : .2)*mix-material.opacity)*follow;
+        ink.opacity += ((active ? .99 : .46)*mix-ink.opacity)*follow;
         borderMaterial.opacity= (active ? .7 : .3)*mix;
       });
+      if(view==='records' && !demoPaused && !motion.matches && now-demoLastPaint>55) {
+        panels[current].demo.paint(demoTime);demoLastPaint=now;
+      }
       renderer.render(scene,camera);
       if(!motion.matches)start();
     }
@@ -298,9 +325,10 @@
     archive.querySelector('.plugin-cylinder').hidden=true;
     resize();
     return {setState(index,nextView) {
+      if(current!==index){demoTime=2.4;demoLastPaint=-Infinity;}
       current=index;view=nextView;
       if(view==='records')finishIntro();
       start();if(motion.matches && visible)draw(performance.now());
-    }};
+    },setDemoPaused(value){demoPaused=value;start();}};
   };
 })();
