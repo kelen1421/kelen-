@@ -37,6 +37,12 @@
     demoToggle.textContent=demoPaused ? '播放演示' : '暂停演示';depth?.setDemoPaused(demoPaused);
   });
   let current = 0, focusTimer, depth;
+  archive.dataset.preview='idle';
+  function syncPreview(index) {
+    archive.dataset.preview=index>=0 ? 'active' : 'idle';
+    controls.querySelector('span').textContent=archive.dataset.view==='records' ? '弧形档案 · 左右切换' : index>=0 ? '点击展示牌 · 打开档案' : '悬停展台 · 标牌升起';
+    demoToggle.hidden=(archive.dataset.view!=='records' && index<0) || motion.matches;
+  }
 
   function useStaticArchive() {
     depth = null;
@@ -77,8 +83,8 @@
     read.setAttribute('aria-label',`读取${names[current]}档案`);
     overviewCopy.hidden = archive.dataset.view === 'records';
     controls.querySelector('output').textContent = `0${current+1} / 04`;
-    controls.querySelector('span').textContent = archive.dataset.view === 'records' ? '弧形档案 · 左右切换' : '悬停探索 · 点击读取';
-    demoToggle.hidden=archive.dataset.view!=='records' || !depth || motion.matches;
+    controls.querySelector('span').textContent = archive.dataset.view === 'records' ? '弧形档案 · 左右切换' : archive.dataset.preview==='active' ? '点击展示牌 · 打开档案' : '悬停展台 · 标牌升起';
+    demoToggle.hidden=(archive.dataset.view!=='records' && archive.dataset.preview!=='active') || !depth || motion.matches;
     depth?.setState(current,archive.dataset.view);
   }
 
@@ -102,8 +108,8 @@
     button.addEventListener('click',() => open(i));
   });
   directory.forEach((button,i) => {
-    button.addEventListener('pointerenter',() => {if (archive.dataset.view === 'overview') select(i);});
-    button.addEventListener('focus',() => {if (archive.dataset.view === 'overview') select(i);});
+    button.addEventListener('pointerenter',() => {if (archive.dataset.view === 'overview'){select(i);depth?.setPreview(i);}});
+    button.addEventListener('focus',() => {if (archive.dataset.view === 'overview'){select(i);if(button.matches(':focus-visible'))depth?.setPreview(i);}});
     button.addEventListener('click',() => open(i));
   });
   leaves.forEach((button,i) => button.addEventListener('click',() => select(i)));
@@ -134,6 +140,8 @@
     if (event.target.closest('details,a')) return;
     if (event.key === 'Escape' && archive.dataset.view === 'records') {
       event.preventDefault();showOverview();
+    } else if(event.key==='Escape' && archive.dataset.preview==='active') {
+      event.preventDefault();depth?.setPreview(-1);
     } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       event.preventDefault();select(current + (event.key === 'ArrowRight' ? 1 : -1));
       (depth ? directory : archive.dataset.view === 'records' ? leaves : stations)[current].focus({preventScroll:true});
@@ -142,7 +150,7 @@
   archive.classList.add('is-enhanced');
   motion.addEventListener('change',() => select(current));
   try {
-    depth = window.createProgramDepth?.(archive,{onSelect:select,onOpen:open,onUnavailable:useStaticArchive});
+    depth = window.createProgramDepth?.(archive,{onSelect:select,onPreview:syncPreview,onOpen:open,onUnavailable:useStaticArchive});
     if (!depth) useStaticArchive();
   } catch (error) {
     useStaticArchive();

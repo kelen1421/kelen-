@@ -207,3 +207,15 @@
  .resume-role>.overline{grid-column:1/-1}.resume-role h3{grid-column:1;grid-row:2/4;margin-top:7px;font-size:24px}
  .resume-role>p:not(.overline){grid-column:2;margin:5px 0}
 }
+
+/* The project mark is the bare San symbol, surrounded by its existing orbits. */
+.resume-project-mark .resume-mark-face{inset:0!important;padding:0!important;display:grid;place-items:center;border:0;background:none;box-shadow:none}
+.resume-san-logo{display:block;width:57%;height:65%;color:#4a613d;overflow:visible}
+.resume-project{align-items:center}
+.resume-project-mark{align-self:center}
+.resume-project-preview{align-self:center}
+.resume-project>span,.resume-project h3,.resume-project>p,.resume-topics{justify-self:start;text-align:left}
+.resume-topics{margin-top:10px;align-self:start}
+.resume-project-mark,.resume-project-preview{grid-row:1/5}
+@container resume-column (min-width:701px){.resume-project h3{margin:6px 0}.resume-project>p{margin:0 0 4px}.resume-topics{margin-top:9px}.resume-role h3,.resume-role>p:not(.overline){margin-top:5px}}
+@container resume-column (max-width:540px){.resume-project-preview{grid-row:5}}

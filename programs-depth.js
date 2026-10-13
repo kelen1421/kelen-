@@ -145,10 +145,11 @@
         }
         box(model,.3,.23,.28,warm,0,.91,0);
       }
-      const labelMaterial=new T.MeshBasicMaterial({map:textTexture(codes[index],names[index],index)});
-      const label=mesh(group,new T.BoxGeometry(1.42,.035,.85),[metal,metal,labelMaterial,metal,metal,metal],0,1.72,0);
+      const restTexture=textTexture(codes[index],names[index],index),demo=demoTexture(index);
+      const labelMaterial=new T.MeshBasicMaterial({map:restTexture,toneMapped:false});
+      const label=mesh(group,new T.BoxGeometry(1.42,.035,.85),[metal,metal,labelMaterial,metal,metal,metal],0,.175,.6);
       label.rotation.y=-.1;
-      hits.push(group);stations.push({group,model,label,index});
+      hits.push(group);stations.push({group,model,label,labelMaterial,restTexture,demo,flight:0,index});
     });
     const core=new T.Group();overview.add(core);
     box(core,.67,.85,.67,glass,0,.52,0);
@@ -178,7 +179,7 @@
       panel.castShadow=false;panel.receiveShadow=false;
       const borderMaterial=new T.LineBasicMaterial({color:0xb6b6a1,transparent:true,opacity:.65});
       const border=new T.LineSegments(new T.EdgesGeometry(panel.geometry),borderMaterial);panel.add(border);
-      const demo=demoTexture(i);
+      const demo=stations[i].demo;
       const ink=new T.MeshBasicMaterial({map:demo.texture,transparent:true,opacity:.98,depthWrite:false,side:T.DoubleSide,toneMapped:false});
       const print=new T.Mesh(new T.PlaneGeometry(panelWidth-.08,panelHeight-.08),ink);print.position.z=.031;group.add(print);
       hits.push(group);panels.push({group,material,borderMaterial,ink,demo,index:i});
@@ -203,7 +204,12 @@
     let current=0,view='overview',mix=0,selectedAngle=-1.5*step;
     let visible=false,raf,lastFrame,introStart,introDone=motion.matches,disposed=false;
     let demoTime=2.4,demoLastPaint=-Infinity,demoPaused=false;
+    let previewIndex=-1;
     const eye=new T.Vector3(),target=new T.Vector3(),zoom=new T.Vector3(),panelScale=new T.Vector3();
+    const flightWorld=new T.Vector3(),flightLocal=new T.Vector3(),flightDirection=new T.Vector3(),normal=new T.Vector3();
+    const restPosition=new T.Vector3(0,.175,.6),restRotation=new T.Quaternion().setFromEuler(new T.Euler(0,-.1,0));
+    const flightRotation=new T.Quaternion(),parentRotation=new T.Quaternion(),localRotation=new T.Quaternion();
+    const flightEuler=new T.Euler(0,0,0,'YXZ');
     const overviewEye=new T.Vector3(5.4,6.5,7.7),overviewTarget=new T.Vector3(0,.45,0);
     const galleryEye=new T.Vector3(0,2.08,.25),galleryTarget=new T.Vector3(0,1.92,-radius);
     const drift=new T.Vector2(),driftTarget=new T.Vector2();
@@ -211,12 +217,19 @@
     const ready=()=>!root.classList.contains('intro-pending')&&!root.classList.contains('vortex-open');
     const start=()=>{if(!raf&&!disposed&&visible&&!document.hidden&&ready())raf=requestAnimationFrame(draw);};
     function finishIntro() {introDone=true;archive.classList.remove('program-opening');}
+    function setPreview(index) {
+      if(index===previewIndex)return;
+      previewIndex=index;
+      if(index>=0){demoTime=2.4;demoLastPaint=-Infinity;}
+      callbacks.onPreview?.(index);start();
+      if(motion.matches && visible)draw(performance.now());
+    }
     function draw(now) {
       raf=undefined;if(disposed||!ready())return;
       if(introStart===undefined)introStart=now;
       const dt=Math.min(.05,(now-(lastFrame ?? now))/1000);lastFrame=now;
       const follow=motion.matches ? 1 : 1-Math.exp(-dt/ .19);
-      if(!motion.matches && !demoPaused && view==='records')demoTime+=dt;
+      if(!motion.matches && !demoPaused && (view==='records' || previewIndex>=0))demoTime+=dt;
       mix += ((view==='records' ? 1 : 0)-mix)*follow;
       if(Math.abs(mix-(view==='records' ? 1 : 0))<.0001)mix=view==='records' ? 1 : 0;
       const intro=introDone ? 1 : smooth((now-introStart)/1400);
@@ -229,18 +242,37 @@
       if(!motion.matches){eye.x+=drift.x*.28;eye.y+=drift.y*.15;}
       target.set(overviewTarget.x*intro,overviewTarget.y,0).lerp(galleryTarget,mix);
       camera.position.copy(eye);camera.lookAt(target);
+      flightDirection.copy(target).sub(eye).normalize();
+      flightWorld.copy(eye).addScaledVector(flightDirection,6.2);
+      normal.copy(eye).sub(flightWorld).normalize();
+      flightEuler.set(Math.atan2(Math.hypot(normal.x,normal.z),normal.y),Math.atan2(normal.x,normal.z),0,'YXZ');
+      flightRotation.setFromEuler(flightEuler);
       core.rotation.y=-Math.PI/5+(1-intro)*Math.PI*.7;
       core.scale.setScalar(1+.55*(1-intro));
       wires.forEach(line=>line.geometry.setDrawRange(0,Math.round(24*smooth((intro-.15)/.48))));
-      stations.forEach(({group,label,index})=>{
+      stations.forEach(station=>{
+        const {group,label,labelMaterial,restTexture,demo,index}=station;
         const born=introDone ? 1 : smooth(((now-introStart)-280-index*90)/750);
         group.visible=born>.001;
         group.scale.setScalar(.62+.38*born);
-        const hover=index===current ? .3 : 0;
+        const hover=index===previewIndex && view==='overview' ? .06 : 0;
         const desired=-(1-born)*.65+hover;
         group.position.y += (desired-group.position.y)* (introDone ? follow : 1);
-        const labelY=1.72+(index===current ? .22 : 0);
-        label.position.y += (labelY-label.position.y)*follow;
+        const goal=index===previewIndex && view==='overview' ? 1 : 0;
+        station.flight += (goal-station.flight)*(motion.matches ? 1 : 1-Math.exp(-dt/.18));
+        if(Math.abs(station.flight-goal)<.001)station.flight=goal;
+        const p=smooth(station.flight),turn=smooth((p-.08)/.8),grow=smooth((p-.15)/.85);
+        group.updateWorldMatrix(true,false);
+        group.worldToLocal(flightLocal.copy(flightWorld));
+        label.position.lerpVectors(restPosition,flightLocal,p);
+        label.position.y+=Math.sin(p*Math.PI)*.32;
+        group.getWorldQuaternion(parentRotation);
+        localRotation.copy(parentRotation).invert().multiply(flightRotation);
+        label.quaternion.slerpQuaternions(restRotation,localRotation,turn);
+        label.scale.set(1+(3.45/1.42-1)*grow,1,1+(2.875/.85-1)*grow);
+        label.castShadow=p<.28;
+        const wantedTexture=p>.12 ? demo.texture : restTexture;
+        if(labelMaterial.map!==wantedTexture){labelMaterial.map=wantedTexture;labelMaterial.needsUpdate=true;}
       });
       const goal=(current-1.5)*step;
       selectedAngle += (goal-selectedAngle)*follow;
@@ -256,8 +288,9 @@
         ink.opacity += ((active ? .99 : .46)*mix-ink.opacity)*follow;
         borderMaterial.opacity= (active ? .7 : .3)*mix;
       });
-      if(view==='records' && !demoPaused && !motion.matches && now-demoLastPaint>55) {
-        panels[current].demo.paint(demoTime);demoLastPaint=now;
+      const demoIndex=view==='records' ? current : previewIndex;
+      if(demoIndex>=0 && !demoPaused && !motion.matches && now-demoLastPaint>55) {
+        stations[demoIndex].demo.paint(demoTime);demoLastPaint=now;
       }
       renderer.render(scene,camera);
       if(!motion.matches)start();
@@ -290,9 +323,16 @@
       const bounds=host.getBoundingClientRect();
       driftTarget.set((event.clientX-bounds.left)/bounds.width-.5,-((event.clientY-bounds.top)/bounds.height-.5));
       const index=hit(event);renderer.domElement.style.cursor=index===undefined ? 'default' : 'pointer';
-      if(index!==undefined && view==='overview')callbacks.onSelect(index);
+      if(view==='overview') {
+        setPreview(index ?? -1);
+        if(index!==undefined && index!==current)callbacks.onSelect(index);
+      }
     },{passive:true});
-    host.addEventListener('pointerleave',()=>{driftTarget.set(0,0);renderer.domElement.style.cursor='default';});
+    host.addEventListener('pointerleave',event=>{
+      driftTarget.set(0,0);renderer.domElement.style.cursor='default';
+      if(!event.relatedTarget?.closest?.('.plugin-vault-top,.plugin-scene-controls,.plugin-inspector'))setPreview(-1);
+    });
+    archive.addEventListener('pointerleave',()=>setPreview(-1));
     host.addEventListener('click',event=>{
       const index=hit(event);if(index!==undefined){if(view==='overview')callbacks.onOpen(index);else callbacks.onSelect(index);}
     });
@@ -327,8 +367,9 @@
     return {setState(index,nextView) {
       if(current!==index){demoTime=2.4;demoLastPaint=-Infinity;}
       current=index;view=nextView;
+      if(view==='records')setPreview(-1);
       if(view==='records')finishIntro();
       start();if(motion.matches && visible)draw(performance.now());
-    },setDemoPaused(value){demoPaused=value;start();}};
+    },setDemoPaused(value){demoPaused=value;start();},setPreview};
   };
 })();
