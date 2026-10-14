@@ -223,3 +223,14 @@
 .resume-project-mark,.resume-project-preview{grid-row:1/5}
 @container resume-column (min-width:701px){.resume-project h3{margin:6px 0}.resume-project>p{margin:0 0 4px}.resume-topics{margin-top:9px}.resume-role h3,.resume-role>p:not(.overline){margin-top:5px}}
 @container resume-column (max-width:540px){.resume-project-preview{grid-row:5}}
+
+/* Each explanation travels with its active node inside the workflow map. */
+.resume-column .journey-viewport{height:560px;overflow:hidden}
+.resume-column .journey-panel.journey-callout{position:absolute;z-index:5;display:block;width:min(330px,calc(100% - 28px));padding:15px 18px 16px;border:1px solid #b8c8ab9c;border-left:2px solid #91a87d;background:linear-gradient(125deg,#fafcf5f5,#eff5e8f5);box-shadow:5px 7px 23px #60784a13;backdrop-filter:blur(7px);user-select:text}
+.resume-column .journey-callout .journey-panel-head{gap:10px;font-size:7px}
+.resume-column .journey-callout h3{margin:9px 0 8px;font-size:17px;line-height:1.5}
+.resume-column .journey-callout>p{font-size:11px;line-height:1.85}
+.resume-column .journey-callout .journey-check{margin-top:13px;padding:9px 0 0;border-left:0;border-top:1px solid #cbd7c1}
+.resume-column .journey-callout .journey-check span{font-size:7px}
+.resume-column .journey-callout .journey-check p{font-size:10px;line-height:1.75;margin:5px 0 0}
+@container resume-column (max-width:540px){.resume-column .journey-viewport{height:575px}.resume-column .journey-callout h3{font-size:16px}}

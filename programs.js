@@ -27,6 +27,27 @@
   controls.className = 'plugin-scene-controls';
   controls.innerHTML = '<span>悬停探索 · 点击读取</span><div><button type="button" data-program-prev aria-label="上一个程序">←</button><output aria-live="polite">01 / 04</output><button type="button" data-program-next aria-label="下一个程序">→</button></div>';
   viewport.append(controls);
+  const hallTitle=document.createElement('h3');hallTitle.className='plugin-hall-title';
+  const hallLink=document.createElement('a');hallLink.className='program-primary plugin-hall-primary';hallLink.hidden=true;
+  viewport.append(hallTitle,hallLink);
+  function syncHallAction(index) {
+    const source=cards[index].querySelector('.program-primary');
+    hallLink.href=source.href;hallLink.innerHTML=source.innerHTML;
+    ['download','target','rel'].forEach(attribute=>{
+      if(source.hasAttribute(attribute))hallLink.setAttribute(attribute,source.getAttribute(attribute));
+      else hallLink.removeAttribute(attribute);
+    });
+    hallLink.setAttribute('aria-label',index===0 ? '打开物理模型网页版' : `下载${names[index]} Mac 版`);
+    hallLink.title=`${cards[index].querySelector('.program-platform').textContent} · ${cards[index].querySelector('.program-version').textContent}`;
+    hallTitle.textContent=`${names[index]} · 功能演示`;
+    hallTitle.hidden=archive.dataset.view!=='records';
+    if(archive.dataset.view!=='records')hallLink.hidden=true;
+  }
+  function placeHallAction(rect) {
+    hallLink.hidden=!rect.visible || archive.dataset.view!=='records';
+    if(hallLink.hidden)return;
+    Object.assign(hallLink.style,{left:`${rect.left}px`,top:`${rect.top}px`,width:`${rect.width}px`,height:`${rect.height}px`});
+  }
   const demoToggle = document.createElement('button');
   demoToggle.className='plugin-demo-toggle';demoToggle.type='button';
   demoToggle.textContent='暂停演示';demoToggle.setAttribute('aria-pressed','false');demoToggle.hidden=true;
@@ -50,6 +71,7 @@
     archive.classList.remove('is-enhanced','has-depth','program-opening');
     cards.forEach(card => {card.hidden = false;});
     demoToggle.hidden=true;
+    hallLink.hidden=true;
     cards.forEach((card,index) => {
       if(card.querySelector('.program-demo-preview') || !window.createProgramDemo)return;
       const demo=window.createProgramDemo(index),figure=document.createElement('figure'),caption=document.createElement('figcaption');
@@ -74,13 +96,14 @@
       leaf.setAttribute('aria-pressed',String(i === current));
     });
     cards.forEach((card,i) => {
-      card.hidden = archive.classList.contains('is-enhanced') && (archive.dataset.view !== 'records' || i !== current);
+      card.hidden = archive.classList.contains('is-enhanced');
       if (i !== current) card.querySelector('details').open = false;
     });
     archive.querySelector('.plugin-active-number').textContent = `PROGRAM / 0${current+1} — 04`;
     archive.querySelector('.plugin-active-title').textContent = names[current];
     archive.querySelector('.plugin-active-description').textContent = descriptions[current];
     read.setAttribute('aria-label',`读取${names[current]}档案`);
+    syncHallAction(current);
     overviewCopy.hidden = archive.dataset.view === 'records';
     controls.querySelector('output').textContent = `0${current+1} / 04`;
     controls.querySelector('span').textContent = archive.dataset.view === 'records' ? '弧形档案 · 左右切换' : archive.dataset.preview==='active' ? '点击展示牌 · 打开档案' : '悬停展台 · 标牌升起';
@@ -97,9 +120,10 @@
     back.hidden = false;
     select(index);
     if (entering && archive.getBoundingClientRect().top < 0) archive.scrollIntoView({behavior:motion.matches ? 'instant' : 'smooth',block:'start'});
-    const heading = cards[current].querySelector('h3');
-    heading.tabIndex = -1;
-    focusTimer = setTimeout(() => heading.focus({preventScroll:true}),motion.matches ? 0 : 450);
+    focusTimer = setTimeout(() => {
+      const destination=hallLink.hidden ? back : hallLink;
+      destination.focus({preventScroll:true});
+    },motion.matches ? 0 : 450);
   }
 
   stations.forEach((button,i) => {
@@ -150,7 +174,9 @@
   archive.classList.add('is-enhanced');
   motion.addEventListener('change',() => select(current));
   try {
-    depth = window.createProgramDepth?.(archive,{onSelect:select,onPreview:syncPreview,onOpen:open,onUnavailable:useStaticArchive});
+    depth = window.createProgramDepth?.(archive,{onSelect:select,onPreview:syncPreview,onOpen:open,onUnavailable:useStaticArchive,onActionLayout:placeHallAction,onAction:index=>{
+      select(index);hallLink.click();
+    }});
     if (!depth) useStaticArchive();
   } catch (error) {
     useStaticArchive();

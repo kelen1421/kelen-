@@ -6,6 +6,8 @@
   const steps = [{"title": "读稿与结构梳理", "text": "标出核心问句、概念顺序、转折与回扣。先确认观众需要哪些前置理解，再判断哪些段落可以压缩。", "check": "检查：删掉这段，下一段还能不能理解？", "code": "READ", "x": 270, "y": 254}, {"title": "分镜与素材准备", "text": "让每段旁白对应具体的画面任务。需要展示关系时用图示，需要认识对象时用实物或素材，并整理来源与署名要求。", "check": "检查：画面是在解释内容，还是只提供气氛？", "code": "STORYBOARD", "x": 580, "y": 300}, {"title": "初剪与节奏搭建", "text": "先搭建完整的解释路径，再处理段落衔接和信息密度。复杂推理之后留出消化空间，转场与重点强调服务于内容推进。", "check": "检查：观众是否知道这一段在解决什么问题？", "code": "ROUGH CUT", "x": 910, "y": 232}, {"title": "声音、字幕与精剪", "text": "整理旁白，安排音乐与音效，平衡音量；核对术语、数字及字幕对应关系，让画面与声音形成一致的解释节奏。", "check": "检查：音乐不遮住旁白，字幕不制造新的歧义。", "code": "FINE CUT", "x": 1260, "y": 302}, {"title": "反馈修改与成片交付", "text": "配合创作者处理内容反馈，逐轮检查逻辑、画面和声音。完成最终输出，并整理工程文件与素材，便于后续修改及系列内容复用。", "check": "检查：版本清晰、素材可追溯、成片播放正常。", "code": "DELIVERY", "x": 1610, "y": 260}];
   const viewport = $('#cv-journey-viewport');
   const world = $('#cv-journey-world');
+  const journeyPanel=$('.journey-panel');
+  journeyPanel.classList.add('journey-callout');viewport.append(journeyPanel);
   const previous = $('[data-resume-prev]');
   const next = $('[data-resume-next]');
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -41,7 +43,7 @@
     const low = Math.floor(position), high = Math.min(4,low + 1), mix = position - low;
     const x = steps[low].x + (steps[high].x - steps[low].x) * mix;
     const y = steps[low].y + (steps[high].y - steps[low].y) * mix;
-    const cameraX = viewport.clientWidth * .48 - x * scale;
+    const cameraX = viewport.clientWidth * .29 - x * scale;
     world.style.setProperty('--scene-scale',scale);
     world.style.setProperty('--far-drift',`${-cameraX * .12 / scale}px`);
     world.style.setProperty('--near-drift',`${cameraX * .055 / scale}px`);
@@ -53,6 +55,10 @@
       node.style.top = `${step.y * scale}px`;
     });
     select(Math.round(position));
+    const active=steps[Math.round(position)],panelWidth=journeyPanel.offsetWidth;
+    const nodeX=active.x*scale+cameraX,nodeY=active.y*scale+(270-y)*scale*.22-8;
+    journeyPanel.style.left=`${Math.max(14,Math.min(viewport.clientWidth-panelWidth-14,nodeX+112))}px`;
+    journeyPanel.style.top=`${nodeY+43}px`;
   }
   function tick(time) {
     const dt = lastTime ? Math.min(50,time - lastTime) : 16;

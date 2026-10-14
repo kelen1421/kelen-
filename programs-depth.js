@@ -85,6 +85,7 @@
       const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
       texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return texture;
     }
+    const actionArea={x:835,y:866,width:307,height:66};
     function demoTexture(index) {
       const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=1000;
       const ctx=canvas.getContext('2d'),demo=window.createProgramDemo(index);
@@ -99,8 +100,12 @@
       ctx.beginPath();ctx.moveTo(58,296);ctx.lineTo(1142,296);ctx.strokeStyle='#aabf9b';ctx.stroke();
       ctx.fillStyle='#6a855a';ctx.font='24px sans-serif';ctx.fillText('功能演示',58,344);
       ctx.font='19px monospace';ctx.fillText('FUNCTION / PREVIEW',920,341);
-      ctx.fillStyle='#68835e';ctx.font='26px sans-serif';ctx.fillText(demo.caption,58,909);
-      ctx.fillStyle='#8e9e83';ctx.font='20px monospace';ctx.fillText(`0${index+1} / 04`,58,952);ctx.fillText('IDEAS IN USE / KELEN',902,952);
+      ctx.fillStyle='#68835e';ctx.font='26px sans-serif';ctx.fillText(demo.caption,58,909,745);
+      ctx.fillStyle='#20382a';ctx.fillRect(actionArea.x,actionArea.y,actionArea.width,actionArea.height);
+      ctx.fillStyle='#f4f8ec';ctx.font='28px sans-serif';ctx.fillText(index===0 ? '打开网页版  ↗' : '下载 Mac 版  ↓',actionArea.x+22,actionArea.y+43);
+      const source=archive.querySelectorAll('.program-card')[index];
+      ctx.fillStyle='#8e9e83';ctx.font='20px monospace';ctx.fillText(`0${index+1} / 04`,58,952);
+      ctx.textAlign='right';ctx.font='18px sans-serif';ctx.fillText(`${source.querySelector('.program-platform').textContent} · ${source.querySelector('.program-version').textContent}`,1142,965);ctx.textAlign='left';
       const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;
       texture.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
       const paint=time=>{demo.paint(time);ctx.drawImage(demo.canvas,58,380,1084,466);texture.needsUpdate=true;};
@@ -181,8 +186,8 @@
       const border=new T.LineSegments(new T.EdgesGeometry(panel.geometry),borderMaterial);panel.add(border);
       const demo=stations[i].demo;
       const ink=new T.MeshBasicMaterial({map:demo.texture,transparent:true,opacity:.98,depthWrite:false,side:T.DoubleSide,toneMapped:false});
-      const print=new T.Mesh(new T.PlaneGeometry(panelWidth-.08,panelHeight-.08),ink);print.position.z=.031;group.add(print);
-      hits.push(group);panels.push({group,material,borderMaterial,ink,demo,index:i});
+      const print=new T.Mesh(new T.PlaneGeometry(panelWidth-.08,panelHeight-.08),ink);print.position.z=.031;print.userData.actionSurface=true;group.add(print);
+      hits.push(group);panels.push({group,print,material,borderMaterial,ink,demo,index:i});
       for(let j=-2;j<=2;j++) {
         if(j===0)continue;
         const a=angle+j*.027;
@@ -293,6 +298,16 @@
         stations[demoIndex].demo.paint(demoTime);demoLastPaint=now;
       }
       renderer.render(scene,camera);
+      if(callbacks.onActionLayout) {
+        const print=panels[current].print;
+        const points=[[actionArea.x,actionArea.y],[actionArea.x+actionArea.width,actionArea.y],[actionArea.x+actionArea.width,actionArea.y+actionArea.height],[actionArea.x,actionArea.y+actionArea.height]].map(([x,y])=>{
+          const p=print.localToWorld(new T.Vector3((x/1200-.5)*(panelWidth-.08),(.5-y/1000)*(panelHeight-.08),0)).project(camera);
+          return {x:(p.x+1)*host.clientWidth/2,y:(1-p.y)*host.clientHeight/2};
+        });
+        const left=Math.min(...points.map(p=>p.x)),top=Math.min(...points.map(p=>p.y));
+        const width=Math.max(...points.map(p=>p.x))-left,height=Math.max(...points.map(p=>p.y))-top;
+        callbacks.onActionLayout({left,top,width,height,visible:view==='records'&&mix>.9&&width>20&&height>8&&left<host.clientWidth&&left+width>0&&top<host.clientHeight&&top+height>0});
+      }
       if(!motion.matches)start();
     }
     function resize() {
@@ -306,7 +321,7 @@
       camera.updateProjectionMatrix();
       start();if(motion.matches && visible)draw(performance.now());
     }
-    function hit(event) {
+    function hit(event,withAction=false) {
       const rect=renderer.domElement.getBoundingClientRect();
       pointer.set((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1);
       raycaster.setFromCamera(pointer,camera);
@@ -315,7 +330,11 @@
       for(const hit of hits) {
         let node=hit.object;
         while(node&&node.userData.program===undefined)node=node.parent;
-        if(node)return node.userData.program;
+        if(node) {
+          if(!withAction)return node.userData.program;
+          const uv=hit.uv,x=uv?.x*1200,y=(1-(uv?.y??0))*1000;
+          return {index:node.userData.program,action:hit.object.userData.actionSurface&&x>=actionArea.x&&x<=actionArea.x+actionArea.width&&y>=actionArea.y&&y<=actionArea.y+actionArea.height};
+        }
       }
     }
     host.addEventListener('pointermove',event=>{
@@ -334,7 +353,7 @@
     });
     archive.addEventListener('pointerleave',()=>setPreview(-1));
     host.addEventListener('click',event=>{
-      const index=hit(event);if(index!==undefined){if(view==='overview')callbacks.onOpen(index);else callbacks.onSelect(index);}
+      const target=hit(event,true);if(target){if(view==='overview')callbacks.onOpen(target.index);else if(target.action)callbacks.onAction?.(target.index);else callbacks.onSelect(target.index);}
     });
     const observer=new IntersectionObserver(([entry])=>{
       visible=entry.isIntersecting;

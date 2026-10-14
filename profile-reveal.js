@@ -142,6 +142,7 @@ function onWheel(event) {
 }
 function onScroll() {
   const down=scrollY>lastScroll+2;lastScroll=scrollY;
+  if(location.hash&&!['#home','#about'].includes(location.hash))return;
   if(down&&canOpen())open();
 }
 function onTouchStart(event){touchY=event.touches[0]?.clientY??null;}

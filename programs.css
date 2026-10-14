@@ -162,3 +162,11 @@
  .is-enhanced .plugin-vault-top>span{font-size:6px}
  .plugin-overview-back{font-size:8px;padding:6px 7px}
 }
+
+/* Downloads belong to the selected screen in the room. */
+.is-enhanced[data-view="records"] .plugin-inspector{display:none!important}
+.is-enhanced .program-grid{display:none!important}
+.is-enhanced .plugin-hall-primary{position:absolute;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:0 10px;gap:9px;min-width:0;white-space:nowrap;background:#20382a;color:#f4f8ec;border:1px solid #526d45;font:500 clamp(9px,1.2cqw,13px)/1.2 var(--sans);box-shadow:0 3px 12px #0c1c1624;text-shadow:none}
+.is-enhanced .plugin-hall-primary:hover{background:#3b5b3d;border-color:#82966a}
+.is-enhanced .plugin-hall-primary:focus-visible{outline:2px solid #dbf0b5;outline-offset:3px}
+.plugin-hall-title{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
