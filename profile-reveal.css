@@ -1,47 +1,37 @@
-/* A compact closed mark unfolds into the profile, then can assemble back again. */
-.about.profile-reveal-ready{container:profile-panel / inline-size;--profile-card-size:clamp(140px,22cqw,185px);padding-bottom:34px;overflow-anchor:none}
-html.profile-layout-changing{overflow-anchor:none}
-html.profile-layout-changing body{overflow-anchor:none}
-.about.profile-reveal-ready .profile-layout{position:relative;isolation:isolate;grid-template-columns:minmax(150px,.58fr) minmax(0,1.42fr);grid-template-rows:max-content;align-content:start;gap:6%;padding:32px 3% 14px;align-items:center;min-height:0}
-.about.profile-reveal-ready:not(.profile-revealed) .profile-layout{grid-template-columns:1fr;justify-items:center;gap:0;padding-bottom:74px}
-.about.profile-reveal-ready:not(.profile-revealed) .profile-copy:not(.profile-copy-ghost){display:none}
-.about.profile-reveal-ready .profile-stamp{width:var(--profile-card-size);height:var(--profile-card-size);margin:0;transform:rotate(-5deg);background:transparent;color:inherit;padding:0;cursor:pointer;appearance:none;flex-shrink:0}
-.about.profile-reveal-ready .profile-stamp b{font-size:calc(var(--profile-card-size)*.47)}
-.about.profile-reveal-ready .profile-copy{min-width:0;max-width:590px}
-.about.profile-reveal-ready .profile-copy h2{font-size:clamp(30px,5cqw,43px);line-height:1.4;margin-bottom:18px}
-.profile-stamp:focus-visible{outline:2px solid var(--ink);outline-offset:6px}
-.profile-stamp .profile-trigger-hint{position:absolute;bottom:-25px;left:50%;transform:translateX(-50%);white-space:nowrap;font:7px var(--mono);letter-spacing:.1em;color:#879077}
-.profile-revealed .profile-trigger-hint{color:#8e9486}
-.profile-reveal-running .profile-layout{overflow:clip;will-change:height}
-.profile-reveal-running .profile-copy>*{will-change:transform,opacity,clip-path}
-.profile-fragmenting .profile-stamp:not(.profile-fragment-face){opacity:0;pointer-events:none}
-.profile-heading-fragmenting .profile-layout>.profile-copy:not(.profile-copy-ghost)>h2{opacity:0}
-.profile-fragments{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:visible}
-.profile-fragment{position:absolute;pointer-events:none;transform-origin:center;will-change:transform,opacity}
-.profile-fragment .profile-fragment-face{position:absolute;left:0;top:0;transform:none!important;margin:0!important;cursor:default;pointer-events:none}
-.profile-copy-fragment{position:absolute;pointer-events:none;transform-origin:center;will-change:transform,opacity}
-.profile-copy-fragment .profile-copy{position:absolute;inset:0;display:block!important;max-width:none!important}
-.profile-copy-fragment h2{margin:0!important}
-.profile-copy-ghost{position:absolute;max-width:none!important;pointer-events:none;z-index:2}
-.profile-copy-ghost>*{transform-origin:center}
+/* Reuse the throne actor's three-second pull to reveal the existing biography. */
+.about.profile-unfold-ready{container:profile-panel / inline-size;padding-bottom:32px;overflow-anchor:none}
+html.profile-layout-changing,html.profile-layout-changing body{overflow-anchor:none;scroll-behavior:auto}
+.profile-unfold-stage{position:relative;isolation:isolate;overflow:hidden;margin-top:20px}
+.profile-unfold-intro{position:absolute;inset:0 0 auto}
+.profile-unfold-copy{position:absolute;left:3%;top:50%;transform:translateY(-50%);width:55%}
+.profile-unfold-copy h3{font:600 clamp(28px,4.6cqw,48px)/1.36 var(--sans);letter-spacing:-.05em;margin:17px 0 24px}
+.profile-unfold-copy .overline{font-size:8px}
+.profile-unfold-trigger{font:9px/1.7 var(--mono);letter-spacing:.07em;border:0;border-bottom:1px solid #8c9c8045;background:none;color:#617457;padding:10px 0;cursor:pointer;text-align:left}
+.profile-unfold-trigger span{display:inline-block;margin-left:15px;font-size:16px}
+.profile-unfold-trigger:hover{color:#253922}.profile-unfold-trigger:focus-visible{outline:1px solid #667f55;outline-offset:6px}
+.profile-unfold-trigger:disabled{cursor:default;opacity:.6}
+.profile-unfold-revealed .profile-unfold-trigger{visibility:hidden}
+.profile-unfold-throne{position:absolute;object-fit:contain;pointer-events:none;filter:brightness(.38) saturate(.32);opacity:.8}
+.profile-unfold-mask{position:absolute;left:0;right:0;height:0;overflow:hidden}
+.about.profile-unfold-ready .profile-layout{grid-template-columns:minmax(130px,.58fr) minmax(0,1.42fr);gap:6%;padding:35px 3% 32px;align-items:center}
+.about.profile-unfold-ready .profile-stamp{width:clamp(125px,20cqw,185px);height:clamp(125px,20cqw,185px);margin:0;flex-shrink:0}
+.about.profile-unfold-ready .profile-stamp b{font-size:clamp(58px,9.4cqw,87px)}
+.about.profile-unfold-ready .profile-copy{min-width:0;max-width:690px}
+.about.profile-unfold-ready .profile-copy h2{font-size:clamp(30px,4.4cqw,46px)}
+.profile-unfold-overlay{position:absolute;inset:0 0 auto;width:100%;display:block;overflow:visible;pointer-events:none;z-index:3}
+.profile-unfold-overlay .edge{stroke:#85947a;stroke-width:1.3;fill:none}
+#profile-motion-edge-two{stroke:#617957;stroke-width:2}
+.profile-unfold-overlay .edge-label{font:11px var(--mono);letter-spacing:2px;fill:#7b906c}
+#profile-motion-actor{stroke:#465b49;fill:var(--paper);stroke-width:2.2;stroke-linejoin:miter;stroke-linecap:round}
+#profile-motion-actor-silhouette{stroke:none;fill:var(--paper)}
+#profile-motion-actor-lines{stroke:#465b49;fill:none;stroke-width:1.25}
+#profile-motion-motion-lines{stroke:#8ca57a;stroke-width:1.2;fill:none}
+#profile-motion-landing-ring{stroke:#839c71;stroke-width:1;fill:none}
 @container profile-panel (max-width:540px){
- .about.profile-reveal-ready .profile-layout{grid-template-columns:1fr;gap:28px;padding:27px 3% 10px;justify-items:start}
- .about.profile-reveal-ready:not(.profile-revealed) .profile-layout{justify-items:center;gap:0;padding-bottom:74px}
- .about.profile-reveal-ready .profile-copy h2{font-size:clamp(28px,6cqw,36px)}
- .about.profile-reveal-ready .profile-stamp{margin-left:8px}
- .about.profile-reveal-ready:not(.profile-revealed) .profile-stamp{margin-left:0}
- .profile-revealed .profile-trigger-hint{display:none}
+ .profile-unfold-copy{left:2%;width:51%}.profile-unfold-copy h3{font-size:26px;line-height:1.4;margin:10px 0 16px}
+ .profile-unfold-copy .overline{font-size:6px;letter-spacing:.06em}.profile-unfold-trigger{font-size:7px}.profile-unfold-trigger span{margin-left:4px;font-size:12px}
+ .about.profile-unfold-ready .profile-layout{grid-template-columns:1fr;gap:25px;padding:28px 3% 32px}
+ .about.profile-unfold-ready .profile-copy h2{font-size:32px}
+ .about.profile-unfold-ready .profile-stamp{width:125px;height:125px;margin-left:8px}
 }
-@media(prefers-reduced-motion:reduce){.profile-reveal-running *{animation:none!important;transition:none!important}.profile-stamp{will-change:auto!important}.profile-copy>*{will-change:auto!important}}
-
-/* Every glyph group has its own cropped text surface and ballistic flight. */
-.profile-text-throwing .profile-layout>.profile-copy>*{opacity:0}
-.profile-text-chip{position:absolute;overflow:hidden;pointer-events:none;transform-origin:center;will-change:transform,opacity;backface-visibility:hidden}
-.profile-text-chip .profile-copy{position:absolute;display:block!important;max-width:none!important;min-width:0}
-.profile-text-chip .profile-copy>*{margin:0!important;opacity:1!important;transform:none!important;clip-path:none!important}
-
-.profile-loose-mark .profile-layout>.profile-stamp{opacity:0}
-.profile-idle-fragments .profile-fragment{will-change:auto}
-.profile-idle-hint{position:absolute;transform:translateX(-50%);white-space:nowrap;color:#8b927d;font:7px var(--mono);letter-spacing:.1em}
-.profile-loose-mark .profile-layout>.profile-stamp:before{content:'';position:absolute;inset:-65px;cursor:pointer}
-.profile-loose-mark:has(.profile-layout>.profile-stamp:focus-visible) .profile-idle-fragments{outline:1px dashed #879077;outline-offset:-7px}
+@media(prefers-reduced-motion:reduce){.profile-unfold-trigger{transition:none}}

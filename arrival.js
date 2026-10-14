@@ -1,7 +1,7 @@
 /* A finite, seekable browser opening: binary orbit -> gamma jets -> glass K -> home. */
 (function(global) {
   'use strict';
-  const TAU=Math.PI*2, MERGE=5.4, POINT=5.9, BURST=6.15, K_START=7.7, K_FORM_END=8.85, CONTENT_START=9.45, END=10.9;
+  const TAU=Math.PI*2, MERGE=5.4, POINT=5.9, BURST=6.15, K_START=7.7, K_FORM_END=8.85, CONTENT_START=9.45, END=10.9, PLAYBACK_RATE=END/2.85;
   const clamp=v=>Math.max(0,Math.min(1,v));
   const smooth=(a,b,v)=>{const t=clamp((v-a)/(b-a));return t*t*(3-2*t);};
   function seed(i){let n=Math.imul(i+13,1597334677);n=Math.imul(n^(n>>>15),2246822519);return ((n^(n>>>13))>>>0)/4294967296;}
@@ -98,7 +98,7 @@
       this.canvas.dataset.time=t.toFixed(2);
     }
     play() {
-      cancelAnimationFrame(this.raf);this.elapsed=0;this.last=0;this.mode='opening';this.root.classList.add('intro-running');
+      cancelAnimationFrame(this.raf);this.elapsed=0;this.last=0;this.startedAt=null;this.mode='opening';this.root.classList.add('intro-running');
       this.home.inert=true;this.render(0);this.raf=requestAnimationFrame(this.tick);
     }
     finish(fromSkip=false) {
@@ -109,8 +109,8 @@
     }
     tick(now) {
       if(this.mode!=='opening')return;
-      const dt=this.last?Math.min((now-this.last)/1000,.05):0;this.last=now;
-      if(!document.hidden)this.elapsed+=dt;
+      if(this.startedAt===null)this.startedAt=now;
+      this.elapsed=Math.min(END,(now-this.startedAt)/1000*PLAYBACK_RATE);
       if(this.elapsed>=END){this.finish();return;}
       this.render(this.elapsed);this.raf=requestAnimationFrame(this.tick);
     }
