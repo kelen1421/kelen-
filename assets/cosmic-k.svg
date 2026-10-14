@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="311 74 419 494" fill="none"><defs>
+                <linearGradient id="glass-front" x1="290" y1="130" x2="550" y2="530" gradientUnits="userSpaceOnUse"><stop stop-color="#fff" stop-opacity=".97"/><stop offset=".46" stop-color="#f7faf7" stop-opacity=".7"/><stop offset="1" stop-color="#9ebfbd" stop-opacity=".38"/></linearGradient>
+                <linearGradient id="glass-side" x1="600" y1="160" x2="365" y2="420" gradientUnits="userSpaceOnUse"><stop stop-color="#738b87" stop-opacity=".4"/><stop offset="1" stop-color="#f5faf7" stop-opacity=".07"/></linearGradient>
+                <linearGradient id="glass-ribbon" x1="250" y1="550" x2="680" y2="280" gradientUnits="userSpaceOnUse"><stop stop-color="#dde5db" stop-opacity=".12"/><stop offset=".5" stop-color="#b9d7d4" stop-opacity=".88"/><stop offset="1" stop-color="#fff" stop-opacity=".08"/></linearGradient>
+                <radialGradient id="scene-glow"><stop stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+                <filter id="glass-shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="24" stdDeviation="20" flood-color="#47615b" flood-opacity=".13"/></filter>
+              </defs><g class="scene-glass" filter="url(#glass-shadow)">
+                <path d="M351 133 402 151 402 522 351 504Z" fill="url(#glass-side)" stroke="#fff" stroke-opacity=".55"/>
+                <path d="M402 151 452 133 452 504 402 522Z" fill="url(#glass-front)" stroke="#fff" stroke-width="1.6"/>
+                <path d="M351 133 401 114 452 133 402 151Z" fill="#fafcf7" stroke="#fff"/>
+                <path d="M452 304 561 167 610 185 500 322Z" fill="url(#glass-side)" stroke="#fff" stroke-opacity=".6"/>
+                <path d="M452 304 500 322 610 185 659 167 548 322 500 359 452 341Z" fill="url(#glass-front)" stroke="#fff" stroke-width="1.5"/>
+                <path d="M561 167 610 148 659 167 610 185Z" fill="#f9fbf5" stroke="#fff"/>
+                <path d="M452 341 500 359 641 510 591 528 452 378Z" fill="url(#glass-side)" stroke="#fff" stroke-opacity=".6"/>
+                <path d="M500 359 548 341 690 491 641 510Z" fill="url(#glass-front)" stroke="#fff" stroke-width="1.4"/>
+                <path d="M591 528 641 510 690 491 641 510Z" fill="#eef7ef" stroke="#fff"/>
+                <path d="M402 171V496M512 320 635 172M519 365 663 497" stroke="#fff" stroke-width="2" opacity=".7"/>
+              </g></svg>

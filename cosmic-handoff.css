@@ -1,0 +1,3 @@
+html.cosmic-transit .site-frame { opacity: var(--cosmic-content-progress, 0); pointer-events: none; }
+html.cosmic-transit .scene-glass { opacity: 0 !important; animation: none !important; }
+html.cosmic-transit .scene-drawing g { animation-play-state: paused !important; }
