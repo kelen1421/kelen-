@@ -234,3 +234,19 @@
 .resume-column .journey-callout .journey-check span{font-size:7px}
 .resume-column .journey-callout .journey-check p{font-size:10px;line-height:1.75;margin:5px 0 0}
 @container resume-column (max-width:540px){.resume-column .journey-viewport{height:575px}.resume-column .journey-callout h3{font-size:16px}}
+
+/* Lift the framed surface; the text occupies the space below it. */
+.resume-craft{align-items:start;row-gap:44px;padding-top:34px}
+.resume-craft details{padding:0;border:0;background:none;box-shadow:none;transform:none;transition:height .35s cubic-bezier(.2,.8,.2,1);overflow:visible}
+.resume-craft details:hover,.resume-craft details:focus-within{border:0;background:none;box-shadow:none}
+.resume-craft details:before,.resume-craft details:after{display:none}
+.resume-craft summary{display:block;padding:18px 20px;border:1px solid #c6ceba;background:linear-gradient(130deg,#f7f9f0,#e9eede);box-shadow:6px 7px 0 #c3cbb434,0 12px 28px #7a8a6410;transform:perspective(650px) rotateX(var(--craft-tilt-x,0deg)) rotateY(var(--craft-tilt-y,0deg)) translateY(var(--craft-face-lift,0px));transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s;z-index:2}
+.resume-craft summary:before,.resume-craft summary:after{content:'';position:absolute;width:10px;height:10px;border-color:#91a477;border-style:solid;pointer-events:none;opacity:.65}
+.resume-craft summary:before{top:-1px;left:-1px;border-width:1px 0 0 1px}.resume-craft summary:after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
+.resume-craft summary b{right:18px;bottom:18px}
+.resume-craft .is-craft-open summary{border-color:#94a879;box-shadow:8px 12px 0 #b2c29840,0 21px 32px #6a825425}
+.resume-craft details>p{position:absolute;left:20px;right:20px;margin:0;opacity:0;transform:translateY(12px);transition:opacity .28s ease,transform .3s ease;pointer-events:none}
+.resume-craft .is-craft-open>p{opacity:1;transform:none;pointer-events:auto}
+.resume-craft summary:focus-visible{outline:2px solid #789363;outline-offset:4px}
+@container resume-column (max-width:540px){.resume-craft summary{padding:16px}.resume-craft details>p{left:16px;right:16px}}
+@media(prefers-reduced-motion:reduce){.resume-craft details,.resume-craft summary,.resume-craft details>p{transition:none}}

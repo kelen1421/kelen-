@@ -107,26 +107,37 @@
   motion.addEventListener('change',() => move(target));
   // Stagger the work surfaces on entry, then keep their own diagrams alive in view.
   const craftCards = $$('.resume-craft details');
-  // The wheel brings each explanation into the reading band and unfolds it once.
-  const manualCards = new WeakSet();
-  const copyReveal = new IntersectionObserver(entries => {
-    if(document.documentElement.classList.contains('intro-pending'))return;
-    entries.forEach(entry => {
-      if(!entry.isIntersecting || manualCards.has(entry.target))return;
-      const card=entry.target;
-      copyReveal.unobserve(card);
-      if(card.open)return;
-      card.open=true;
-      const paragraph=card.querySelector('p'),height=paragraph.scrollHeight;
-      if(!motion.matches)paragraph.animate([
-        {height:'0px',opacity:0,marginTop:'0px',transform:'translateY(18px)',clipPath:'inset(0 0 100% 0)'},
-        {height:`${height}px`,opacity:1,marginTop:'15px',transform:'none',clipPath:'inset(0)'}
-      ],{duration:680,easing:'cubic-bezier(.22,.8,.24,1)'});
-    });
-  },{threshold:.15,rootMargin:'0px 0px -24% 0px'});
+  // Each surface lifts on hover and reveals its explanation underneath.
   craftCards.forEach(card => {
-    copyReveal.observe(card);
-    card.querySelector('summary').addEventListener('click',() => {manualCards.add(card);copyReveal.unobserve(card);});
+    const summary=card.querySelector('summary'),paragraph=card.querySelector('p');
+    let closeTimer,pointerInside=false,pinned=false;
+    card.open=false;
+    function measure() {
+      const lift=motion.matches?0:28,faceHeight=summary.offsetHeight;
+      card.style.setProperty('--craft-face-lift',card.classList.contains('is-craft-open')?`${-lift}px`:'0px');
+      paragraph.style.top=`${faceHeight-lift+13}px`;
+      card.style.height=`${faceHeight+(card.classList.contains('is-craft-open')?paragraph.scrollHeight+13-lift:0)}px`;
+    }
+    function show() {
+      clearTimeout(closeTimer);card.open=true;card.classList.add('is-craft-open');measure();
+    }
+    function hide(force=false) {
+      if(!force&&(pinned||pointerInside||summary.matches(':focus-visible')))return;
+      card.classList.remove('is-craft-open');measure();
+      closeTimer=setTimeout(()=>{if(!card.classList.contains('is-craft-open'))card.open=false;},motion.matches?0:330);
+    }
+    card.addEventListener('pointerenter',event=>{if(event.pointerType==='mouse'){pointerInside=true;show();}});
+    card.addEventListener('pointerleave',event=>{if(event.pointerType==='mouse'){pointerInside=false;hide();}});
+    summary.addEventListener('click',event=>{
+      event.preventDefault();
+      if(matchMedia('(hover: none)').matches||event.detail===0){pinned=!pinned;pinned?show():hide(true);}
+      else show();
+    });
+    card.addEventListener('focusin',()=>{if(summary.matches(':focus-visible'))show();});
+    card.addEventListener('focusout',()=>setTimeout(()=>{if(!card.contains(document.activeElement))hide();},0));
+    new ResizeObserver(measure).observe(summary);
+    motion.addEventListener('change',measure);
+    document.fonts.ready.then(measure);measure();
   });
   const animatedParts = [$('.resume-project'),$('.resume-role h3'),...$$('.resume-role>p:not(.overline)'),...craftCards];
   const visibleMotion = new Set();
