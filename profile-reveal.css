@@ -28,6 +28,10 @@ html.profile-layout-changing,html.profile-layout-changing body{overflow-anchor:n
 .profile-unfold-overlay feFlood{flood-color:var(--profile-motion-ink)}
 #profile-motion-motion-lines{stroke:#8ca57a;stroke-width:1.2;fill:none}
 #profile-motion-landing-ring{stroke:#839c71;stroke-width:1;fill:none}
+.profile-paper-actor{position:absolute;inset:0 0 auto;width:100%;z-index:4;pointer-events:none;opacity:0}
+.profile-paper-character .profile-paper-actor{opacity:1}
+.profile-paper-character #profile-motion-actor{visibility:hidden}
+.profile-paper-fallback{position:absolute;left:0;top:0;object-fit:contain;z-index:4;pointer-events:none;transform-origin:0 0}
 @container profile-panel (max-width:540px){
  .profile-unfold-copy{left:2%;width:51%}.profile-unfold-copy h3{font-size:26px;line-height:1.4;margin:10px 0 16px}
  .profile-unfold-copy .overline{font-size:6px;letter-spacing:.06em}.profile-unfold-trigger{font-size:7px}.profile-unfold-trigger span{margin-left:4px;font-size:12px}
