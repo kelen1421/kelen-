@@ -128,6 +128,10 @@
     const panel = $('.detail-tab-panel');
     panel.setAttribute('aria-labelledby', `interest-tab-${key}`);
     panel.replaceChildren();
+    if (window.KelenVisuals) {
+      panel.append(window.KelenVisuals.interest(current, key, records[current]));
+      return;
+    }
     if (key === 'focus') {
       const list = document.createElement('ul');
       records[current].focus.forEach(text => {

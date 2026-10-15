@@ -29,6 +29,7 @@
     $('#cv-journey-title').textContent = step.title;
     $('#cv-journey-description').textContent = step.text;
     $('#cv-journey-check').textContent = step.check;
+    window.KelenVisuals?.journey(index, step);
     $('#cv-journey-count').textContent = `${number} / 05`;
     $('#cv-journey-letter').textContent = ['R','S','E','A','F'][index];
     previous.disabled = index === 0;
