@@ -33,6 +33,7 @@
 /* Close the gap around the role title and its explanation diagram. */
 .site-frame .archive-type--role{--type-first-size:clamp(48px,6cqw,68px);--type-second-size:clamp(40px,4.8cqw,54px)}
 .archive-type--role .type-caption{margin-top:10px;padding-top:7px}
+.archive-type--role .type-outline{font-weight:600;letter-spacing:.04em;color:transparent;-webkit-text-fill-color:transparent;-webkit-text-stroke:.85px var(--type-edge);text-shadow:none;margin-left:.07em}
 .resume-role .vc-editing>svg{max-height:120px}
 .resume-role .vc-editing figcaption{margin-top:4px}
 .resume-role .vc-transcript{margin-top:9px;padding-top:5px}
