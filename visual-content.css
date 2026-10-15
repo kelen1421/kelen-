@@ -76,7 +76,7 @@
 .vc-life figcaption small{font-size:6px;margin:0;color:#89967b}
 .vc-life-fields{display:flex;justify-content:space-between;border-top:1px solid #ffffff1a;padding-top:12px;font:9px var(--sans);color:#a6b095}
 .contact:after{display:none}
-@container resume-column (min-width:701px){.resume-role .vc-editing{grid-column:2;grid-row:2/5}.resume-role .vc-editing>svg{max-height:145px}}
+@container resume-column (min-width:701px){.resume-role .vc-editing{grid-column:2;grid-row:2}.resume-role .vc-editing>svg{max-height:145px}}
 .interest-archive[data-view="detail"]{height:auto;min-height:720px;max-height:none}
 .interest-archive[data-view="detail"] .archive-detail{position:relative;inset:auto;min-height:720px;padding:135px 6.2% 85px 53%}
 .interest-archive[data-view="detail"] .archive-detail-copy{position:relative;inset:auto;padding:0}
