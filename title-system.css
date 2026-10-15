@@ -1,0 +1,66 @@
+/* Shared paper-and-sage title system: solid type, outline type, fine rule, English footer. */
+.site-frame .archive-type{--type-ink:#303e2c;--type-edge:#657d53;--type-muted:#8a9b7d;--type-rule:#a7b89a;--type-first-size:clamp(42px,4.4vw,64px);--type-second-size:clamp(36px,3.7vw,54px);display:block;width:max-content;max-width:100%;color:var(--type-ink);margin:0!important;font-family:"Noto Sans SC",sans-serif;line-height:1.1;letter-spacing:-.065em}
+.archive-type .type-first,.archive-type .type-second{display:flex;align-items:center;gap:0;margin:0;padding:0;font-family:"Noto Sans SC",sans-serif;font-weight:900;letter-spacing:-.065em;color:var(--type-ink)}
+.archive-type .type-first{font-size:var(--type-first-size);line-height:1.12}
+.archive-type .type-second{font-size:var(--type-second-size);line-height:1.24;margin-top:3px;white-space:nowrap}
+.archive-type .type-particle{display:inline-block;writing-mode:vertical-rl;flex:0 0 auto;font:500 10px/1.35 "Noto Sans SC",sans-serif;letter-spacing:.15em;color:var(--type-muted);margin:0 12px 0 13px;padding:2px 0 0}
+.archive-type .type-outline{display:inline;font:inherit;line-height:inherit;letter-spacing:inherit;color:transparent;-webkit-text-stroke:1px var(--type-edge);margin:0 0 0 2px;padding:0}
+.archive-type .type-caption{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid var(--type-rule);margin:14px 0 0;padding:9px 0 0;color:var(--type-muted);font:6px/1.7 var(--mono);letter-spacing:.07em;white-space:nowrap}
+.archive-type .type-caption>span{display:inline;font:inherit;letter-spacing:inherit;line-height:inherit;color:inherit;margin:0;padding:0}
+.archive-type .type-caption i{font:16px var(--mono);font-style:normal;color:var(--type-edge)}
+.site-frame .archive-type--compact{--type-first-size:clamp(25px,2.6vw,38px)}
+.archive-type--compact .type-caption{margin-top:8px;padding-top:6px;font-size:5px;gap:20px}
+.archive-brand .archive-type{margin-top:6px!important}
+.site-frame .archive-type--short{--type-first-size:clamp(44px,4.5vw,64px);min-width:160px}
+.site-frame .archive-type--identity{--type-first-size:clamp(30px,3.2vw,44px);--type-second-size:clamp(36px,3.7vw,50px);margin-bottom:20px!important}
+.archive-type--identity .type-second{font-family:var(--sans);letter-spacing:-.06em;line-height:1.12}
+.archive-type--identity .type-outline{font-weight:800}
+.site-frame .archive-type--intro{--type-first-size:clamp(28px,4vw,52px);--type-second-size:clamp(26px,3.3vw,44px)}
+.profile-unfold-copy .archive-type{margin:17px 0 22px!important}
+.site-frame .archive-type--process{--type-first-size:clamp(26px,2.6vw,37px);margin:12px 0!important}
+.archive-type--process .type-particle{font-size:8px;margin:0 11px}
+.archive-type--process .type-caption{font-size:5px;margin-top:10px;padding-top:7px}
+.resume-process-heading>.overline{display:none}
+.programs-heading,.resume-heading{padding-top:28px;padding-bottom:24px;align-items:center}
+.site-frame .archive-type--home{--type-first-size:clamp(46px,5.6vw,76px);min-width:235px}
+.archive-type--home .type-first{font-family:var(--sans);letter-spacing:-.075em;line-height:1}
+.archive-type--home .type-caption{font-size:7px;letter-spacing:.05em;gap:24px}
+.scene-intro .archive-type--home .type-caption>span{font-family:"Noto Sans SC",sans-serif}
+.contact .archive-type{--type-ink:#e9ecdf;--type-edge:#a6bb92;--type-muted:#98a78a;--type-rule:#91a77b66;--type-first-size:clamp(36px,3.8vw,54px);--type-second-size:clamp(33px,3.4vw,48px)}
+.archive-type--life .type-caption{font-size:5px;gap:15px}
+.notes-layout{padding-top:32px}
+
+/* Close the gap around the role title and its explanation diagram. */
+.site-frame .archive-type--role{--type-first-size:clamp(48px,6cqw,68px);--type-second-size:clamp(40px,4.8cqw,54px)}
+.archive-type--role .type-caption{margin-top:10px;padding-top:7px}
+.resume-role .vc-editing>svg{max-height:120px}
+.resume-role .vc-editing figcaption{margin-top:4px}
+.resume-role .vc-transcript{margin-top:9px;padding-top:5px}
+.resume-role .vc-editing-labels{margin-bottom:8px}
+.resume-experience{padding-bottom:14px}
+.resume-craft{padding-top:28px}
+@container resume-column (min-width:701px){
+ .resume-role{grid-template-columns:minmax(190px,230px) minmax(0,1fr);column-gap:24px;row-gap:10px;padding-top:16px}
+ .resume-role h3.archive-type{align-self:center;grid-row:2}
+ .resume-role .vc-editing{grid-row:2;align-self:center;margin:0}
+ .resume-role .vc-editing>svg{max-height:120px}
+ .resume-experience{gap:16px;padding-bottom:14px}
+}
+@media(max-width:680px){
+ .site-frame .archive-type{--type-first-size:42px;--type-second-size:36px}
+ .archive-type .type-caption{font-size:5px;gap:16px;margin-top:11px;padding-top:7px}
+ .archive-type .type-particle{font-size:8px;margin-left:10px;margin-right:9px}
+ .site-frame .archive-type--compact{--type-first-size:27px}
+ .site-frame .archive-type--intro{--type-first-size:28px;--type-second-size:26px}
+ .archive-type--intro .type-caption{font-size:4px;gap:8px}
+ .profile-unfold-copy .archive-type{margin:12px 0 14px!important}
+ .site-frame .archive-type--identity{--type-first-size:33px;--type-second-size:39px}
+ .site-frame .archive-type--home{--type-first-size:52px;min-width:210px}
+ .site-frame .archive-type--process{--type-first-size:27px}
+ .site-frame .archive-type--short{--type-first-size:45px}
+ .contact .archive-type{--type-first-size:39px;--type-second-size:36px}
+ .programs-heading,.resume-heading{padding-top:25px;padding-bottom:22px}
+ .programs-heading{align-items:center;gap:20px}
+ .resume-role .archive-type--role{margin-bottom:18px!important}
+ .resume-role .vc-editing>svg{max-height:120px}
+}
