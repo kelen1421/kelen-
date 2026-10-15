@@ -45,10 +45,12 @@
     const x = steps[low].x + (steps[high].x - steps[low].x) * mix;
     const y = steps[low].y + (steps[high].y - steps[low].y) * mix;
     const cameraX = viewport.clientWidth * .29 - x * scale;
+    const narrow = viewport.clientWidth < 640;
+    const sceneY = (270-y)*scale*.22 + (narrow ? -70 : 0);
     world.style.setProperty('--scene-scale',scale);
     world.style.setProperty('--far-drift',`${-cameraX * .12 / scale}px`);
     world.style.setProperty('--near-drift',`${cameraX * .055 / scale}px`);
-    world.style.transform = `translate3d(${cameraX}px,${(270-y)*scale*.22}px,0)`;
+    world.style.transform = `translate3d(${cameraX}px,${sceneY}px,0)`;
     $('#cv-journey-progress').style.transform = `scaleX(${position / 4})`;
     $$('[data-step]').forEach(node => {
       const step = steps[Number(node.dataset.step)];
@@ -57,9 +59,10 @@
     });
     select(Math.round(position));
     const active=steps[Math.round(position)],panelWidth=journeyPanel.offsetWidth;
-    const nodeX=active.x*scale+cameraX,nodeY=active.y*scale+(270-y)*scale*.22-8;
+    const nodeX=active.x*scale+cameraX,nodeY=active.y*scale+sceneY-8;
     journeyPanel.style.left=`${Math.max(14,Math.min(viewport.clientWidth-panelWidth-14,nodeX+112))}px`;
-    journeyPanel.style.top=`${nodeY+43}px`;
+    const panelTop=narrow ? Math.max(140,nodeY+35) : Math.max(24,nodeY-150);
+    journeyPanel.style.top=`${Math.max(18,Math.min(viewport.clientHeight-journeyPanel.offsetHeight-18,panelTop))}px`;
   }
   function tick(time) {
     const dt = lastTime ? Math.min(50,time - lastTime) : 16;
