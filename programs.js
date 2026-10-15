@@ -4,7 +4,6 @@
   const cards = [...archive.querySelectorAll('.program-card')];
   const stations = [...archive.querySelectorAll('.plugin-station')];
   const leaves = [...archive.querySelectorAll('.plugin-leaf')];
-  const directory = [...archive.querySelectorAll('[data-plugin-select]')];
   const overview = archive.querySelector('.plugin-overview');
   const stage = archive.querySelector('.plugin-panel-stage');
   const back = archive.querySelector('.plugin-overview-back');
@@ -85,7 +84,6 @@
     current = (index + cards.length) % cards.length;
     archive.dataset.selected = String(current);
     stations.forEach((station,i) => station.classList.toggle('is-selected',i === current));
-    directory.forEach((button,i) => button.setAttribute('aria-pressed',String(i === current)));
     leaves.forEach((leaf,i) => {
       const angle = (i-current)*25;
       const radians = angle*Math.PI/180;
@@ -131,11 +129,6 @@
     button.addEventListener('focus',() => select(i));
     button.addEventListener('click',() => open(i));
   });
-  directory.forEach((button,i) => {
-    button.addEventListener('pointerenter',() => {if (archive.dataset.view === 'overview'){select(i);depth?.setPreview(i);}});
-    button.addEventListener('focus',() => {if (archive.dataset.view === 'overview'){select(i);if(button.matches(':focus-visible'))depth?.setPreview(i);}});
-    button.addEventListener('click',() => open(i));
-  });
   leaves.forEach((button,i) => button.addEventListener('click',() => select(i)));
   read.addEventListener('click',() => open(current));
   controls.querySelector('[data-program-prev]').addEventListener('click',() => select(current-1));
@@ -157,7 +150,7 @@
     stage.hidden = true;
     back.hidden = true;
     select(current);
-    (depth ? directory : stations)[current].focus({preventScroll:true});
+    (depth ? read : stations[current])?.focus({preventScroll:true});
   }
   back.addEventListener('click',showOverview);
   archive.addEventListener('keydown',event => {
@@ -168,7 +161,8 @@
       event.preventDefault();depth?.setPreview(-1);
     } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       event.preventDefault();select(current + (event.key === 'ArrowRight' ? 1 : -1));
-      (depth ? directory : archive.dataset.view === 'records' ? leaves : stations)[current].focus({preventScroll:true});
+      const destination = depth ? controls.querySelector(event.key === 'ArrowRight' ? '[data-program-next]' : '[data-program-prev]') : (archive.dataset.view === 'records' ? leaves : stations)[current];
+      destination?.focus({preventScroll:true});
     }
   });
   archive.classList.add('is-enhanced');
