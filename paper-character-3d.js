@@ -54,7 +54,15 @@ function createPaperCharacter3D(canvas,options={}) {
  const skeleton=new T.Skeleton(bones);mesh.bind(skeleton);mesh.normalizeSkinWeights();
  const bindWorld=bones.map(b=>b.matrixWorld.clone());bones.forEach(b=>b.matrixAutoUpdate=false);
  const limbMaterial=new T.MeshStandardMaterial({color:0xe2ddcb,roughness:.95,flatShading:true}),jointMaterial=new T.MeshStandardMaterial({color:0x73815b,roughness:.8,flatShading:true});
- const legSegments=Array.from({length:4},()=>{const m=new T.Mesh(new T.CylinderGeometry(1,1,1,5),limbMaterial);scene.add(m);return m;});
+ const legSegments=Array.from({length:4},(_,i)=>{
+   const shin=i%2===1,g=new T.CylinderGeometry(shin ? .67 : .86,1,1,6,12),p=g.attributes.position;
+   // A gently bowed centre line and tapered calf soften the paper limb's outline.
+   for(let k=0;k<p.count;k++){
+     const u=p.getY(k)+.5,curve=Math.sin(Math.PI*u),fullness=1+(shin ? .13 : .04)*curve;
+     p.setXYZ(k,p.getX(k)*fullness+(shin ? .40 : .10)*curve,p.getY(k),p.getZ(k)*fullness);
+   }
+   g.computeVertexNormals();const m=new T.Mesh(g,limbMaterial);scene.add(m);return m;
+ });
  const jointMarks=Array.from({length:8},()=>{const m=new T.Mesh(new T.IcosahedronGeometry(1,1),jointMaterial);scene.add(m);return m;});
  let ready=false,lastState=null,viewWidth=0,viewHeight=0,pixelScale=0;
  const image=new Image();image.onload=()=>{texture.image=image;texture.needsUpdate=true;ready=true;options.onReady?.();if(lastState)draw(lastState);};image.src=options.src||'assets/kelen-paper-character.png';
@@ -95,17 +103,19 @@ function createPaperCharacter3D(canvas,options={}) {
    transforms.Folder=transforms.Hand_L;
    transforms.Hand_R=segment([861,607],[940,608],J.wr,[J.wr[0]+rightDirection[0]*22,J.wr[1]+rightDirection[1]*22],height);
    transforms.Fingers_R=transforms.Hand_R;transforms.Thumb_R=transforms.Hand_R;
-   // Preserve the old line actor's sole positions while keeping the boot proportions.
-   const footScale=.25,leftAnkle=[J.al[0],J.al[1]+18-(1147-983)*footScale],rightAnkle=[J.ar[0],J.ar[1]+18-(1210-1036)*footScale];
+   // Ease the hanging knee forward and let the ankle relax as the actor sits.
+   const settling=clamp((t-2.20)/.52,0,1),relax=settling*settling*(3-2*settling);
+   const rightKnee=[J.kr[0]+14*relax,J.kr[1]-2*relax];
+   const footScale=.25,leftAnkle=[J.al[0],J.al[1]+18-(1147-983)*footScale],rightAnkle=[J.ar[0]-7*relax,J.ar[1]+18-(1210-1036)*footScale];
    transforms.UpperLeg_L=segment([568,710],[569,856],[x-10,y],J.kl,height,.27);
    transforms.LowerLeg_L=segment([569,856],[590,983],J.kl,leftAnkle,height,.27);
    transforms.Foot_L=rigid([590,983],leftAnkle,height,footScale);
-   transforms.UpperLeg_R=segment([654,710],[696,872],[x+10,y],J.kr,height,.27);
-   transforms.LowerLeg_R=segment([696,872],[737,1036],J.kr,rightAnkle,height,.27);
-   transforms.Foot_R=rigid([737,1036],rightAnkle,height,footScale);
-   const segments=[[[x-10,y+8],J.kl,7],[J.kl,leftAnkle,5.8],[[x+10,y+8],J.kr,7],[J.kr,rightAnkle,5.8]];
+   transforms.UpperLeg_R=segment([654,710],[696,872],[x+10,y],rightKnee,height,.27);
+   transforms.LowerLeg_R=segment([696,872],[737,1036],rightKnee,rightAnkle,height,.27);
+   transforms.Foot_R=rigid([737,1036],rightAnkle,height,footScale,.13*relax);
+   const segments=[[[x-10,y+8],J.kl,7],[J.kl,leftAnkle,5.8],[[x+10,y+8],rightKnee,7],[rightKnee,rightAnkle,5.8]];
    segments.forEach(([a,b,r],i)=>{const start=v(a,height,-1),end=v(b,height,-1),direction=end.clone().sub(start);legSegments[i].position.copy(start).add(end).multiplyScalar(.5);legSegments[i].scale.set(r,direction.length(),r);legSegments[i].quaternion.setFromUnitVectors(new T.Vector3(0,1,0),direction.normalize());});
-   [J.kl,J.kr,leftAnkle,rightAnkle,J.sl,J.sr,J.el,J.er].forEach((p,i)=>{jointMarks[i].position.copy(v(p,height,1));jointMarks[i].scale.setScalar(i<4?5.5:5);});
+   [J.kl,rightKnee,leftAnkle,rightAnkle,J.sl,J.sr,J.el,J.er].forEach((p,i)=>{jointMarks[i].position.copy(v(p,height,1));jointMarks[i].scale.setScalar(i<4?5.5:5);});
    const worldMatrices={};
    bones.forEach((bone,i)=>{
      const desired=(transforms[bone.name]||transforms.Hips).clone().multiply(bindWorld[i]);worldMatrices[bone.name]=desired;
