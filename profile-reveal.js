@@ -11,7 +11,8 @@ section.insertBefore(stage,layout);mask.append(layout);stage.append(intro,mask);
 section.classList.add('profile-unfold-ready');
 const overlay=stage.querySelector('.profile-unfold-overlay'),trigger=stage.querySelector('.profile-unfold-trigger'),throne=stage.querySelector('.profile-unfold-throne');
 const paperCanvas=document.createElement('canvas');paperCanvas.className='profile-paper-actor';paperCanvas.setAttribute('role','img');paperCanvas.setAttribute('aria-label','纸质探索者小人，拉开个人介绍');stage.append(paperCanvas);
-const paperActor=window.createPaperCharacter?.(paperCanvas,{src:'assets/kelen-paper-character.png',onReady(){stage.classList.add('profile-paper-character');render();}});
+const paperOptions={src:'assets/kelen-paper-character.png',onReady(){stage.classList.add('profile-paper-character');render();}};
+const paperActor=window.createPaperCharacter3D?.(paperCanvas,paperOptions)||window.createPaperCharacter?.(paperCanvas,paperOptions);
 const copy=layout.querySelector('.profile-copy'),copyItems=[...copy.children];
 let scale=1,bodyHeight=260,played=false,running=false,buttonStarted=false,lastScroll=scrollY,touchY=null,observer;
 
@@ -94,7 +95,7 @@ gsap.set($("motion-lines"),{opacity:speed*.8});
 const land=clamp((t-2.02)/.5,0,1),pulse=t>=2.02&&t<2.52?Math.sin(land*Math.PI):0;
 $("landing-ring").setAttribute("cy",num(edge));$("landing-ring").setAttribute("cx",num(a.x-66));$("landing-ring").setAttribute("rx",num(15+land*45));gsap.set($("landing-ring"),{opacity:pulse*.45});
 const bottom=Math.max(J.al[1]+20,J.ar[1]+20,edge+30),visibleHeight=clamp(Math.max(580,bottom+40),580,CONFIG.height);
-paperActor?.draw({t,x:a.x,y:a.y,width:CONFIG.width,height:CONFIG.height,scale,edge,gripX:CONFIG.gripX});
+paperActor?.draw({t,x:a.x,y:a.y,width:CONFIG.width,height:CONFIG.height,scale,edge,gripX:CONFIG.gripX,joints:J,localJoints:j,gripping,seated,phase:phase(t)});
 const state={time:t,duration:CONFIG.duration,reveal:grow,firstEdge:CONFIG.firstEdge,secondEdge:edge,actorX:a.x,actorY:a.y,gripY:gripping?edge:null,gripX:gripping?CONFIG.gripX:null,rightWrist:J.wr.slice(),leftFootY:J.al[1]+18,actorBottom:bottom,visibleHeight:visibleHeight,phase:phase(t),complete:t>=2.999};
 update(state);
 }
