@@ -1,8 +1,5 @@
 (() => {
-  const archive = document.querySelector('.interest-archive');
-  if (!archive) return;
-
-  const records = window.KelenResearchRecords || [];
+  window.createKelenResearchVault = function(archive,records,options={}) {
   if (!records.length) return;
   const $ = selector => archive.querySelector(selector);
   const world = $('.archive-world');
@@ -16,11 +13,9 @@
   const dots = [...dotStrip.children];
   $('.archive-counter i').textContent='/ '+String(records.length).padStart(2,'0');
   archive.dataset.total=records.length;
-  const topicNav=document.createElement('nav');topicNav.className='research-groups';topicNav.setAttribute('aria-label','研究方向');
-  for(const [group,label] of [['life','生命起源'],['flight','起飞与降落'],['population','人口结构']]){const button=document.createElement('button');button.type='button';button.dataset.group=group;button.textContent=label;const n=document.createElement('small');n.textContent=String(records.filter(r=>r.group===group).length).padStart(2,'0');button.append(n);button.addEventListener('click',()=>setRecord(records.findIndex(r=>r.group===group)));topicNav.append(button);}archive.append(topicNav);
   const model = $('.archive-document');
   const viewer = $('.archive-model-viewer');
-  const dialog = document.querySelector('.archive-index-dialog');
+  const dialog = archive.querySelector('.archive-index-dialog');
   const search = dialog.querySelector('input');
   const results = dialog.querySelector('.archive-index-results');
   const tabs = [...archive.querySelectorAll('[role="tab"]')];
@@ -43,7 +38,7 @@
   const waveVolumes = [];
   const geometry = document.createDocumentFragment();
   for (let row = 0; row < 3; row++) {
-    for (let column = 0; column < 24; column++) {
+    for (let column = 0; column < Math.max(24,records.length+12); column++) {
       const volume = document.createElement('div');
       volume.className = 'file-volume';
       volume.style.setProperty('--book-x', `${column * 48}px`);
@@ -102,23 +97,12 @@
     const panel = $('.detail-tab-panel');
     panel.setAttribute('aria-labelledby', `interest-tab-${key}`);
     panel.replaceChildren();
-    if (window.KelenResearchVisual) {panel.append(window.KelenResearchVisual(records[current],key));return;}
-    if (window.KelenVisuals) {
-      panel.append(window.KelenVisuals.interest(current, key, records[current]));
-      return;
-    }
-    if (key === 'focus') {
-      const list = document.createElement('ul');
-      records[current].focus.forEach(text => {
-        const item = document.createElement('li');
-        item.textContent = text;
-        list.append(item);
-      });
-      panel.append(list);
-    } else {
-      const paragraph = document.createElement('p');
-      paragraph.textContent = records[current][key];
-      panel.append(paragraph);
+    const record=records[current];
+    if(key==='focus'){
+      const list=document.createElement('ol');list.className='research-questions';record.focus.forEach(text=>{const li=document.createElement('li');li.textContent=text;list.append(li);});panel.append(list);
+    }else{
+      const flow=document.createElement('div');flow.className='research-flow';record.labels.forEach((label,i)=>{const item=document.createElement('span'),number=document.createElement('small');number.textContent=String(i+1).padStart(2,'0');item.append(number,label);flow.append(item);});panel.append(flow);
+      const text=document.createElement('p');text.textContent=key==='feeling'?record.feeling:record.overview;panel.append(text);
     }
   }
 
@@ -132,9 +116,9 @@
     const number = String(current + 1).padStart(2, '0');
     archive.dataset.current = current;
     archive.dataset.researchGroup=record.group;
-    topicNav.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.group===record.group)));
     $('.archive-selection-rule span').textContent=record.field+' / '+record.status;
     archive.style.setProperty('--archive-focus-pan', `${112 - current * 37}px`);
+    archive.style.setProperty('--archive-focus-y', `${current*16}px`);
     shapeWave(current);
     volumes.forEach((volume, i) => volume.classList.toggle('is-current', i === current));
     dots.forEach((dot, i) => dot.setAttribute('aria-pressed', String(i === current)));
@@ -150,6 +134,8 @@
     $('.detail-keywords').textContent = record.keywords;
     $('.document-id').textContent = `NO.${record.id.slice(2)}`;
     $('.document-label').textContent = record.english;
+    $('.document-scene').innerHTML=window.KelenResearchScene(record);
+    options.onSelect?.(current);
     $('.archive-live').textContent = `已选择档案 ${number}：${record.title}`;
     readButton.setAttribute('aria-label', `读取档案 ${number}：${record.title}`);
     renderTab(currentTab);
@@ -176,6 +162,7 @@
     selection.setAttribute('aria-hidden', 'true');
     controls.setAttribute('aria-hidden', 'true');
     archive.dataset.view = 'detail';
+    requestAnimationFrame(()=>archive.scrollIntoView({block:'start',behavior:motion.matches?'instant':'smooth'}));
     focusTimer = setTimeout(() => {
       detail.inert = false;
       detail.setAttribute('aria-hidden', 'false');
@@ -250,7 +237,7 @@
 
   function renderIndex() {
     const query = search.value.trim().toLocaleLowerCase();
-    const matches = records.map((record, index) => ({record,index})).filter(({record}) => `${record.id} ${record.title} ${record.english} ${record.field} ${record.keywords} ${record.source}`.toLocaleLowerCase().includes(query));
+    const matches = records.map((record, index) => ({record,index})).filter(({record}) => `${record.id} ${record.title} ${record.english} ${record.field} ${record.keywords} ${record.source} ${record.chapter}`.toLocaleLowerCase().includes(query));
     results.replaceChildren();
     matches.forEach(({record,index}) => {
       const button = document.createElement('button');
@@ -378,6 +365,8 @@
     else applyRotation(rotation.x + (event.key === 'ArrowUp' ? -5 : event.key === 'ArrowDown' ? 5 : 0),rotation.y + (event.key === 'ArrowLeft' ? -8 : event.key === 'ArrowRight' ? 8 : 0));
   });
   $('.archive-model-reset').addEventListener('click',resetModel);
-  setRecord(0,false);
+  setRecord(options.index||0,false);
   archive.dataset.ready = 'true';
+  return {destroy(){clearTimeout(focusTimer);stopPointerFrame();if(dialog.open)dialog.close();}};
+  };
 })();

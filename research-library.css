@@ -73,3 +73,46 @@
 }
 @media(max-width:680px){.research-section{padding-top:20px}.research-section>.page-head{margin:0 5%}.research-libraries{padding:27px 5% 30px}.research-library-masthead{gap:12px;margin-bottom:22px}.research-libraries[data-view="room"] .research-library-masthead{top:60px}.library-lobby-intro{align-items:start;flex-direction:column;gap:10px}.library-lobby-intro p{font-size:11px}.library-card{column-gap:13px;padding:14px}.library-card-copy>strong{font-size:22px}.library-card-copy>small{font-size:5px}.library-card-description{font-size:10px}.library-card-tags{gap:3px}.library-card-tags i{font-size:7px;padding:2px 3px}.library-switch{font-size:9px;white-space:nowrap}.library-switch span{margin-left:5px}.library-room-bar{flex-direction:column;gap:8px}.library-room-name{font-size:21px}.library-room-total{padding:0}.library-scene-legend{padding:8px 12px 13px}.library-scene-legend b{font-size:10px}.library-entry-title{font-size:26px}.library-source{font-size:7px}}
 @media(prefers-reduced-motion:reduce){.research-libraries *{animation:none!important;transition:none!important}.library-card:hover{transform:none}}
+
+/* The original dimensional cabinet stays inside each independent collection. */
+.research-libraries{position:relative}
+.research-libraries[data-view="lobby"] .archive-brand{position:static}
+.research-libraries[data-view="room"]{padding:0}
+.research-libraries[data-view="room"] .research-library-masthead{position:absolute;inset:30px 6.2% auto;top:30px;padding:0;background:none;backdrop-filter:none;align-items:start;pointer-events:none;z-index:9}
+.research-libraries[data-view="room"] .research-library-masthead .archive-brand{position:static}
+.research-libraries[data-view="room"] .research-library-masthead h2{display:block;--type-first-size:26px;--type-second-size:31px}
+.research-libraries[data-view="room"] .library-switch{pointer-events:auto;padding-top:5px;white-space:nowrap;font-size:9px;background:#f8f7ef88}
+.research-libraries[data-view="room"] .library-room-bar{position:absolute;top:184px;left:6.2%;z-index:8;display:block;margin:0;padding:0;border:0;max-width:39%;pointer-events:none}
+.research-libraries[data-view="room"] .library-room-name{font-size:13px;margin-bottom:5px}
+.research-libraries[data-view="room"] .library-room-intro{font-size:8px;line-height:1.6;max-width:220px}
+.research-libraries[data-view="room"] .library-room-total{display:block;font-size:6px;padding-top:6px}
+.library-vault-host{min-width:0}.library-vault-host .interest-archive{--archive-pan:var(--archive-focus-pan);color:#343b2a}
+.library-vault-host .archive-toolbar{top:71px}.library-vault-host .archive-back{top:247px}
+.library-vault-host .archive-detail-copy{top:29%}.library-vault-host .archive-selected-title{font-size:16px;letter-spacing:0;line-height:1.5;max-width:100%}
+.library-vault-host .archive-selected-subtitle{letter-spacing:.04em}
+.library-vault-host .document-scene{position:absolute;inset:26% 9% 20% 13%;display:flex;align-items:center;justify-content:center;color:#8d9c7b}
+.library-vault-host .document-scene svg{width:100%;height:auto;max-height:100%;stroke-width:1.7}
+.library-vault-host .document-scene svg text{font-size:18px;fill:currentColor}
+.library-vault-host .detail-english{font-size:clamp(16px,2cqw,27px);overflow-wrap:anywhere}
+.library-vault-host .detail-tab-panel{min-height:150px;max-height:260px;overflow-y:auto;padding-right:4px;overscroll-behavior:contain}
+.library-vault-host .research-flow{margin-top:6px}.library-vault-host .detail-tab-panel p{font:11px/1.9 var(--sans);color:#6f7a61}
+.library-vault-host .detail-meta b{font-size:10px}
+.library-vault-host .research-questions{font-size:11px;line-height:1.9}
+.library-vault-host .archive-detail-copy .detail-next{margin-top:16px}
+.library-vault-host .interest-archive[data-view="detail"]{min-height:850px}
+.library-vault-host .archive-index-dialog{position:fixed}
+@media(max-width:680px){
+ .research-libraries[data-view="room"] .research-library-masthead{inset:24px 6% auto;top:24px;gap:10px}
+ .research-libraries[data-view="room"] .research-library-masthead h2{--type-first-size:23px;--type-second-size:27px}
+ .research-libraries[data-view="room"] .library-switch{font-size:8px}
+ .research-libraries[data-view="room"] .library-room-bar{top:165px;left:6%;max-width:80%}
+ .research-libraries[data-view="room"] .library-room-name{font-size:13px}
+ .research-libraries[data-view="room"] .library-room-intro{max-width:none;font-size:8px}
+ .library-vault-host .archive-toolbar{top:73px}.library-vault-host .archive-back{top:232px}
+ .library-vault-host .archive-detail-copy{top:58%}.library-vault-host .archive-model-viewer{top:25%;height:29%}
+ .library-vault-host .interest-archive[data-view="detail"]{min-height:1230px}
+ .library-vault-host .detail-tab-panel{min-height:160px;max-height:300px;font-size:12px}
+ .library-vault-host .archive-selected-title{font-size:16px}
+}
+
+.research-section,.library-vault-host .interest-archive{overflow-anchor:none}
