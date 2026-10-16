@@ -1,4 +1,4 @@
-/* Reuse the throne actor's three-second pull to reveal the existing biography. */
+/* Jump up, pull an opaque profile sheet down, then sit on its lower right edge. */
 .about.profile-unfold-ready{container:profile-panel / inline-size;padding-bottom:0;overflow-anchor:none;z-index:2}
 html.profile-layout-changing,html.profile-layout-changing body{overflow-anchor:none;scroll-behavior:auto}
 .profile-unfold-stage{--profile-motion-ink:#536a4b;--profile-motion-edge:#91a17f;position:relative;isolation:isolate;overflow:visible;margin-top:20px}
@@ -12,8 +12,8 @@ html.profile-layout-changing,html.profile-layout-changing body{overflow-anchor:n
 .profile-unfold-trigger:disabled{cursor:default;opacity:.6}
 .profile-unfold-revealed .profile-unfold-trigger{visibility:hidden}
 .profile-unfold-throne{position:absolute;object-fit:contain;pointer-events:none;filter:brightness(.42) sepia(1) hue-rotate(38deg) saturate(.48);opacity:.9}
-.profile-unfold-mask{position:absolute;left:0;right:0;height:0;overflow:hidden}
-.about.profile-unfold-ready .profile-layout{grid-template-columns:minmax(100px,.3fr) minmax(0,1fr);column-gap:7%;row-gap:12px;padding:28px 3% 20px;align-items:center}
+.profile-unfold-mask{position:absolute;left:0;right:0;top:0;height:0;overflow:hidden;z-index:2;background:var(--paper);box-shadow:0 12px 20px -18px #35482b33}
+.about.profile-unfold-ready .profile-layout{will-change:transform;background:var(--paper);grid-template-columns:minmax(100px,.3fr) minmax(0,1fr);column-gap:7%;row-gap:12px;padding:28px 3% 20px;align-items:center}
 .about.profile-unfold-ready .profile-stamp{grid-column:1;grid-row:1/3;justify-self:center;width:clamp(105px,16cqw,150px);height:clamp(105px,16cqw,150px);margin:0;flex-shrink:0}
 .about.profile-unfold-ready .profile-stamp b{font-size:clamp(58px,9.4cqw,87px)}
 .about.profile-unfold-ready .profile-copy{display:contents}
@@ -62,3 +62,5 @@ html.profile-layout-changing,html.profile-layout-changing body{overflow-anchor:n
  .about.profile-unfold-ready .vc-curiosity{max-width:66%;grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){.profile-unfold-trigger{transition:none}}
+
+.profile-unfold-revealed .profile-layout{will-change:auto}.profile-unfold-intro[hidden]{display:none}

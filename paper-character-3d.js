@@ -83,7 +83,8 @@ function createPaperCharacter3D(canvas,options={}) {
  function draw(state){
    lastState=state;if(!ready||!state.joints)return;
    const {t,x,y,width,height,scale,edge,joints:J,localJoints:j,gripping,seated}=state;
-   if(viewWidth!==width||viewHeight!==height||pixelScale!==scale){viewWidth=width;viewHeight=height;pixelScale=scale;renderer.setSize(Math.max(1,Math.round(width*scale)),Math.max(1,Math.round(height*scale)),false);canvas.style.height=`${height*scale}px`;camera.right=width;camera.top=height;camera.updateProjectionMatrix();}
+   const topInset=state.topInset||0,viewportHeight=height+topInset;
+   if(viewWidth!==width||viewHeight!==viewportHeight||pixelScale!==scale){viewWidth=width;viewHeight=viewportHeight;pixelScale=scale;renderer.setSize(Math.max(1,Math.round(width*scale)),Math.max(1,Math.round(viewportHeight*scale)),false);canvas.style.height=`${viewportHeight*scale}px`;canvas.style.top=`${-topInset*scale}px`;camera.right=width;camera.top=viewportHeight;camera.updateProjectionMatrix();}
    const root=[x,y],shoulder=[(J.sl[0]+J.sr[0])*.5,(J.sl[1]+J.sr[1])*.5],headPivot=[J.head[0],J.head[1]+24];
    const transforms={};
    const torso=segment([612,710],[623,499],root,shoulder,height,.27);
