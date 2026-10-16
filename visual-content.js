@@ -12,9 +12,13 @@
   if (profile) {
     const paragraphs = [...profile.querySelectorAll(':scope > p:not(.overline)')];
     const original = paragraphs.map(p => p.textContent).join('');
+    const identity = document.createElement('div');
+    identity.className = 'profile-identity';
+    identity.append(profile.querySelector(':scope > .overline'), profile.querySelector(':scope > h2'));
+    profile.prepend(identity);
     const facts = document.createElement('div');
     facts.className = 'vc-profile';
-    facts.innerHTML = `<ol class="vc-profile-path" aria-label="基本经历"><li><span class="vc-fact-sign">02</span><small>BORN / 出生</small><b>2002 年</b></li><li><span class="vc-fact-sign">${svg('<path d="M7 30h38M14 28V17l12-9 12 9v11M20 28V18h12v10M10 17h32"/>','0 0 52 40')}</span><small>STUDY / 本科</small><b>能源与动力</b></li><li><span class="vc-fact-sign">${svg('<path d="m3 13 23-10 23 10-23 10ZM12 18v12c10 7 18 7 28 0V18M48 14v17"/>','0 0 52 40')}</span><small>GRADUATED / 毕业</small><b>仲恺大学</b></li></ol><figure class="vc-curiosity"><figcaption><small>HOW I EXPLORE</small><b>从好奇出发</b></figcaption>${svg('<path class="vc-soft" d="M18 55C85 15 130 92 191 52S277 15 344 52"/><path d="M43 55H312" stroke-dasharray="2 6"/>'+dot(43,55)+dot(178,55)+dot(312,55)+text(43,34,'原理','text-anchor="middle"')+text(178,83,'跨领域探索','text-anchor="middle"')+text(312,34,'连接','text-anchor="middle"'),'0 0 360 100')}</figure>${transcript(original)}`;
+    facts.innerHTML = `<ol class="vc-profile-path" aria-label="基本经历"><li><small>BORN / 出生</small><span class="vc-fact-sign">02</span><b>2002 年</b></li><li><small>STUDY / 本科</small><span class="vc-fact-sign">${svg('<path d="M7 30h38M14 28V17l12-9 12 9v11M20 28V18h12v10M10 17h32"/>','0 0 52 40')}</span><b>能源与动力</b></li><li><small>GRADUATED / 毕业</small><span class="vc-fact-sign">${svg('<path d="m3 13 23-10 23 10-23 10ZM12 18v12c10 7 18 7 28 0V18M48 14v17"/>','0 0 52 40')}</span><b>仲恺大学</b></li></ol><figure class="vc-curiosity"><figcaption><small>HOW I EXPLORE</small><b>从好奇出发</b></figcaption>${svg('<path class="vc-soft" d="M18 55C85 15 130 92 191 52S277 15 344 52"/><path d="M43 55H312" stroke-dasharray="2 6"/>'+dot(43,55)+dot(178,55)+dot(312,55)+text(43,34,'原理','text-anchor="middle"')+text(178,83,'跨领域探索','text-anchor="middle"')+text(312,34,'连接','text-anchor="middle"'),'0 0 360 100')}</figure>${transcript(original)}`;
     paragraphs.forEach(p => p.remove());
     profile.querySelector('.data-strip')?.remove();
     profile.append(facts);
