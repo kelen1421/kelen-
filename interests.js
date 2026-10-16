@@ -37,17 +37,25 @@
   const volumes = [];
   const waveVolumes = [];
   const geometry = document.createDocumentFragment();
+  const columnCount = Math.max(24,records.length+12);
   for (let row = 0; row < 3; row++) {
-    for (let column = 0; column < Math.max(24,records.length+12); column++) {
+    for (let column = 0; column < columnCount; column++) {
       const volume = document.createElement('div');
       volume.className = 'file-volume';
       volume.style.setProperty('--book-x', `${column * 48}px`);
       volume.style.setProperty('--book-y', `${row * 392}px`);
       volume.style.setProperty('--book-height', `${152 + ((column + row * 3) % 5) * 2}px`);
+      volume.style.setProperty('--prism-hue', `${(188 + column / (columnCount - 1) * 128 + row * 3).toFixed(1)}`);
       waveVolumes.push({volume, row, column});
       ['volume-top','volume-cover','volume-spine'].forEach(name => {
         const face = document.createElement('span');
         face.className = name;
+        if (name === 'volume-cover') {
+          const light = document.createElement('span');
+          light.className = 'volume-light';
+          light.setAttribute('aria-hidden','true');
+          face.append(light);
+        }
         volume.append(face);
       });
       if (row === 1 && column >= 6 && column < 6 + records.length) {
@@ -78,6 +86,8 @@
       const amplitude = row === 1 ? 134 : 89;
       const rise = amplitude * Math.exp(-(distance * distance) / 11.5) - 27;
       volume.style.setProperty('--wave-rise', `${rise.toFixed(2)}px`);
+      volume.style.setProperty('--pearl-shift', `${(Math.max(-4,Math.min(4,distance))*6).toFixed(1)}px`);
+      volume.classList.toggle('is-lit', Math.abs(distance) <= 2);
     });
   }
 
