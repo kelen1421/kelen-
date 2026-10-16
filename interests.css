@@ -1,5 +1,5 @@
-/* A navigable, dimensional cabinet of personal interests. */
-.interest-section{padding:27px 0 0;overflow:clip;background:#eeede6}
+/* A navigable, dimensional cabinet of personal research notes. */
+.interest-section{padding:27px 0 0;overflow:clip;background:#eeede6;border-top:0}
 .interest-section>.page-head{margin:0 6.2%;position:relative;z-index:6}
 .interest-archive{--archive-pan:128px;--archive-focus-pan:112px;--camera-x:0px;--camera-y:0px;position:relative;min-height:600px;height:calc(100svh - 118px);max-height:850px;isolation:isolate;overflow:clip;background:radial-gradient(ellipse at 47% 22%,#fbfaf4 0%,#eeece3 73%)}
 .archive-wash{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,#f3f2eba1,transparent 26%,transparent 69%,#efeee8e6),linear-gradient(90deg,transparent 45%,#f8f7f13d 77%,#f2f1e97a)}
@@ -155,3 +155,40 @@
 @media(max-width:680px){.interest-archive{--archive-pan:var(--archive-focus-pan)}.file-volume.is-current{--book-lift:74px}.archive-pick-area,.file-volume[data-record]>span{pointer-events:none}}
 @media(min-width:361px) and (max-width:680px){.archive-prev,.archive-next{width:44px;height:44px}}
 @media(prefers-reduced-motion:reduce){.interest-archive *,.archive-index-dialog{animation:none!important;transition:none!important}.archive-world{--camera-x:0px;--camera-y:0px}.archive-document{--model-rx:0deg;--model-ry:0deg}}
+
+/* Sixteen notes, collected into three research directions. */
+.research-groups{position:absolute;left:6.2%;top:170px;z-index:8;display:flex;gap:13px;max-width:88%;flex-wrap:wrap}
+.research-groups button{padding:6px 0!important;border-bottom:1px solid transparent;font:9px var(--sans);color:#7a8470}
+.research-groups button small{font:5px var(--mono);margin-left:6px;opacity:.6}
+.research-groups button[aria-pressed="true"]{color:#35492c;border-color:#80966d}
+.interest-archive[data-view="detail"] .research-groups{opacity:0;pointer-events:none}
+.interest-archive .archive-back{top:170px}
+.archive-controls{gap:14px}
+.archive-stepper{min-width:0;gap:5px}
+.archive-dots{width:min(32vw,288px);overflow-x:auto;scrollbar-width:none;padding-top:6px}
+.archive-dots::-webkit-scrollbar{display:none}
+.archive-dots button{flex:0 0 18px;width:18px}
+.archive-dots button::before{left:8px}
+.archive-control-caption{display:none}
+.research-note{margin:0;color:#526747}
+.research-note-top{display:flex;justify-content:space-between;align-items:start;gap:10px;font:8px/1.6 var(--sans);color:#88947c}
+.research-note-top b{font:6px/1.6 var(--mono);white-space:nowrap;border:1px solid #b1bfa4;padding:2px 5px;color:#647c52}
+.research-note>svg{display:block;width:100%;height:clamp(88px,10vw,138px);max-width:330px;margin:8px auto;color:#8b9f78;stroke:currentColor;stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round}
+.research-note>svg text{font:9px var(--sans);fill:currentColor;stroke:none}
+.research-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:9px 0 14px}
+.research-flow>span{border-top:1px solid #b5c3a8;padding-top:7px;font:10px/1.5 var(--sans)}
+.research-flow small{display:block;font:5px var(--mono);opacity:.55;margin-bottom:4px}
+.research-note p,.research-questions{font:11px/1.9 var(--sans);color:#727e68;margin:8px 0 0}
+.research-questions{padding-left:17px}.research-questions li{margin:0 0 7px}
+.interest-archive[data-view="detail"]{min-height:790px}
+@media(max-width:1000px){.research-groups{gap:10px}.research-groups button{font-size:8px}.research-note p,.research-questions{font-size:10px}}
+@media(max-width:680px){
+ .research-groups{top:155px;left:6%;gap:15px}
+ .research-groups button{font-size:9px}
+ .archive-dots{width:clamp(80px,30vw,200px)}
+ .archive-stepper{flex:0 1 auto}.archive-controls{gap:9px}
+ .research-note>svg{height:100px}
+ .research-note p,.research-questions{font-size:11px}
+ .interest-archive[data-view="detail"]{min-height:1200px}
+ .site-frame .archive-type--research{--type-first-size:23px;--type-second-size:29px}
+}

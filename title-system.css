@@ -4,7 +4,7 @@
 .archive-type .type-first{font-size:var(--type-first-size);line-height:1.12}
 .archive-type .type-second{font-size:var(--type-second-size);line-height:1.24;margin-top:3px;white-space:nowrap}
 .archive-type .type-particle{display:inline-block;writing-mode:vertical-rl;flex:0 0 auto;font:500 10px/1.35 "Noto Sans SC",sans-serif;letter-spacing:.15em;color:var(--type-muted);margin:0 12px 0 13px;padding:2px 0 0}
-.archive-type .type-outline{display:inline;font:inherit;line-height:inherit;letter-spacing:inherit;color:transparent;-webkit-text-stroke:1px var(--type-edge);margin:0 0 0 2px;padding:0}
+.archive-type .type-outline{display:inline-block;font:inherit;line-height:inherit;letter-spacing:.025em;color:var(--type-edge);-webkit-text-fill-color:var(--type-edge);-webkit-text-stroke:0;filter:url(#title-clean-contour);margin:0 0 0 .045em;padding:0}
 .archive-type .type-caption{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid var(--type-rule);margin:14px 0 0;padding:9px 0 0;color:var(--type-muted);font:6px/1.7 var(--mono);letter-spacing:.07em;white-space:nowrap}
 .archive-type .type-caption>span{display:inline;font:inherit;letter-spacing:inherit;line-height:inherit;color:inherit;margin:0;padding:0}
 .archive-type .type-caption i{font:16px var(--mono);font-style:normal;color:var(--type-edge)}
@@ -33,7 +33,9 @@
 /* Close the gap around the role title and its explanation diagram. */
 .site-frame .archive-type--role{--type-first-size:clamp(48px,6cqw,68px);--type-second-size:clamp(40px,4.8cqw,54px)}
 .archive-type--role .type-caption{margin-top:10px;padding-top:7px}
-.archive-type--role .type-outline{font-weight:600;letter-spacing:.04em;color:transparent;-webkit-text-fill-color:transparent;-webkit-text-stroke:.85px var(--type-edge);text-shadow:none;margin-left:.07em}
+.archive-type--role .type-outline{font-weight:600;letter-spacing:.04em;text-shadow:none;margin-left:.07em}
+.site-frame .archive-type--research{--type-first-size:25px;--type-second-size:32px}
+.archive-type--research .type-caption{font-size:5px;gap:16px;margin-top:9px;padding-top:6px}
 .resume-role .vc-editing>svg{max-height:120px}
 .resume-role .vc-editing figcaption{margin-top:4px}
 .resume-role .vc-transcript{margin-top:9px;padding-top:5px}
@@ -52,6 +54,7 @@
  .archive-type .type-caption{font-size:5px;gap:16px;margin-top:11px;padding-top:7px}
  .archive-type .type-particle{font-size:8px;margin-left:10px;margin-right:9px}
  .site-frame .archive-type--compact{--type-first-size:27px}
+ .site-frame .archive-type--research{--type-first-size:23px;--type-second-size:29px}
  .site-frame .archive-type--intro{--type-first-size:28px;--type-second-size:26px}
  .archive-type--intro .type-caption{font-size:4px;gap:8px}
  .profile-unfold-copy .archive-type{margin:12px 0 14px!important}

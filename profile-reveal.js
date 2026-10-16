@@ -94,7 +94,9 @@ path("motion-lines",line([[a.x-78,a.y-64],[a.x-90,a.y-64+direction*90]])+" "+lin
 gsap.set($("motion-lines"),{opacity:speed*.8});
 const land=clamp((t-2.02)/.5,0,1),pulse=t>=2.02&&t<2.52?Math.sin(land*Math.PI):0;
 $("landing-ring").setAttribute("cy",num(edge));$("landing-ring").setAttribute("cx",num(a.x-66));$("landing-ring").setAttribute("rx",num(15+land*45));gsap.set($("landing-ring"),{opacity:pulse*.45});
-const bottom=Math.max(J.al[1]+20,J.ar[1]+20,edge+30),visibleHeight=clamp(Math.max(580,bottom+40),580,CONFIG.height);
+const bottom=Math.max(J.al[1]+20,J.ar[1]+20,edge+30),fullHeight=clamp(Math.max(580,bottom+40),580,CONFIG.height);
+const joinProgress=clamp((t-2.22)/.74,0,1),joinEase=joinProgress*joinProgress*(3-2*joinProgress);
+const visibleHeight=lerp(fullHeight,edge+4,joinEase);
 paperActor?.draw({t,x:a.x,y:a.y,width:CONFIG.width,height:CONFIG.height,scale,edge,gripX:CONFIG.gripX,joints:J,localJoints:j,gripping,seated,phase:phase(t)});
 const state={time:t,duration:CONFIG.duration,reveal:grow,firstEdge:CONFIG.firstEdge,secondEdge:edge,actorX:a.x,actorY:a.y,gripY:gripping?edge:null,gripX:gripping?CONFIG.gripX:null,rightWrist:J.wr.slice(),leftFootY:J.al[1]+18,actorBottom:bottom,visibleHeight:visibleHeight,phase:phase(t),complete:t>=2.999};
 update(state);
@@ -114,7 +116,7 @@ function measure() {
   scale=Math.max(.46,Math.min(width/1440,1));CONFIG.width=width/scale;
   bodyHeight=layout.getBoundingClientRect().height;CONFIG.secondHeight=bodyHeight/scale;
   CONFIG.height=CONFIG.firstEdge+CONFIG.secondHeight+380;
-  CONFIG.gripX=CONFIG.width*.80-30;CONFIG.landingX=CONFIG.gripX-40;
+  CONFIG.gripX=CONFIG.width*.90-30;CONFIG.landingX=CONFIG.gripX-40;
   overlay.setAttribute('viewBox','0 0 '+CONFIG.width+' '+CONFIG.height);
   intro.style.height=(CONFIG.firstEdge*scale)+'px';mask.style.top=(CONFIG.firstEdge*scale)+'px';
   Object.assign(throne.style,{left:((CONFIG.gripX+30-150)*scale)+'px',top:(54*scale)+'px',width:(300*scale)+'px',height:(450*scale)+'px'});

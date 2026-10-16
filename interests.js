@@ -2,40 +2,8 @@
   const archive = document.querySelector('.interest-archive');
   if (!archive) return;
 
-  const records = [
-    { id:'K-001', title:'关卡与博弈', english:'GAME SYSTEMS', field:'游戏', keywords:'关卡逻辑 · 博弈',
-      overview:'喜欢游戏，不止是娱乐方面。我也喜欢理解关卡的逻辑，以及不同选择之间的博弈。',
-      focus:['关卡是怎样引导玩家做出选择的。','规则之内，不同策略如何相互影响。','从尝试到理解，再找到自己的解法。'],
-      feeling:'对我来说，游戏的乐趣也在于思考。看懂一个系统，找到一条通向目标的路，是体验的一部分。' },
-    { id:'K-002', title:'游戏里的音乐', english:'SOUND & ATMOSPHERE', field:'游戏 · 音乐', keywords:'音乐 · 氛围 · 叙事',
-      overview:'音乐也是我喜欢游戏的原因之一。除了画面和玩法，我也会关注音乐如何参与一个故事。',
-      focus:['不同场景中的音乐与氛围。','旋律怎样与关卡、人物和故事相连。','音乐带来的情绪和记忆。'],
-      feeling:'喜欢游戏，不只是玩进去，也包括听进去。音乐是理解游戏想表达的东西的一种方式。' },
-    { id:'K-003', title:'设计者想表达的事', english:'DESIGN & EXPRESSION', field:'游戏设计', keywords:'设计意图 · 表达',
-      overview:'我会好奇游戏设计时想表达什么。玩法、关卡、音乐和故事放在一起，往往能看见创作者的想法。',
-      focus:['规则与故事之间的联系。','设计者希望玩家经历什么、感受到什么。','一次选择背后的表达。'],
-      feeling:'除了体验一个游戏，也想理解做出它的人。那些藏在设计里的想法，是我愿意继续探索的部分。' },
-    { id:'K-004', title:'达成目标的成就感', english:'THE FEELING OF ACHIEVEMENT', field:'游戏 · 目标', keywords:'尝试 · 达成 · 成就感',
-      overview:'喜欢游戏，还有一个很重要的原因：达成某个目标之后的成就感。',
-      focus:['给自己一个值得努力的目标。','尝试不同的方法，慢慢找到方向。','把想完成的事真正完成。'],
-      feeling:'从“我想试试”到“我做到了”，这段过程和最后的成就感，对我来说很重要。' },
-    { id:'K-005', title:'动漫与小说', english:'STORIES & OTHER WORLDS', field:'动漫 · 阅读', keywords:'动漫 · 小说 · 故事',
-      overview:'喜欢动漫和小说，也喜欢别人笔下各种各样的故事。不同的世界、不同的人生，都让我想继续看下去。',
-      focus:['故事里的世界和人物。','不同创作者看待事物的方式。','那些让人想接着读、接着看的情节。'],
-      feeling:'喜欢走进别人写下的世界，看看各种各样的故事，也看看故事里的人会怎样选择。' },
-    { id:'K-006', title:'写下自己的故事', english:'A STORY OF MY OWN', field:'写作 · 想象', keywords:'故事 · 表达 · 写作',
-      overview:'喜欢别人笔下的故事，也会想写下自己的故事。这是我想继续尝试的一件事。',
-      focus:['把自己的想法慢慢变成文字。','想象人物、世界和他们的故事。','找到属于自己的表达方式。'],
-      feeling:'读故事的时候，也会想：如果是我，会怎样写下它？我也想给自己的想象留下一个位置。' },
-    { id:'K-007', title:'去山里走走', english:'INTO THE MOUNTAINS', field:'户外 · 爬山', keywords:'爬山 · 山野 · 体验',
-      overview:'喜欢爬山。游戏和故事之外，我也喜欢走出去，亲自体验眼前的山野。',
-      focus:['离开屏幕，走进真实的环境。','沿着路继续向前。','亲自去看、去经历。'],
-      feeling:'对新体验保持好奇。山野是我喜欢的一部分，有机会就想走出去看看。' },
-    { id:'K-008', title:'射击与专注', english:'AIM & FOCUS', field:'射击 · 体验', keywords:'射击 · 目标 · 专注',
-      overview:'射击也是我的爱好之一。我喜欢亲自体验不同的事，而不是只停留在知道它。',
-      focus:['专注于眼前的目标。','在亲自尝试中了解一项活动。','感受不同于日常的体验。'],
-      feeling:'只要是没试过的事情，我都愿意尝试看看。射击和爬山一样，是我喜欢的真实体验。' }
-  ];
+  const records = window.KelenResearchRecords || [];
+  if (!records.length) return;
   const $ = selector => archive.querySelector(selector);
   const world = $('.archive-world');
   const selection = $('.archive-selection');
@@ -43,7 +11,13 @@
   const detail = $('.archive-detail');
   const detailCopy = $('.archive-detail-copy');
   const readButton = $('.archive-read');
-  const dots = [...archive.querySelectorAll('[data-record]')];
+  const dotStrip=$('.archive-dots');dotStrip.replaceChildren();
+  records.forEach((record,index)=>{const button=document.createElement('button');button.type='button';button.dataset.record=index;button.setAttribute('aria-label',`选择档案 ${String(index+1).padStart(2,'0')}，${record.title}`);const number=document.createElement('span');number.textContent=String(index+1).padStart(2,'0');button.append(number);dotStrip.append(button);});
+  const dots = [...dotStrip.children];
+  $('.archive-counter i').textContent='/ '+String(records.length).padStart(2,'0');
+  archive.dataset.total=records.length;
+  const topicNav=document.createElement('nav');topicNav.className='research-groups';topicNav.setAttribute('aria-label','研究方向');
+  for(const [group,label] of [['life','生命起源'],['flight','起飞与降落'],['population','人口结构']]){const button=document.createElement('button');button.type='button';button.dataset.group=group;button.textContent=label;const n=document.createElement('small');n.textContent=String(records.filter(r=>r.group===group).length).padStart(2,'0');button.append(n);button.addEventListener('click',()=>setRecord(records.findIndex(r=>r.group===group)));topicNav.append(button);}archive.append(topicNav);
   const model = $('.archive-document');
   const viewer = $('.archive-model-viewer');
   const dialog = document.querySelector('.archive-index-dialog');
@@ -81,7 +55,7 @@
         face.className = name;
         volume.append(face);
       });
-      if (row === 1 && column >= 6 && column < 14) {
+      if (row === 1 && column >= 6 && column < 6 + records.length) {
         const index = column - 6;
         const label = document.createElement('b');
         label.className = 'volume-record';
@@ -128,6 +102,7 @@
     const panel = $('.detail-tab-panel');
     panel.setAttribute('aria-labelledby', `interest-tab-${key}`);
     panel.replaceChildren();
+    if (window.KelenResearchVisual) {panel.append(window.KelenResearchVisual(records[current],key));return;}
     if (window.KelenVisuals) {
       panel.append(window.KelenVisuals.interest(current, key, records[current]));
       return;
@@ -156,10 +131,14 @@
     const record = records[current];
     const number = String(current + 1).padStart(2, '0');
     archive.dataset.current = current;
+    archive.dataset.researchGroup=record.group;
+    topicNav.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.group===record.group)));
+    $('.archive-selection-rule span').textContent=record.field+' / '+record.status;
     archive.style.setProperty('--archive-focus-pan', `${112 - current * 37}px`);
     shapeWave(current);
     volumes.forEach((volume, i) => volume.classList.toggle('is-current', i === current));
     dots.forEach((dot, i) => dot.setAttribute('aria-pressed', String(i === current)));
+    dotStrip.scrollLeft=dots[current].offsetLeft-dotStrip.offsetLeft-dotStrip.clientWidth*.5+dots[current].offsetWidth*.5;
     $('.archive-file-number b').textContent = record.id;
     $('.archive-selected-title').textContent = record.title;
     $('.archive-selected-subtitle').textContent = record.english;
@@ -271,7 +250,7 @@
 
   function renderIndex() {
     const query = search.value.trim().toLocaleLowerCase();
-    const matches = records.map((record, index) => ({record,index})).filter(({record}) => `${record.id} ${record.title} ${record.english} ${record.field} ${record.keywords}`.toLocaleLowerCase().includes(query));
+    const matches = records.map((record, index) => ({record,index})).filter(({record}) => `${record.id} ${record.title} ${record.english} ${record.field} ${record.keywords} ${record.source}`.toLocaleLowerCase().includes(query));
     results.replaceChildren();
     matches.forEach(({record,index}) => {
       const button = document.createElement('button');

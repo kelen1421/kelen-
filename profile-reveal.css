@@ -1,7 +1,7 @@
 /* Reuse the throne actor's three-second pull to reveal the existing biography. */
-.about.profile-unfold-ready{container:profile-panel / inline-size;padding-bottom:32px;overflow-anchor:none}
+.about.profile-unfold-ready{container:profile-panel / inline-size;padding-bottom:0;overflow-anchor:none;z-index:2}
 html.profile-layout-changing,html.profile-layout-changing body{overflow-anchor:none;scroll-behavior:auto}
-.profile-unfold-stage{--profile-motion-ink:#536a4b;--profile-motion-edge:#91a17f;position:relative;isolation:isolate;overflow:hidden;margin-top:20px}
+.profile-unfold-stage{--profile-motion-ink:#536a4b;--profile-motion-edge:#91a17f;position:relative;isolation:isolate;overflow:visible;margin-top:20px}
 .profile-unfold-intro{position:absolute;inset:0 0 auto}
 .profile-unfold-copy{position:absolute;left:3%;top:50%;transform:translateY(-50%);width:55%}
 .profile-unfold-copy h3{font:600 clamp(28px,4.6cqw,48px)/1.36 var(--sans);letter-spacing:-.05em;margin:17px 0 24px}
@@ -13,10 +13,18 @@ html.profile-layout-changing,html.profile-layout-changing body{overflow-anchor:n
 .profile-unfold-revealed .profile-unfold-trigger{visibility:hidden}
 .profile-unfold-throne{position:absolute;object-fit:contain;pointer-events:none;filter:brightness(.42) sepia(1) hue-rotate(38deg) saturate(.48);opacity:.9}
 .profile-unfold-mask{position:absolute;left:0;right:0;height:0;overflow:hidden}
-.about.profile-unfold-ready .profile-layout{grid-template-columns:minmax(130px,.58fr) minmax(0,1.42fr);gap:6%;padding:35px 3% 32px;align-items:center}
-.about.profile-unfold-ready .profile-stamp{width:clamp(125px,20cqw,185px);height:clamp(125px,20cqw,185px);margin:0;flex-shrink:0}
+.about.profile-unfold-ready .profile-layout{grid-template-columns:minmax(100px,.3fr) minmax(0,1fr);column-gap:7%;row-gap:12px;padding:28px 3% 20px;align-items:center}
+.about.profile-unfold-ready .profile-stamp{grid-column:1;grid-row:1/3;justify-self:center;width:clamp(105px,16cqw,150px);height:clamp(105px,16cqw,150px);margin:0;flex-shrink:0}
 .about.profile-unfold-ready .profile-stamp b{font-size:clamp(58px,9.4cqw,87px)}
-.about.profile-unfold-ready .profile-copy{min-width:0;max-width:690px}
+.about.profile-unfold-ready .profile-copy{display:contents}
+.about.profile-unfold-ready .profile-copy>.overline{grid-column:2;align-self:end;margin:0}
+.about.profile-unfold-ready .profile-copy h2.archive-type{grid-column:2;align-self:start;margin-bottom:0!important;--type-first-size:clamp(30px,4.3cqw,46px);--type-second-size:clamp(32px,4.6cqw,48px)}
+.about.profile-unfold-ready .vc-profile{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;column-gap:6%;align-items:center;margin-top:8px}
+.about.profile-unfold-ready .vc-profile-path{margin:8px 0 12px}
+.about.profile-unfold-ready .vc-curiosity{margin:0;padding:0;border:0;grid-template-columns:78px 1fr;gap:6px}
+.about.profile-unfold-ready .vc-curiosity svg{max-height:80px}
+.about.profile-unfold-ready .vc-curiosity figcaption b{font-size:11px}
+.about.profile-unfold-ready .vc-profile>.vc-transcript{grid-column:1/-1;margin-top:5px}
 .about.profile-unfold-ready .profile-copy h2{font-size:clamp(30px,4.4cqw,46px)}
 .profile-unfold-overlay{position:absolute;inset:0 0 auto;width:100%;display:block;overflow:visible;pointer-events:none;z-index:3}
 .profile-unfold-overlay .edge{stroke:var(--profile-motion-edge);stroke-width:1.3;fill:none}
@@ -32,11 +40,25 @@ html.profile-layout-changing,html.profile-layout-changing body{overflow-anchor:n
 .profile-paper-character .profile-paper-actor{opacity:1}
 .profile-paper-character #profile-motion-actor{visibility:hidden}
 .profile-paper-fallback{position:absolute;left:0;top:0;object-fit:contain;z-index:4;pointer-events:none;transform-origin:0 0}
+@container profile-panel (min-width:740px){
+ .about.profile-unfold-ready .profile-layout{grid-template-columns:minmax(100px,.55fr) minmax(160px,.75fr) minmax(220px,1.3fr);column-gap:4%;padding:30px 20% 24px 3%}
+ .about.profile-unfold-ready .vc-profile{grid-column:3;grid-row:1/3;display:block;align-self:center;margin:0}
+ .about.profile-unfold-ready .vc-profile-path{margin:0 0 13px}
+ .about.profile-unfold-ready .vc-curiosity{padding-top:9px;border-top:1px solid #a6b29655}
+ .about.profile-unfold-ready .vc-profile>.vc-transcript{margin-top:6px}
+}
 @container profile-panel (max-width:540px){
  .profile-unfold-copy{left:2%;width:51%}.profile-unfold-copy h3{font-size:26px;line-height:1.4;margin:10px 0 16px}
  .profile-unfold-copy .overline{font-size:6px;letter-spacing:.06em}.profile-unfold-trigger{font-size:7px}.profile-unfold-trigger span{margin-left:4px;font-size:12px}
- .about.profile-unfold-ready .profile-layout{grid-template-columns:1fr;gap:25px;padding:28px 3% 32px}
+ .about.profile-unfold-ready .profile-layout{grid-template-columns:90px minmax(0,1fr);column-gap:7%;row-gap:8px;padding:22px 2% 16px}
  .about.profile-unfold-ready .profile-copy h2{font-size:32px}
- .about.profile-unfold-ready .profile-stamp{width:125px;height:125px;margin-left:8px}
+ .about.profile-unfold-ready .profile-stamp{width:85px;height:85px;margin:0}
+ .about.profile-unfold-ready .profile-stamp b{font-size:44px}
+ .about.profile-unfold-ready .profile-stamp span,.about.profile-unfold-ready .profile-stamp small{font-size:4px}
+ .about.profile-unfold-ready .profile-stamp i{font-size:12px;top:12px;right:10px}
+ .about.profile-unfold-ready .profile-copy h2.archive-type{--type-first-size:29px;--type-second-size:32px}
+ .about.profile-unfold-ready .vc-profile{grid-template-columns:1fr}
+ .about.profile-unfold-ready .vc-curiosity{border-top:1px solid #a6b29655;padding-top:8px;margin-top:0}
+ .about.profile-unfold-ready .vc-curiosity{max-width:66%;grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){.profile-unfold-trigger{transition:none}}
