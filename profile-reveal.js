@@ -125,14 +125,18 @@ function update(state) {
 function measure() {
   const width=stage.clientWidth;if(!width)return;
   scale=Math.max(.46,Math.min(width/1440,1));CONFIG.width=width/scale;
+  CONFIG.gripX=CONFIG.width*.90-30;CONFIG.landingX=CONFIG.gripX;
+  // Reserve the seated character's full left extent plus a readable gap.
+  // CSS uses the same measured gutter at every responsive breakpoint.
+  layout.style.setProperty('--profile-actor-gutter',Math.ceil(width-(CONFIG.gripX-140)*scale+24)+'px');
   layout.style.minHeight='0px';
-  bodyHeight=Math.max(510*scale,layout.getBoundingClientRect().height);
+  bodyHeight=Math.max(400*scale,layout.getBoundingClientRect().height);
   layout.style.minHeight=bodyHeight+'px';CONFIG.secondHeight=bodyHeight/scale;
   CONFIG.height=CONFIG.secondHeight+420;
-  CONFIG.gripX=CONFIG.width*.90-30;CONFIG.landingX=CONFIG.gripX;
   overlay.setAttribute('viewBox','0 0 '+CONFIG.width+' '+CONFIG.height);
   intro.style.height=bodyHeight+'px';mask.style.top='0px';
-  Object.assign(throne.style,{left:((CONFIG.gripX+36-150)*scale)+'px',top:((CONFIG.secondHeight*.68-330)*scale)+'px',width:(300*scale)+'px',height:(450*scale)+'px'});
+  const chairScale=Math.min(1,CONFIG.secondHeight/510);
+  Object.assign(throne.style,{left:((CONFIG.gripX+36-150*chairScale)*scale)+'px',top:((CONFIG.secondHeight*.68-330*chairScale)*scale)+'px',width:(300*chairScale*scale)+'px',height:(450*chairScale*scale)+'px'});
   render();
 }
 function finish() {

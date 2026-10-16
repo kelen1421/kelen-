@@ -14,7 +14,10 @@
     const original = paragraphs.map(p => p.textContent).join('');
     const identity = document.createElement('div');
     identity.className = 'profile-identity';
-    identity.append(profile.querySelector(':scope > .overline'), profile.querySelector(':scope > h2'));
+    const informationLabel = profile.querySelector(':scope > .overline');
+    informationLabel.classList.add('profile-information-label');
+    profile.closest('.profile-layout').prepend(informationLabel);
+    identity.append(profile.querySelector(':scope > h2'));
     profile.prepend(identity);
     const facts = document.createElement('div');
     facts.className = 'vc-profile';

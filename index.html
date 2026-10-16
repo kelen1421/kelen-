@@ -7,6 +7,14 @@
   <meta name="description" content="认识谢凯伦 / Kelen：研究档案、自己制作的小程序、剪辑履历、性格与计划，以及对生活的好奇。">
   <title>KELEN — SYNTHESIZE INFORMATION / ANALYSIS OS</title>
   <script>
+    (() => {
+      const requested = new URLSearchParams(location.search).get('theme');
+      let saved;
+      try { saved = localStorage.getItem('kelen-theme'); } catch (_) {}
+      const theme = ['classic', 'colors'].includes(requested) ? requested : ['classic', 'colors'].includes(saved) ? saved : 'classic';
+      document.documentElement.dataset.theme = theme;
+      document.querySelector('meta[name="theme-color"]').content = theme === 'colors' ? '#f2f5fb' : '#eeede8';
+    })();
     if (new URLSearchParams(location.search).has('cosmicHandoff')) document.documentElement.classList.add('cosmic-transit');
     if (!new URLSearchParams(location.search).has('skipIntro') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       document.documentElement.classList.add('intro-pending');
@@ -30,10 +38,11 @@
   <link rel="stylesheet" href="easter.css?v=20261008-softedge">
   <link rel="stylesheet" href="programs.css?v=20261015-clean17">
   <link rel="stylesheet" href="resume.css?v=20261015-type19">
-  <link rel="stylesheet" href="profile-reveal.css?v=20261016-layout32">
+  <link rel="stylesheet" href="profile-reveal.css?v=20261016-spectrum36">
   <link rel="stylesheet" href="cosmic-handoff.css?v=20261014-k1">
   <link rel="stylesheet" href="visual-content.css?v=20261015-type19">
   <link rel="stylesheet" href="title-system.css?v=20261016-research26">
+  <link rel="stylesheet" href="theme-switch.css?v=20261016-spectrum36">
 </head>
 <body>
   <div class="site-arrival" aria-label="同心圆收拢，KELEN 档案标题显现，压成细线后展开网页">
@@ -54,6 +63,14 @@
       <a href="#home" class="identity"><span>KELEN</span><small>SYNTHESIZE INFORMATION</small><b>ANALYSIS&nbsp; <i>OS</i></b></a>
       <div class="rail-rule"></div>
       <div class="rail-meta"><span>PERSONAL<br>ARCHIVE / 001</span><span>EST.<br>2026</span></div>
+      <div class="appearance-control">
+        <span class="appearance-label">APPEARANCE / 风格</span>
+        <div class="style-switch" role="group" aria-label="网页风格">
+          <button type="button" data-set-theme="classic" aria-pressed="true"><i class="switch-classic" aria-hidden="true"></i>原版</button>
+          <button type="button" data-set-theme="colors" aria-pressed="false"><i class="switch-spectrum" aria-hidden="true"></i>光谱</button>
+        </div>
+        <span class="sr-only" id="theme-status" role="status" aria-live="polite"></span>
+      </div>
       <nav class="side-nav" aria-label="页面目录">
         <a class="active" href="#home"><span class="nav-no">00</span><span>首页 / INDEX</span></a>
         <a href="#about"><span class="nav-no">01</span><span>基本信息 / PROFILE</span></a>
@@ -307,12 +324,12 @@
   <script src="arrival.js?v=20261015-archive22" defer></script>
   <script src="cosmic-handoff.js?v=20261014-k1" defer></script>
   <script src="assets/vendor/profile-gsap.min.js" defer></script>
-  <script src="visual-content.js?v=20261016-layout32" defer></script>
+  <script src="visual-content.js?v=20261016-spectrum36" defer></script>
   <script src="assets/vendor/three-r158.min.js" defer></script>
   <script src="assets/kelen-paper-volume.js?v=20261015-line3d24" defer></script>
   <script src="paper-character.js?v=20261015-paper23" defer></script>
   <script src="paper-character-3d.js?v=20261016-foot31" defer></script>
-  <script src="profile-reveal.js?v=20261016-foot31" defer></script>
+  <script src="profile-reveal.js?v=20261016-spectrum36" defer></script>
   <script src="title-system.js?v=20261016-research26" defer></script>
   <script src="program-demos.js?v=20261014-gallery8" defer></script>
   <script src="programs-depth.js?v=20261014-hallmap14" defer></script>
@@ -323,6 +340,7 @@
   <script src="research-scenes.js?v=20261016-libraries27" defer></script>
   <script src="interests.js?v=20261016-vault29-r2" defer></script>
   <script src="research-library.js?v=20261016-hover34" defer></script>
-  <script src="easter.js?v=20261008-spiral-entry" defer></script>
+  <script src="easter.js?v=20261016-bottom37" defer></script>
+  <script src="theme-switch.js?v=20261016-spectrum36" defer></script>
 </body>
 </html>

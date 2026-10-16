@@ -79,17 +79,69 @@
   window.addEventListener('blur', () => { if (!active) resetGesture(); });
   window.addEventListener('scroll', () => { if (!active) resetGesture(); }, {passive:true});
 
-  function openPortal() {
+  // Reach the real page end with a wheel, swipe or navigation key. Layout
+  // changes and restored scroll positions alone do not reveal the secret.
+  let bottomIntentAt=0,bottomTimer,bottomFrame,touchStartY;
+  function clearBottomTrigger(){
+    clearTimeout(bottomTimer);cancelAnimationFrame(bottomFrame);
+    bottomTimer=bottomFrame=undefined;
+  }
+  function atPageEnd(){
+    const page=document.scrollingElement||root;
+    return page.scrollHeight>innerHeight+80&&page.scrollHeight-page.scrollTop-innerHeight<=12;
+  }
+  function canRevealBottom(){
+    return !triggered&&!active&&!document.hidden&&!root.classList.contains('intro-pending')&&
+      !root.classList.contains('profile-layout-changing')&&!document.querySelector('dialog[open]');
+  }
+  function checkBottom(){
+    bottomFrame=undefined;clearTimeout(bottomTimer);
+    if(!canRevealBottom()||performance.now()-bottomIntentAt>1800||!atPageEnd())return;
+    bottomTimer=setTimeout(()=>{
+      if(canRevealBottom()&&atPageEnd()&&performance.now()-bottomIntentAt<1800)openPortal('bottom');
+    },180);
+  }
+  function bottomIntent(delta){
+    if(delta<=0){bottomIntentAt=0;clearBottomTrigger();return;}
+    if(!canRevealBottom())return;
+    bottomIntentAt=performance.now();
+    if(!bottomFrame)bottomFrame=requestAnimationFrame(checkBottom);
+  }
+  function outsideReadingArea(target){
+    return !target.closest?.('input,textarea,select,[contenteditable],dialog,.detail-tab-panel,.library-entry-list,.journey-viewport,.plugin-viewport');
+  }
+  window.addEventListener('wheel',event=>{
+    if(!event.ctrlKey&&!event.defaultPrevented&&outsideReadingArea(event.target))bottomIntent(event.deltaY);
+  },{passive:true});
+  window.addEventListener('scroll',()=>{
+    if(bottomIntentAt&&performance.now()-bottomIntentAt<1800&&!bottomFrame)bottomFrame=requestAnimationFrame(checkBottom);
+  },{passive:true});
+  window.addEventListener('touchstart',event=>{touchStartY=event.touches[0]?.clientY;},{passive:true});
+  window.addEventListener('touchmove',event=>{
+    const y=event.touches[0]?.clientY;
+    if(y!==undefined&&touchStartY!==undefined&&outsideReadingArea(event.target)){
+      const delta=touchStartY-y;if(Math.abs(delta)>4)bottomIntent(delta);touchStartY=y;
+    }
+  },{passive:true});
+  window.addEventListener('keydown',event=>{
+    if(event.defaultPrevented||!outsideReadingArea(event.target))return;
+    if(['End','PageDown','ArrowDown',' '].includes(event.key))bottomIntent(event.shiftKey&&event.key===' '?-1:1);
+    else if(['Home','PageUp','ArrowUp'].includes(event.key))bottomIntent(-1);
+  });
+  window.addEventListener('blur',()=>{bottomIntentAt=0;touchStartY=undefined;clearBottomTrigger();});
+
+  function openPortal(source='gesture') {
     if (active || triggered) return;
     // A new page visit gets one discovery; Escape never rearms the gesture.
     triggered = true;
-    resetGesture();
+    resetGesture();clearBottomTrigger();
     const hole = {x:innerWidth*.5,y:innerHeight*.48};
     const previousFocus = document.activeElement;
     const wasInert = frame.inert;
     const scrollPosition = {left:scrollX, top:scrollY, behavior:'instant'};
     const portal = document.createElement('section');
     portal.className = 'vortex-portal';
+    portal.dataset.trigger=source;
     portal.setAttribute('role', 'dialog'); portal.setAttribute('aria-modal', 'true');
     portal.setAttribute('aria-label', '隐藏彩蛋：公式与黑洞。按 Escape 返回个人档案。');
     portal.innerHTML = '<svg class="vortex-liquid-defs" width="0" height="0" aria-hidden="true"><defs><filter id="vortex-liquid-filter" x="-50%" y="-100%" width="200%" height="300%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".008 .013" numOctaves="2" seed="11" result="flow"/><feDisplacementMap in="SourceGraphic" in2="flow" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg><canvas class="vortex-canvas" aria-hidden="true"></canvas><div class="vortex-caption">KELEN / EVENT HORIZON<span>SECRET ARCHIVE · 002</span></div><button class="vortex-exit" type="button" aria-label="退出彩蛋，返回网页"><kbd>ESC</kbd> 返回档案 ↗</button><div class="vortex-note">你找到了另一个宇宙。<small>移动鼠标，拨动水面 · ESC 返回档案</small></div>';
@@ -108,7 +160,7 @@
     const duration = motion.matches ? 180 : ABSORPTION_MS;
 
     if (!motion.matches) {
-      const parts = frame.querySelectorAll('.identity,.rail-rule,.rail-meta,.side-nav a,.rail-bottom,.micro-head,.scene-topline,.scene-visual,.scene-intro,.scene-link,.scene-bottomline,.hero-footer,.page-head,.profile-stamp,.profile-copy,.archive-topbar,.archive-stage,.archive-footer,.notes-layout,.contact-top,.contact-main,.contact-bottom,footer');
+      const parts = frame.querySelectorAll('.identity,.rail-rule,.rail-meta,.appearance-control,.side-nav a,.rail-bottom,.micro-head,.scene-topline,.scene-visual,.scene-intro,.scene-link,.scene-bottomline,.hero-footer,.page-head,.profile-stamp,.profile-copy,.archive-topbar,.archive-stage,.archive-footer,.notes-layout,.contact-top,.contact-main,.contact-bottom,footer');
       const baseFilter = portal.querySelector('#vortex-liquid-filter');
       let index = 0;
       for (const node of parts) {
