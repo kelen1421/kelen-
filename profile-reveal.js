@@ -70,7 +70,8 @@ if(t>=.72&&t<=1.72)a.y=edge+170;
 const world=function(p){return[a.x+p[0],a.y+p[1]];};const J={};Object.keys(j).forEach(function(k){J[k]=world(j[k]);});
 const gripping=t>=.72&&t<=1.94,seated=t>=2.65;
 if(gripping)J.wr=[CONFIG.gripX,edge+16];
-if(t>=2.42){J.wr=[a.x+j.wr[0],edge-11];}
+const brace=clamp((t-2.18)/.47,0,1),braceEase=brace*brace*(3-2*brace);
+if(brace>0)J.wr=[lerp(J.wr[0],a.x+52,braceEase),lerp(J.wr[1],edge-11,braceEase)];
 const parts=[["left-arm",limb(J.sl,J.el,J.wl,7,6,3.5)],["right-arm",limb(J.sr,J.er,J.wr,7,6,3.5)],["left-leg",limb(world([-10,0]),J.kl,J.al,10,6,3.5)],["right-leg",limb(world([10,0]),J.kr,J.ar,10,6,3.5)]];
 parts.forEach(function(p){path(p[0],p[1].outline);path(p[0]+"-detail",p[1].detail);});
 function foot(p,side){return poly([[p[0]-4,p[1]-3],[p[0]+4,p[1]-3],[p[0]+side*14,p[1]+14],[p[0]+side*7,p[1]+18],[p[0]-side*8,p[1]+17]]);}

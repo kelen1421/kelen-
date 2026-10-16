@@ -28,14 +28,24 @@ function createPaperCharacter3D(canvas,options={}) {
   if(y<464&&x>525&&x<720){if(y<432)return blend('Head','Neck',(y-400)/32);return blend('Neck','Chest',(y-432)/32);}
   if(inside(x,y,[[404,631],[444,641],[455,667],[496,643],[526,657],[518,684],[507,708],[462,728],[425,716],[397,687]]))return[[boneIndex.Hand_L,1]];
   if(inside(x,y,[[390,455],[575,486],[599,775],[451,812],[392,731]]))return[[boneIndex.Folder,1]];
-  if(x>872&&y>535&&y<690)return[[boneIndex.Hand_R,1]];
+  if(x>720&&y>460&&y<700){
+   // Each rigid sleeve owns its surface. Blend only within a short hinge band;
+   // the palm can no longer drag the whole forearm into an S-shaped curve.
+   const smooth=(a,b,value)=>{const u=Math.max(0,Math.min(1,(value-a)/(b-a)));return u*u*(3-2*u);};
+   const wrist=((x-861)*55+(y-607)*50)/Math.hypot(55,50);
+   if(wrist>=7)return[[boneIndex.Hand_R,1]];
+   if(wrist>-9)return blend('LowerArm_R','Hand_R',smooth(-9,7,wrist));
+   const hinge=((x-806)*53+(y-557)*69)/Math.hypot(53,69);
+   if(hinge>-9)return blend('UpperArm_R','LowerArm_R',smooth(-9,9,hinge));
+   const shoulder=((x-753)*53+(y-488)*69)/Math.hypot(53,69);
+   return blend('Shoulder_R','UpperArm_R',smooth(-10,10,shoulder));
+  }
   let chain;
   if(y>795){
    if(x<635&&y>937)return[[boneIndex.Foot_L,1]];
    if(x>=635&&y>990)return[[boneIndex.Foot_R,1]];
    chain=x<635?chains.legL:chains.legR;
-  }else if(x>720&&y>460&&y<700)chain=chains.right;
-  else if(x<535&&y>450&&y<745)chain=chains.left;
+  }else if(x<535&&y>450&&y<745)chain=chains.left;
   else return[[boneIndex.Chest,1]];
   const scored=chain.map(([name,a,b])=>[boneIndex[name],1/Math.pow(distance(x,y,a,b)+8,4)]).sort((a,b)=>b[1]-a[1]).slice(0,4),sum=scored.reduce((n,p)=>n+p[1],0);
   return scored.map(([i,w])=>[i,w/sum]);
@@ -88,14 +98,16 @@ function createPaperCharacter3D(canvas,options={}) {
    const root=[x,y],P={...J};
    P.sl=[x+(J.sl[0]-x)*.86,y+(J.sl[1]-y)*.72];P.sr=[x+(J.sr[0]-x)*.86,y+(J.sr[1]-y)*.72];
    function toward(a,b,length){const dx=b[0]-a[0],dy=b[1]-a[1],d=Math.hypot(dx,dy)||1;return[a[0]+dx/d*length,a[1]+dy/d*length];}
-   function elbow(start,target,hint,upper=47,lower=47){
+   function elbow(start,target,hint,upper=47,lower=47,fixedBend=false){
     let dx=target[0]-start[0],dy=target[1]-start[1],d=Math.hypot(dx,dy)||1;
     if(d>upper+lower-.5){target=toward(start,target,upper+lower-.5);dx=target[0]-start[0];dy=target[1]-start[1];d=upper+lower-.5;}
     const q=(upper*upper-lower*lower+d*d)/(2*d),h=Math.sqrt(Math.max(0,upper*upper-q*q)),c=[start[0]+dx/d*q,start[1]+dy/d*q],a=[c[0]-dy/d*h,c[1]+dx/d*h],b=[c[0]+dy/d*h,c[1]-dx/d*h];
-    return{joint:Math.hypot(a[0]-hint[0],a[1]-hint[1])<Math.hypot(b[0]-hint[0],b[1]-hint[1])?a:b,end:target};
+    return{joint:fixedBend?b:Math.hypot(a[0]-hint[0],a[1]-hint[1])<Math.hypot(b[0]-hint[0],b[1]-hint[1])?a:b,end:target};
    }
    const leftTarget=[x+(J.wl[0]-x)*.82,y+(J.wl[1]-y)*.55];
-   const armL=elbow(P.sl,leftTarget,J.el,38,30),armR=elbow(P.sr,J.wr,J.er);
+   // Raising the shoulder provides reach while the sleeve keeps a fixed length.
+   if(gripping)P.sr[1]=Math.min(P.sr[1],J.wr[1]+72);
+   const armL=elbow(P.sl,leftTarget,J.el,38,30),armR=elbow(P.sr,J.wr,J.er,39,40,true);
    P.el=armL.joint;P.wl=armL.end;P.er=armR.joint;P.wr=armR.end;
    const shoulder=[(P.sl[0]+P.sr[0])*.5,(P.sl[1]+P.sr[1])*.5],headPivot=[shoulder[0]+(J.head[0]-x)*.3,shoulder[1]-22];
    const hipL=[x-12,y+4],hipR=[x+12,y+4],leftKnee=toward(hipL,J.kl,35),rightKnee=toward(hipR,J.kr,37);
@@ -112,7 +124,15 @@ function createPaperCharacter3D(canvas,options={}) {
    transforms.LowerArm_L=segment([424,605],[470,678],P.el,P.wl,height);
    transforms.UpperArm_R=segment([753,488],[806,557],P.sr,P.er,height);
    transforms.LowerArm_R=segment([806,557],[861,607],P.er,P.wr,height);
-   const rightDirection=gripping?[0,-1]:seated?[1,.08]:t<.17?[-.5,-.86]:[.25,1];
+   const restingAngle=t<.17?Math.atan2(-.86,-.5):Math.atan2(1,.25);
+   const contact=clamp((t-2.18)/.47,0,1),contactEase=contact*contact*(3-2*contact);
+   const desiredAngle=gripping?-Math.PI/2:restingAngle+(Math.atan2(.08,1)-restingAngle)*contactEase;
+   // Limit wrist rotation relative to the sleeve, using the shortest angle.
+   const forearmTurn=Math.atan2(P.wr[1]-P.er[1],P.wr[0]-P.er[0])-Math.atan2(50,55);
+   const restHandAngle=Math.atan2(1,79),wanted=desiredAngle;
+   const wristDelta=Math.atan2(Math.sin(wanted-forearmTurn-restHandAngle),Math.cos(wanted-forearmTurn-restHandAngle));
+   const handAngle=forearmTurn+restHandAngle+clamp(wristDelta,-.65,.65);
+   const rightDirection=[Math.cos(handAngle),Math.sin(handAngle)];
    const leftDirection=t<.17?[.6,-.8]:[.7,.3];
    transforms.Hand_L=segment([470,678],[510,684],P.wl,[P.wl[0]+leftDirection[0]*12,P.wl[1]+leftDirection[1]*12],height);
    transforms.Folder=rigid([470,678],P.wl,height,.27,.035*Math.sin(t*Math.PI/3));
@@ -134,7 +154,7 @@ function createPaperCharacter3D(canvas,options={}) {
      bone.matrixWorldNeedsUpdate=true;
    });
    scene.updateMatrixWorld(true);skeleton.update();renderer.render(scene,camera);
-   canvas.dataset.character='connected-paper-rig';canvas.dataset.time=t.toFixed(3);canvas.dataset.gripX=J.wr[0].toFixed(2);canvas.dataset.gripY=J.wr[1].toFixed(2);canvas.dataset.linePhase=state.phase||'';
+   canvas.dataset.character='hinged-paper-rig';canvas.dataset.time=t.toFixed(3);canvas.dataset.gripX=J.wr[0].toFixed(2);canvas.dataset.gripY=J.wr[1].toFixed(2);canvas.dataset.linePhase=state.phase||'';
  }
  return{draw,get ready(){return ready;}};
 }
