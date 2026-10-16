@@ -24,7 +24,7 @@
       if(hoverCard!==button||root.dataset.view!=='lobby')return;
       button.classList.add('is-opening');lobby.classList.add('is-entering');
       entryTimer=setTimeout(()=>openLibrary(key,true),reducedMotion.matches?0:280);
-    },780);
+    },350);
   }
   function element(tag,className,content){const node=document.createElement(tag);if(className)node.className=className;if(content!==undefined)node.textContent=content;return node;}
   function updateURL(){const url=new URL(location.href);if(library){url.searchParams.set('library',library.key);url.searchParams.set('entry',String(index+1).padStart(2,'0'));}else{url.searchParams.set('library','all');url.searchParams.delete('entry');}history.replaceState(null,'',url);}

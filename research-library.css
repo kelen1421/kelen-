@@ -36,7 +36,7 @@
 .library-card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto;padding-bottom:17px}.library-card-tags i{font:8px/1.5 var(--sans);font-style:normal;border:0;border-bottom:1px solid #bbc8ac88;padding:2px 0;margin-right:5px;color:#7b906a}
 .library-card-enter{position:relative;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:13px;border-top:1px solid #adbd9e;font:10px var(--sans)}.library-card-enter b{font:20px var(--mono);font-weight:400;transition:transform .4s}
 .library-hover-progress{position:absolute;left:0;top:-1px;height:2px;width:100%;background:var(--research-ink);transform:scaleX(0);transform-origin:left}
-.library-card.is-previewing .library-hover-progress{animation:library-hover-dwell .78s linear forwards}
+.library-card.is-previewing .library-hover-progress{animation:library-hover-dwell .35s linear forwards}
 .library-card.is-previewing .library-cabinet,.library-card:focus-visible .library-cabinet{transform:translate3d(-4px,-21px,52px) rotateX(2deg) rotateY(-9deg) rotateZ(-1deg)}
 .library-card.is-previewing .library-card-enter b{transform:translate(3px,-3px)}
 .library-card.is-previewing .library-card-stage:after{opacity:.6;transform:translateY(7px) rotate(-8deg) scale(.88)}
