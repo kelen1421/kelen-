@@ -27,9 +27,9 @@ fall:{head:[-4,-108],size:[14,23],sl:[-39,-75],sr:[34,-83],el:[-51,-20],er:[43,-
 grab:{head:[-5,-110],size:[14,23],sl:[-39,-78],sr:[34,-87],el:[-50,-20],er:[43,-127],wl:[-49,24],wr:[46,-154],kl:[-22,43],kr:[20,55],al:[-38,87],ar:[24,112]},
 yank:{head:[-7,-113],size:[14,23],sl:[-39,-83],sr:[33,-96],el:[-60,-20],er:[45,-130],wl:[-58,20],wr:[46,-154],kl:[-37,28],kr:[17,53],al:[-62,74],ar:[23,113]},
 tuck:{head:[-3,-118],size:[14,23],sl:[-39,-83],sr:[34,-82],el:[-56,-20],er:[46,-38],wl:[-68,-14],wr:[46,-14],kl:[-56,-56],kr:[41,16],al:[-77,-48],ar:[43,87]},
-land:{head:[0,-130],size:[14.5,23],sl:[-39,-95],sr:[38,-86],el:[-52,-40],er:[54,3],wl:[-61,-17],wr:[65,69],kl:[-48,13],kr:[30,35],al:[-72,66],ar:[45,107]},
+land:{head:[0,-130],size:[14.5,23],sl:[-39,-95],sr:[38,-86],el:[-52,-40],er:[54,3],wl:[-61,-17],wr:[65,69],kl:[-47,-48],kr:[30,35],al:[-60,10],ar:[45,107]},
 press:{head:[4,-143],size:[15,23],sl:[-39,-108],sr:[39,-97],el:[-47,-54],er:[62,-16],wl:[-47,-63],wr:[77,17],kl:[-47,-48],kr:[29,45],al:[-60,10],ar:[37,150]},
-perch:{head:[3,-148],size:[15,23],sl:[-40,-109],sr:[40,-104],el:[-57,-74],er:[61,-47],wl:[-45,-67],wr:[83,-11],kl:[-58,15],kr:[44,20],al:[-52,96],ar:[48,105]}
+perch:{head:[3,-148],size:[15,23],sl:[-40,-109],sr:[40,-104],el:[-57,-74],er:[61,-47],wl:[-45,-67],wr:[83,-11],kl:[-50,-69],kr:[44,20],al:[-60,-18],ar:[48,105]}
 };
 // Positions use the same panel coordinates as the moving sheet and its lower edge.
 const keys=[
@@ -72,6 +72,10 @@ const gripping=t>=.72&&t<=1.94,seated=t>=2.65;
 if(gripping)J.wr=[CONFIG.gripX,edge+16];
 const brace=clamp((t-2.18)/.47,0,1),braceEase=brace*brace*(3-2*brace);
 if(brace>0)J.wr=[lerp(J.wr[0],a.x+52,braceEase),lerp(J.wr[1],edge-11,braceEase)];
+// Restore the original raised-left-foot action: place its sole on the edge
+// before the hips settle, then hold that contact through the final seated pose.
+const leftPlant=clamp((t-1.98)/.24,0,1),leftFootContact=leftPlant*leftPlant*(3-2*leftPlant);
+if(leftFootContact>0)J.al=[J.al[0],lerp(J.al[1],edge-18,leftFootContact)];
 const parts=[["left-arm",limb(J.sl,J.el,J.wl,7,6,3.5)],["right-arm",limb(J.sr,J.er,J.wr,7,6,3.5)],["left-leg",limb(world([-10,0]),J.kl,J.al,10,6,3.5)],["right-leg",limb(world([10,0]),J.kr,J.ar,10,6,3.5)]];
 parts.forEach(function(p){path(p[0],p[1].outline);path(p[0]+"-detail",p[1].detail);});
 function foot(p,side){return poly([[p[0]-4,p[1]-3],[p[0]+4,p[1]-3],[p[0]+side*14,p[1]+14],[p[0]+side*7,p[1]+18],[p[0]-side*8,p[1]+17]]);}
@@ -108,7 +112,7 @@ const land=clamp((t-2.42)/.4,0,1),pulse=t>=2.42&&t<2.82?Math.sin(land*Math.PI):0
 $("landing-ring").setAttribute("cy",num(edge));$("landing-ring").setAttribute("cx",num(a.x));$("landing-ring").setAttribute("rx",num(15+land*45));gsap.set($("landing-ring"),{opacity:pulse*.45});
 const bottom=Math.max(J.al[1]+20,J.ar[1]+20,edge+30);
 const visibleHeight=CONFIG.secondHeight+4;
-paperActor?.draw({t,x:a.x,y:a.y,width:CONFIG.width,height:CONFIG.height,topInset:180,scale,edge,gripX:CONFIG.gripX,joints:J,localJoints:j,gripping,seated,phase:phase(t)});
+paperActor?.draw({t,x:a.x,y:a.y,width:CONFIG.width,height:CONFIG.height,topInset:180,scale,edge,gripX:CONFIG.gripX,joints:J,localJoints:j,gripping,seated,leftFootContact,phase:phase(t)});
 const state={time:t,duration:CONFIG.duration,reveal:grow,firstEdge:CONFIG.firstEdge,secondEdge:edge,actorX:a.x,actorY:a.y,gripY:gripping?edge:null,gripX:gripping?CONFIG.gripX:null,rightWrist:J.wr.slice(),leftFootY:J.al[1]+18,actorBottom:bottom,visibleHeight:visibleHeight,phase:phase(t),complete:t>=2.999};
 update(state);
 }

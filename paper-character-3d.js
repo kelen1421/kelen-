@@ -110,8 +110,13 @@ function createPaperCharacter3D(canvas,options={}) {
    const armL=elbow(P.sl,leftTarget,J.el,38,30),armR=elbow(P.sr,J.wr,J.er,39,40,true);
    P.el=armL.joint;P.wl=armL.end;P.er=armR.joint;P.wr=armR.end;
    const shoulder=[(P.sl[0]+P.sr[0])*.5,(P.sl[1]+P.sr[1])*.5],headPivot=[shoulder[0]+(J.head[0]-x)*.3,shoulder[1]-22];
-   const hipL=[x-12,y+4],hipR=[x+12,y+4],leftKnee=toward(hipL,J.kl,35),rightKnee=toward(hipR,J.kr,37);
-   const footScale=.25,leftAnkle=toward(leftKnee,[J.al[0],J.al[1]-23],37),rightAnkle=toward(rightKnee,[J.ar[0],J.ar[1]-25],40);
+   const hipL=[x-12,y+4],hipR=[x+12,y+4],rightKnee=toward(hipR,J.kr,37);
+   const footScale=.25,leftGoal=[J.al[0],J.al[1]+18-(1147-983)*footScale];
+   const freeKnee=toward(hipL,J.kl,35),freeAnkle=toward(freeKnee,leftGoal,37);
+   const planted=elbow(hipL,leftGoal,J.kl,35,37),plant=state.leftFootContact||0;
+   const mixPoint=(a,b,u)=>[a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u];
+   const leftKnee=mixPoint(freeKnee,planted.joint,plant),leftAnkle=mixPoint(freeAnkle,planted.end,plant);
+   const rightAnkle=toward(rightKnee,[J.ar[0],J.ar[1]-25],40);
    const transforms={};
    const torso=segment([612,790],[623,499],root,shoulder,height,.27);
    transforms.Hips=rigid([612,790],root,height,.27);transforms.Spine=torso;transforms.Chest=torso;
@@ -154,7 +159,7 @@ function createPaperCharacter3D(canvas,options={}) {
      bone.matrixWorldNeedsUpdate=true;
    });
    scene.updateMatrixWorld(true);skeleton.update();renderer.render(scene,camera);
-   canvas.dataset.character='hinged-paper-rig';canvas.dataset.time=t.toFixed(3);canvas.dataset.gripX=J.wr[0].toFixed(2);canvas.dataset.gripY=J.wr[1].toFixed(2);canvas.dataset.linePhase=state.phase||'';
+   canvas.dataset.character='edge-perched-paper-rig';canvas.dataset.time=t.toFixed(3);canvas.dataset.gripX=J.wr[0].toFixed(2);canvas.dataset.gripY=J.wr[1].toFixed(2);canvas.dataset.linePhase=state.phase||'';
  }
  return{draw,get ready(){return ready;}};
 }
