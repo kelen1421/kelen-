@@ -116,3 +116,5 @@
 }
 
 .research-section,.library-vault-host .interest-archive{overflow-anchor:none}
+
+.library-vault-host .archive-back{top:112px;left:auto;right:6.2%;z-index:10;background:#f7f6eecc;padding:6px 10px!important}
