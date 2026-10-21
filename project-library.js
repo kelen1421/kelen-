@@ -1,6 +1,7 @@
 (() => {
   const host=document.querySelector('#project-index');
-  if(!host)return;
+  const archive=document.querySelector('.program-archive');
+  if(!host||!archive)return;
   const groups={all:'全部',desktop:'桌面工具',web:'网页项目',lab:'实验项目'};
   const projects=[
     {id:'voice',code:'VOX',name:'克隆音',group:'desktop',platform:'MAC / APPLE SILICON',status:'本地应用',version:'1.3.1',featured:true,
@@ -38,11 +39,6 @@
       steps:['链接或源码','内容识别','预览与导出'],tags:['HTML 导入','正文与媒体','多格式导出'],
       features:['输入公开链接自动提取；支持辅助加载与整页 HTML 源码导入。','预览正文、视频、音频和字幕，复制内容或下载可用资源。','导出 TXT、Markdown、JSON 与资源链接，保留本机历史。'],
       note:'项目当前为受限访问。登录、验证码、地区限制与 DRM 会影响提取；当前不进行语音转写。'},
-    {id:'yuky',code:'FOL',name:'Yuky 作品集网站',group:'web',platform:'WEB / RESPONSIVE PORTFOLIO',status:'在线项目',url:'https://kelen1421.github.io/uk/',source:'https://github.com/kelen1421/uk',
-      intro:'为设计作品建立有层次的展示空间，让分类、搜索、详情与立体预览连成一体。',
-      steps:['分类浏览','作品详情','三维预览'],tags:['作品管理','响应式布局','Three.js'],
-      features:['七类作品、侧栏导航、搜索、作品详情和合作入口。','本地上传封面、编辑作品、导入与导出备份。','部分概念作品支持旋转、缩放、换色与线框预览。'],
-      note:'这是网站开发项目。站内示例明确标为概念作品；管理内容保存在当前浏览器，不是共享后台。'},
     {id:'atelier',code:'ANI',name:'小知未动画工作台',group:'web',platform:'WEB / ANIMATION EDITOR',status:'受限访问',
       intro:'从分镜到时间轴，把光点、颜色和故事变成可以逐帧调整的动画。',
       steps:['编辑分镜','时间轴预览','导出工程'],tags:['逐帧预览','分镜编辑','工程导出'],
@@ -58,60 +54,49 @@
       intro:'在其他应用里工作，也能从浮窗看见 Codex 任务进度，随时回到当前对话。',steps:['读取任务','浮窗看进度','回到对话'],tags:['任务浮窗','进度与续聊'],features:['以方框、列表或圆球显示本机任务的处理阶段。','固定任务，切换个性化外观，从浮窗打开对应对话。'],note:'进度表示任务阶段，不预测精确剩余时间；下载入口位于交互展示厅。'}
   ];
   const e=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
-  function diagram(id){
-    const forms={
-      voice:'<path d="M34 79V101m10-34v46m10-57v68m10-54v40m10-29v18M112 90h41m-9-7 9 7-9 7"/><rect x="174" y="42" width="140" height="97" rx="5"/><path d="M190 61h69m-69 59h105M194 89v13m10-23v32m10-48v56m10-36v23m10-17v12m10-30v47m10-35v27m10-49v69m10-37v14m10-23v30"/><circle cx="289" cy="59" r="4" class="pl-fill"/>',
-      avatar:'<rect x="32" y="38" width="87" height="104" rx="4"/><circle cx="75" cy="70" r="16"/><path d="M49 126v-12c0-27 51-27 51 0v12M138 71v36m9-47v58m9-37v20m16-11h30m-7-7 7 7-7 7"/><rect x="223" y="31" width="97" height="117" rx="5"/><circle cx="272" cy="66" r="15"/><path d="m272 82-1 28m-1-16-23 13m25-13 23 13m-25 4-17 23m19-23 19 23"/><g class="pl-fill"><circle cx="271" cy="95" r="3"/><circle cx="247" cy="107" r="3"/><circle cx="295" cy="107" r="3"/></g>',
-      translate:'<rect x="38" y="38" width="274" height="108" rx="4"/><path d="M38 56h274m-252 21h79m-79 12h61m-61 12h73M169 69h123v60H169zM181 84h82m-82 12h98m-98 12h65"/><path d="M160 79h-8V65h19m122 0h8v14m0 44v13h-18" class="pl-accent"/>',
-      studio:'<path d="m40 48 99-25h159l22 25v102H40zm99-25v127M41 124h279"/><rect x="178" y="49" width="99" height="53"/><path d="m178 95 28-27 23 18 30-22 18 29"/><circle cx="135" cy="76" r="16"/><path d="M107 127v-19c0-24 55-24 55 0v19M81 130h184m-170 0v21m157-21v21"/><path d="M71 47v17m-8-9h17M284 115v12m-6-6h12" class="pl-accent"/>',
-      hub:'<rect x="36" y="34" width="278" height="117" rx="4"/><path d="M36 55h278m-207 0v96M51 76h39m-39 17h31m-31 17h37"/><rect x="126" y="75" width="67" height="53"/><rect x="213" y="75" width="79" height="53"/><path d="M140 91h37m-37 15h24m63-15h51m-51 15h31"/><circle cx="287" cy="44" r="3" class="pl-fill"/>',
-      mobile:'<rect x="30" y="37" width="148" height="100" rx="4"/><path d="M91 137v13m-22 0h58m-83-90h102m-102 14h77m-77 14h91"/><rect x="239" y="23" width="72" height="136" rx="10"/><path d="M261 35h28m-37 25h44m-44 14h35m-35 14h40m-27 55h15M187 90h39m-8-7 8 7-8 7"/>',
-      pagepick:'<rect x="29" y="35" width="115" height="113" rx="4"/><path d="M44 54h85m-85 17h63m-63 12h75m-75 12h55m-55 12h69M157 90h35m-8-7 8 7-8 7"/><rect x="213" y="35" width="107" height="31"/><rect x="213" y="76" width="107" height="31"/><rect x="213" y="117" width="107" height="31"/><path d="m224 45 10 6-10 6zm0 41h13m-13 11h7m-7 29h72m-72 10h54"/>',
-      yuky:'<rect x="28" y="33" width="294" height="119" rx="4"/><path d="M28 52h294m-236 0v100M41 70h30m-30 14h24m-24 14h29"/><rect x="104" y="68" width="94" height="65"/><path d="m112 121 25-31 22 17 19-20 12 34"/><rect x="213" y="68" width="90" height="27"/><path d="M213 109h83m-83 13h59"/>',
-      atelier:'<rect x="30" y="30" width="291" height="123" rx="4"/><path d="M30 121h291M47 135h33m10 0h46m10 0h66m10 0h48m-123-15V40"/><circle cx="174" cy="77" r="22"/><path d="M141 76c17-28 51-28 68 0m-68 0c17 28 51 28 68 0"/><circle cx="229" cy="56" r="4" class="pl-fill"/>',
-      physics:'<circle cx="138" cy="88" r="54"/><ellipse cx="138" cy="88" rx="54" ry="19"/><ellipse cx="138" cy="88" rx="22" ry="54"/><path d="m229 57 41-20 36 22-41 22-36-24zm0 0v49l36 24V81m41-22v47l-41 24M40 151h283"/>',
-      capture:'<rect x="42" y="37" width="268" height="113" rx="4"/><path d="M42 55h268M86 78V65h17m148 0h17v13m0 48v12h-17m-148 0H86v-12M111 88h121m-121 17h93m-93 16h117"/><path d="m254 112 6 37 9-11 13 8 5-7-14-8 10-6z" class="pl-accent"/>',
-      recorder:'<rect x="34" y="41" width="154" height="103" rx="4"/><circle cx="111" cy="75" r="17"/><path d="M81 128v-12c0-29 60-29 60 0v12"/><rect x="212" y="30" width="103" height="123"/><path d="M226 52h74m-74 17h57m-57 17h74m-74 17h57m-57 17h74m-74 17h48"/>',
-      progress:'<rect x="38" y="34" width="123" height="53" rx="4"/><rect x="184" y="34" width="123" height="53" rx="4"/><rect x="38" y="106" width="123" height="53" rx="4"/><rect x="184" y="106" width="123" height="53" rx="4"/><path d="M51 51h68m-68 18h94m52-18h76m-76 18h63M51 123h51m-51 18h70m76-18h66m-66 18h94"/>'
-    };
-    return '<svg viewBox="0 0 350 185" fill="none" aria-hidden="true" focusable="false"><g stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">'+forms[id]+'</g></svg>';
-  }
-  const header=e('div','pl-header');
-  const heading=e('div');heading.append(e('p','pl-kicker','DEVELOPMENT COLLECTION / 开发项目'),e('h3','','把想法做出来。'));
-  heading.querySelector('h3').id='project-library-title';
-  const meta=e('p','pl-meta','13 PROJECTS · 更新于 2026.10.21');header.append(heading,meta);
-  const toolbar=e('div','pl-toolbar'),filters=e('div','pl-filters');filters.setAttribute('role','group');filters.setAttribute('aria-label','按项目类型筛选');
-  Object.entries(groups).forEach(([key,name])=>{const button=e('button','',name+' '+String(key==='all'?projects.length:projects.filter(p=>p.group===key).length).padStart(2,'0'));button.type='button';button.dataset.filter=key;button.setAttribute('aria-pressed',String(key==='all'));filters.append(button);});
-  const searchLabel=e('label','pl-search');searchLabel.append(e('span','','搜索项目'));const input=e('input');input.type='search';input.placeholder='名称 / 功能';input.autocomplete='off';searchLabel.append(input);toolbar.append(filters,searchLabel);
-  const grid=e('div','pl-grid'),status=e('p','pl-result');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
-  const cards=projects.map((p,index)=>{
-    const card=e('article','pl-card'+(p.featured?' pl-featured':''));card.dataset.group=p.group;
-    const top=e('div','pl-card-top');top.append(e('span','',String(index+1).padStart(2,'0')+' / '+p.code),e('span','pl-status',p.status));
-    const visual=e('div','pl-visual');visual.innerHTML=diagram(p.id);
-    const copy=e('div','pl-copy'),title=e('h4','',p.name);title.id='project-'+p.id;card.setAttribute('aria-labelledby',title.id);
-    copy.append(e('p','pl-platform',p.platform),title,e('p','pl-description',p.intro));
-    const flow=e('ol','pl-flow');p.steps.forEach((step,i)=>{const li=e('li');li.append(e('small','',String(i+1).padStart(2,'0')),e('span','',step));flow.append(li);});copy.append(flow);
-    const tags=e('div','pl-tags');p.tags.forEach(tag=>tags.append(e('span','',tag)));copy.append(tags);
-    const details=e('details','pl-details'),summary=e('summary');summary.append(e('span','','功能与当前状态'),e('span','pl-plus','＋'));details.append(summary);
-    const body=e('div','pl-detail-body'),list=e('ul');p.features.forEach(feature=>list.append(e('li','',feature)));body.append(list,e('p','pl-note',p.note));if(p.version)body.append(e('small','pl-version','VERSION '+p.version));details.append(body);
-    const actions=e('div','pl-actions');
-    if(p.url){const link=e('a','pl-action','打开网站 ↗');link.href=p.url;link.target='_blank';link.rel='noopener noreferrer';actions.append(link);if(p.source){const source=e('a','pl-source','源码 ↗');source.href=p.source;source.target='_blank';source.rel='noopener noreferrer';actions.append(source);}}
-    else if(p.hall!==undefined){const button=e('button','pl-action','在展示厅打开 ↗');button.type='button';button.addEventListener('click',()=>document.querySelector('.program-archive')?.dispatchEvent(new CustomEvent('kelen-program-open',{detail:{index:p.hall}})));actions.append(button);}
-    else actions.append(e('span','pl-access',p.status==='受限访问'?'项目展示 / 访问受限':p.group==='lab'?'研究记录 / 本地运行':'项目展示 / 本地应用'));
-    card.append(top,visual,copy,details,actions);grid.append(card);return card;
+  const ordered=[...projects.filter(p=>p.hall!==undefined).sort((a,b)=>a.hall-b.hall),...projects.filter(p=>p.hall===undefined)];
+  window.KelenProgramProjects=ordered;
+  const grid=archive.querySelector('.program-grid'),original=[...grid.children];
+  ordered.forEach((p,index)=>{
+    let card=original[index];
+    if(index>=original.length){
+      card=e('article','program-card');
+      const top=e('div','program-card-top');top.append(e('span','','PROJECT / '+String(index+1).padStart(3,'0')),e('span','program-platform',p.platform));
+      const art=e('div','program-art');art.setAttribute('aria-hidden','true');
+      const copy=e('div','program-copy');copy.append(e('h3','',p.name),e('p','',p.intro));
+      const tags=e('div','program-tags');p.tags.forEach(tag=>tags.append(e('span','',tag)));copy.append(tags);
+      const actions=e('div','program-actions');const action=e(p.url?'a':'button','program-primary',p.url?'打开网站 ↗':'查看功能与状态 ↗');
+      if(p.url){action.href=p.url;action.target='_blank';action.rel='noopener noreferrer';}else action.type='button';
+      actions.append(action,e('span','program-version',p.version?'V '+p.version:p.status));
+      const help=e('details','program-help'),summary=e('summary','',p.name+' · 功能与状态');help.append(summary);
+      p.features.forEach(feature=>help.append(e('p','',feature)));help.append(e('p','',p.note));
+      if(!p.url)action.addEventListener('click',()=>{help.open=true;summary.focus();});
+      card.append(top,art,copy,actions,help);grid.append(card);
+    }
+    card.dataset.projectId=p.id;card.dataset.projectCode=p.code;
+    p.action=card.querySelector('.program-primary').textContent.trim();
   });
-  const empty=e('p','pl-empty','没有找到对应项目，试试其他名称或功能。');empty.hidden=true;
-  const more=e('button','pl-more','展开全部 13 个项目 ↓');more.type='button';more.setAttribute('aria-expanded','false');more.setAttribute('aria-controls','project-library-grid');grid.id='project-library-grid';
-  host.append(header,toolbar,status,grid,empty,more);
-  let filter='all',expanded=false;
-  function render(){
-    const query=input.value.trim().toLocaleLowerCase();let total=0,shown=0;
-    cards.forEach((card,i)=>{const p=projects[i],matches=(filter==='all'||p.group===filter)&&[p.name,p.intro,...p.tags,...p.features].join(' ').toLocaleLowerCase().includes(query);if(matches)total++;const visible=matches&&(expanded||filter!=='all'||query||shown<6);card.hidden=!visible;if(visible)shown++;});
-    status.textContent='显示 '+String(shown).padStart(2,'0')+' / '+String(total).padStart(2,'0')+' 个项目';empty.hidden=total>0;
-    more.hidden=filter!=='all'||Boolean(query)||total<=6;more.textContent=expanded?'收起项目 ↑':'展开全部 '+total+' 个项目 ↓';more.setAttribute('aria-expanded',String(expanded));
+  host.className='hall-catalog';host.setAttribute('aria-label','展示厅项目目录');host.removeAttribute('aria-labelledby');
+  archive.querySelector('.plugin-vault-top').after(host);
+  const toolbar=e('div','hall-catalog-tools'),filters=e('div','hall-catalog-filters');filters.setAttribute('role','group');filters.setAttribute('aria-label','筛选展示厅项目');
+  Object.entries(groups).forEach(([key,label])=>{const button=e('button','',label+' '+String(key==='all'?ordered.length:ordered.filter(p=>p.group===key).length).padStart(2,'0'));button.type='button';button.dataset.filter=key;button.setAttribute('aria-pressed',String(key==='all'));filters.append(button);});
+  const label=e('label','hall-catalog-search','搜索项目'),input=e('input');input.type='search';input.placeholder='名称 / 功能';label.append(input);toolbar.append(filters,label);
+  const chips=e('div','hall-catalog-list');chips.setAttribute('role','group');chips.setAttribute('aria-label','选择展示厅项目');
+  const buttons=ordered.map((p,index)=>{const button=e('button','hall-catalog-item');button.type='button';button.append(e('small','',String(index+1).padStart(2,'0')+' / '+p.code),e('span','',p.name));button.setAttribute('aria-pressed','false');button.dataset.project=index;button.addEventListener('click',()=>archive.dispatchEvent(new CustomEvent('kelen-program-open',{detail:{index}})));chips.append(button);return button;});
+  const result=e('p','hall-catalog-result');result.setAttribute('role','status');result.setAttribute('aria-live','polite');
+  host.append(toolbar,chips,result);let filter='all',current=4;
+  function filterProjects(){
+    const query=input.value.trim().toLocaleLowerCase(),indices=[];
+    buttons.forEach((button,index)=>{const p=ordered[index],matches=(filter==='all'||p.group===filter)&&[p.name,p.intro,...p.tags].join(' ').toLocaleLowerCase().includes(query);button.hidden=!matches;if(matches)indices.push(index);});
+    result.textContent=indices.length?'可选择 '+indices.length+' 个项目 · 每组 4 个立体展台':'没有找到对应项目';
     filters.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.filter===filter)));
+    archive.dispatchEvent(new CustomEvent('kelen-program-filter',{detail:{indices}}));
+    if(indices.length&&!indices.includes(current))archive.dispatchEvent(new CustomEvent('kelen-program-select',{detail:{index:indices[0]}}));
   }
-  filters.addEventListener('click',event=>{const button=event.target.closest('button[data-filter]');if(!button)return;filter=button.dataset.filter;render();});input.addEventListener('input',render);
-  more.addEventListener('click',()=>{expanded=!expanded;render();if(!expanded)host.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});});
-  render();
+  filters.addEventListener('click',event=>{const button=event.target.closest('button[data-filter]');if(button){filter=button.dataset.filter;filterProjects();}});input.addEventListener('input',filterProjects);
+  window.KelenProgramCatalog={select(index){current=index;buttons.forEach((button,i)=>button.setAttribute('aria-pressed',String(i===index)));},projects:ordered};
+  const stamp=document.querySelector('.programs-stamp');stamp.setAttribute('aria-label',ordered.length+' 个程序与项目');stamp.querySelector('b').textContent=ordered.length;
+  document.querySelector('.programs-footer>span').textContent=ordered.length+' PROJECTS / MADE BY KELEN';
+  archive.querySelector('.plugin-vault-top>span').textContent="KELEN'S LAB / "+ordered.length+' PROJECTS';
+  filterProjects();
 })();
