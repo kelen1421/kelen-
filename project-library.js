@@ -88,7 +88,7 @@
   function filterProjects(){
     const query=input.value.trim().toLocaleLowerCase(),indices=[];
     buttons.forEach((button,index)=>{const p=ordered[index],matches=(filter==='all'||p.group===filter)&&[p.name,p.intro,...p.tags].join(' ').toLocaleLowerCase().includes(query);button.hidden=!matches;if(matches)indices.push(index);});
-    result.textContent=indices.length?'可选择 '+indices.length+' 个项目 · 每组 4 个立体展台':'没有找到对应项目';
+    result.textContent=indices.length?'可选择 '+indices.length+' 个项目 · 同一球面 / 拖动旋转':'没有找到对应项目';
     filters.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.filter===filter)));
     archive.dispatchEvent(new CustomEvent('kelen-program-filter',{detail:{indices}}));
     if(indices.length&&!indices.includes(current))archive.dispatchEvent(new CustomEvent('kelen-program-select',{detail:{index:indices[0]}}));

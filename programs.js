@@ -78,7 +78,7 @@
   archive.dataset.preview='idle';
   function syncPreview(index) {
     archive.dataset.preview=index>=0 ? 'active' : 'idle';
-    controls.querySelector('span').textContent=archive.dataset.view==='records' ? '弧形档案 · 左右切换' : index>=0 ? '点击展示牌 · 打开档案' : '悬停展台 · 标牌升起';
+    controls.querySelector('span').textContent=archive.dataset.view==='records' ? '弧形档案 · 左右切换' : index>=0 ? '点击展示牌 · 打开档案' : '移动跟随 · 拖动旋转 · 悬停升牌';
     demoToggle.hidden=(archive.dataset.view!=='records' && index<0) || motion.matches;
   }
 
@@ -98,7 +98,7 @@
     });
   }
 
-  function select(index) {
+  function select(index,focusSphere=false) {
     current = (index + cards.length) % cards.length;
     archive.dataset.selected = String(current);
     stations.forEach((station,i) => station.classList.toggle('is-selected',i === current));
@@ -122,10 +122,10 @@
     syncHallAction(current);
     overviewCopy.hidden = archive.dataset.view === 'records';
     controls.querySelector('output').textContent = `${number(current)} / ${total}`;
-    controls.querySelector('span').textContent = archive.dataset.view === 'records' ? '弧形档案 · 左右切换' : archive.dataset.preview==='active' ? '点击展示牌 · 打开档案' : '悬停展台 · 标牌升起';
+    controls.querySelector('span').textContent = archive.dataset.view === 'records' ? '弧形档案 · 左右切换' : archive.dataset.preview==='active' ? '点击展示牌 · 打开档案' : '移动跟随 · 拖动旋转 · 悬停升牌';
     demoToggle.hidden=(archive.dataset.view!=='records' && archive.dataset.preview!=='active') || !depth || motion.matches;
     window.KelenProgramCatalog?.select(current);
-    depth?.setState(current,archive.dataset.view);
+    depth?.setState(current,archive.dataset.view,{focus:focusSphere});
     if(archive.dataset.view==='records'){const url=new URL(location.href);url.searchParams.set('program',projects[current]?.id||String(current));history.replaceState(null,'',url);}
   }
 
@@ -151,12 +151,12 @@
   });
   leaves.forEach((button,i) => button.addEventListener('click',() => select(i)));
   read.addEventListener('click',() => open(current));
-  function stepSelection(direction){if(!available.length)return;const at=available.indexOf(current);select(available[(at+direction+available.length)%available.length]);}
+  function stepSelection(direction){if(!available.length)return;const at=available.indexOf(current);select(available[(at+direction+available.length)%available.length],true);}
   controls.querySelector('[data-program-prev]').addEventListener('click',() => stepSelection(-1));
   controls.querySelector('[data-program-next]').addEventListener('click',() => stepSelection(1));
   let swipe;
   let swiped=false;
-  viewport.addEventListener('pointerdown',event => {if(event.pointerType !== 'mouse')swipe={x:event.clientX,y:event.clientY};});
+  viewport.addEventListener('pointerdown',event => {if(archive.dataset.view==='records'&&event.pointerType !== 'mouse')swipe={x:event.clientX,y:event.clientY};});
   viewport.addEventListener('pointerup',event => {
     if(!swipe)return;
     const dx=event.clientX-swipe.x,dy=event.clientY-swipe.y;swipe=null;
@@ -180,7 +180,7 @@
     open(index);
     viewport.scrollIntoView({behavior:motion.matches ? 'instant' : 'smooth',block:'center'});
   });
-  archive.addEventListener('kelen-program-select',event=>{const index=Number(event.detail?.index);if(Number.isInteger(index)&&index>=0&&index<cards.length)select(index);});
+  archive.addEventListener('kelen-program-select',event=>{const index=Number(event.detail?.index);if(Number.isInteger(index)&&index>=0&&index<cards.length)select(index,true);});
   archive.addEventListener('kelen-program-filter',event=>{available=event.detail.indices;});
   archive.addEventListener('keydown',event => {
     if (event.target.closest('details,a,input,textarea,select,[contenteditable]')) return;
@@ -207,5 +207,5 @@
   }
   const requested=new URL(location.href).searchParams.get('program');
   const initial=projects.findIndex(p=>p.id===(requested||'voice'));
-  select(initial>=0?initial:0);if(requested&&initial>=0)open(initial);
+  select(initial>=0?initial:0,true);if(requested&&initial>=0)open(initial);
 })();

@@ -47,3 +47,6 @@
 [data-theme=colors] .hall-project-flow small{color:#9aa6be}
 @container program-gallery (max-width:700px){.hall-catalog-tools{flex-wrap:wrap;gap:9px}.hall-catalog-search{width:100%}.hall-catalog-search input{flex:1}.hall-catalog-list{grid-template-columns:repeat(3,minmax(0,1fr))}.hall-project-copy{padding:20px}.hall-project-heading h3{font-size:22px}}
 @container program-gallery (max-width:430px){.hall-catalog{padding:12px}.hall-catalog-list{display:flex;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:6px}.hall-catalog-list .hall-catalog-item{flex:0 0 135px;scroll-snap-align:start}.hall-catalog-item span{font-size:11px}.hall-catalog-filters button{font-size:8px;padding:6px 8px}.hall-project-heading{display:block}.hall-project-heading>span{display:block;text-align:left;max-width:none;margin-top:8px}.hall-project-copy{padding:18px}.hall-project-copy>p{font-size:11px}.hall-project-flow{gap:14px}.hall-project-flow li{font-size:11px}.hall-project-copy details{font-size:11px}}
+
+.program-archive.is-enhanced[data-view=overview] .plugin-viewport{height:clamp(430px,50cqw,650px)}
+.program-archive.is-enhanced[data-view=overview] .plugin-depth-stage{touch-action:none;cursor:grab}

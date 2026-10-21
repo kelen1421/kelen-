@@ -53,10 +53,16 @@
     const names=cards.map(card=>card.querySelector('h3').textContent);
     const total=cards.length,number=index=>String(index+1).padStart(2,'0');
     const overview = new T.Group(),gallery = new T.Group();scene.add(overview,gallery);
+    const orbital=new T.Group();overview.add(orbital);
+    const sphereRadius=2.9,stationScale=.62;
+    const orbitBase=new T.Vector2(.1,-.25),orbit=new T.Vector2(.1,-.25),orbitPointer=new T.Vector2(),orbitVelocity=new T.Vector2();
+    let orbitDrag=null,suppressClick=false;
+    const phi=(1+Math.sqrt(5))/2;
+    const directions=[[0,1,phi],[0,-1,phi],[0,1,-phi],[0,-1,-phi],[1,phi,0],[-1,phi,0],[1,-phi,0],[-1,-phi,0],[phi,0,1],[-phi,0,1],[phi,0,-1],[-phi,0,-1]].map(v=>new T.Vector3(...v).normalize());
     const shadow = new T.Mesh(new T.PlaneGeometry(22,22),new T.ShadowMaterial({opacity:.13}));
-    shadow.rotation.x=-Math.PI/2;shadow.position.y=-.12;shadow.receiveShadow=true;overview.add(shadow);
+    shadow.rotation.x=-Math.PI/2;shadow.position.y=-.12;shadow.receiveShadow=true;shadow.visible=false;overview.add(shadow);
     const grid = new T.GridHelper(16,16,0xbdbfb0,0xbdbfb0);
-    grid.material.transparent=true;grid.material.opacity=.16;grid.position.y=-.095;overview.add(grid);
+    grid.material.transparent=true;grid.material.opacity=.16;grid.position.y=-.095;grid.visible=false;overview.add(grid);
     function mesh(parent,geometry,material,x=0,y=0,z=0) {
       const value=new T.Mesh(geometry,material);value.position.set(x,y,z);
       value.castShadow=true;value.receiveShadow=true;parent.add(value);return value;
@@ -116,11 +122,13 @@
       const paint=time=>{demo.paint(time);ctx.drawImage(demo.canvas,58,380,1084,466);texture.needsUpdate=true;};
       paint(2.4);return {texture,paint};
     }
-    const positions=[[-1.65,-1.65],[1.65,-1.65],[-1.65,1.65],[1.65,1.65]];
+    const sphereUp=new T.Vector3(0,1,0);
+    const faceNormal=new T.Vector3(),stationWorld=new T.Vector3(),cameraDirection=new T.Vector3();
+    const orbitWorldRotation=new T.Quaternion(),stationFacing=new T.Quaternion().setFromEuler(new T.Euler(.04,-.2,0));
     const hits=[],stations=[];
     cards.forEach((card,index) => {
-      const [x,z]=positions[index%4],id=entries[index]?.id;
-      const group=new T.Group();group.position.set(x,0,z);overview.add(group);
+      const direction=directions[index%directions.length],id=entries[index]?.id;
+      const group=new T.Group();group.position.copy(direction).multiplyScalar(sphereRadius);group.rotation.y=-.2;orbital.add(group);
       group.userData.program=index;
       box(group,1.76,.09,1.52,edge,0,0,0);
       box(group,1.66,.075,1.42,metal,0,.07,0);
@@ -178,9 +186,9 @@
       const labelMaterial=new T.MeshBasicMaterial({map:restTexture,toneMapped:false});
       const label=mesh(group,new T.BoxGeometry(1.42,.035,.85),[metal,metal,labelMaterial,metal,metal,metal],0,.175,.6);
       label.rotation.y=-.1;
-      hits.push(group);stations.push({group,model,label,labelMaterial,restTexture,demo,flight:0,index});
+      hits.push(group);stations.push({group,model,label,labelMaterial,restTexture,demo,flight:0,index,direction,frontFacing:true});
     });
-    const core=new T.Group();overview.add(core);
+    const core=new T.Group();orbital.add(core);
     box(core,.67,.85,.67,glass,0,.52,0);
     const coreEdges=new T.LineSegments(new T.EdgesGeometry(new T.BoxGeometry(.7,.88,.7)),new T.LineBasicMaterial({color:0x9caa8e,transparent:true,opacity:.8}));
     coreEdges.position.y=.52;core.add(coreEdges);
@@ -190,11 +198,21 @@
     const kFace=new T.Mesh(new T.PlaneGeometry(.42,.42),new T.MeshBasicMaterial({map:kTexture,transparent:true,depthWrite:false}));
     kFace.position.set(0,.55,.353);core.add(kFace);
     const wires=[];
-    for(const [x,z] of positions) {
-      const points=[];
-      for(let i=0;i<24;i++){const p=i/23;points.push(new T.Vector3(x*p,-.075,z*p));}
+    function sphereLine(points,opacity=.25){
       const geometry=new T.BufferGeometry().setFromPoints(points);
-      const line=new T.Line(geometry,new T.LineBasicMaterial({color:0x9b9f8d,transparent:true,opacity:.6}));overview.add(line);wires.push(line);
+      const line=new T.Line(geometry,new T.LineBasicMaterial({color:0x9ba88d,transparent:true,opacity,depthWrite:false}));line.userData.points=points.length;orbital.add(line);wires.push(line);
+    }
+    for(let longitude=0;longitude<6;longitude++){
+      const a=longitude*Math.PI/6;
+      sphereLine(Array.from({length:97},(_,i)=>{const t=i/96*Math.PI*2;return new T.Vector3(Math.sin(t)*Math.cos(a)*sphereRadius,Math.cos(t)*sphereRadius,Math.sin(t)*Math.sin(a)*sphereRadius);}));
+    }
+    for(const latitude of [-Math.PI/3,-Math.PI/6,0,Math.PI/6,Math.PI/3]){
+      sphereLine(Array.from({length:97},(_,i)=>{const t=i/96*Math.PI*2,r=Math.cos(latitude)*sphereRadius;return new T.Vector3(Math.cos(t)*r,Math.sin(latitude)*sphereRadius,Math.sin(t)*r);}),.19);
+    }
+    const globe=new T.Mesh(new T.SphereGeometry(sphereRadius-.07,48,32),new T.MeshPhysicalMaterial({color:0xe8eee1,roughness:.6,metalness:.04,transparent:true,opacity:.075,depthWrite:false,side:T.FrontSide}));orbital.add(globe);
+    function focusSphere(index){
+      const n=directions[index%directions.length];
+      orbitBase.set(Math.atan2(n.y,Math.hypot(n.x,n.z)),-Math.atan2(n.x,n.z));orbitPointer.set(0,0);orbitVelocity.set(0,0);
     }
 
     const panels=[],ribs=[];
@@ -239,7 +257,7 @@
     const restPosition=new T.Vector3(0,.175,.6),restRotation=new T.Quaternion().setFromEuler(new T.Euler(0,-.1,0));
     const flightRotation=new T.Quaternion(),parentRotation=new T.Quaternion(),localRotation=new T.Quaternion();
     const flightEuler=new T.Euler(0,0,0,'YXZ');
-    const overviewEye=new T.Vector3(5.4,6.5,7.7),overviewTarget=new T.Vector3(0,.45,0);
+    const overviewEye=new T.Vector3(0,5.4,11.5),overviewTarget=new T.Vector3(0,0,0);
     const galleryEye=new T.Vector3(0,2.08,.25),galleryTarget=new T.Vector3(0,1.92,-radius);
     const drift=new T.Vector2(),driftTarget=new T.Vector2();
     const smooth=p=>{const t=Math.max(0,Math.min(1,p));return t*t*(3-2*t);};
@@ -265,7 +283,7 @@
       if(intro>=1)finishIntro();
       overview.visible=mix<.86;gallery.visible=mix>.03;
       overview.scale.setScalar(1-mix*.48);overview.rotation.y=-mix*.36;overview.position.y=-mix*.75;
-      zoom.set(3.7,3.7,5.4).lerp(overviewEye,intro);
+      zoom.copy(overviewEye).multiplyScalar(1.12-.12*intro);
       eye.copy(zoom).lerp(galleryEye,mix);
       drift.lerp(driftTarget,motion.matches ? 1 : follow*.6);
       if(!motion.matches){eye.x+=drift.x*.28;eye.y+=drift.y*.15;}
@@ -276,18 +294,23 @@
       normal.copy(eye).sub(flightWorld).normalize();
       flightEuler.set(Math.atan2(Math.hypot(normal.x,normal.z),normal.y),Math.atan2(normal.x,normal.z),0,'YXZ');
       flightRotation.setFromEuler(flightEuler);
+      if(view==='overview' && !orbitDrag?.moved && previewIndex<0){orbitBase.x+=orbitVelocity.x*dt;orbitBase.y+=orbitVelocity.y*dt;orbitVelocity.multiplyScalar(Math.exp(-dt*5));}
+      orbitBase.x=Math.max(-1.3,Math.min(1.3,orbitBase.x));
+      if(previewIndex<0||orbitDrag?.moved){orbit.x+=((orbitBase.x+orbitPointer.y*.28)-orbit.x)*follow;orbit.y+=((orbitBase.y+orbitPointer.x*.65)-orbit.y)*follow;}
+      orbital.rotation.set(orbit.x,orbit.y,0,'XYZ');
+      orbital.updateWorldMatrix(true,true);
       core.rotation.y=-Math.PI/5+(1-intro)*Math.PI*.7;
       core.scale.setScalar(1+.55*(1-intro));
-      wires.forEach(line=>line.geometry.setDrawRange(0,Math.round(24*smooth((intro-.15)/.48))));
+      wires.forEach(line=>line.geometry.setDrawRange(0,Math.round(line.userData.points*smooth((intro-.15)/.48))));
       stations.forEach(station=>{
         const {group,label,labelMaterial,restTexture,demo,index}=station;
-        const born=introDone ? 1 : smooth(((now-introStart)-280-(index%4)*90)/750);
-        group.visible=born>.001&&Math.floor(index/4)===Math.floor(current/4);
-        if(!group.visible)return;
-        group.scale.setScalar(.62+.38*born);
-        const hover=index===previewIndex && view==='overview' ? .06 : 0;
-        const desired=-(1-born)*.65+hover;
-        group.position.y += (desired-group.position.y)* (introDone ? follow : 1);
+        const born=introDone ? 1 : smooth(((now-introStart)-150-index*35)/750);
+        group.visible=born>.001;if(!group.visible)return;
+        group.scale.setScalar(stationScale*(.62+.38*born));
+        orbital.getWorldQuaternion(orbitWorldRotation);group.quaternion.copy(orbitWorldRotation).invert().multiply(stationFacing);
+        const hover=index===previewIndex&&view==='overview' ? .12 : 0;
+        group.position.copy(station.direction).multiplyScalar(sphereRadius-(1-born)*.7+hover);
+        group.getWorldPosition(stationWorld);faceNormal.copy(station.direction).applyEuler(orbital.rotation);cameraDirection.copy(camera.position).sub(stationWorld).normalize();station.frontFacing=faceNormal.dot(cameraDirection)>.02;
         const goal=index===previewIndex && view==='overview' ? 1 : 0;
         station.flight += (goal-station.flight)*(motion.matches ? 1 : 1-Math.exp(-dt/.18));
         if(Math.abs(station.flight-goal)<.001)station.flight=goal;
@@ -299,7 +322,7 @@
         group.getWorldQuaternion(parentRotation);
         localRotation.copy(parentRotation).invert().multiply(flightRotation);
         label.quaternion.slerpQuaternions(restRotation,localRotation,turn);
-        label.scale.set(1+(3.45/1.42-1)*grow,1,1+(2.875/.85-1)*grow);
+        label.scale.set(1+(3.45/1.42/stationScale-1)*grow,1,1+(2.875/.85/stationScale-1)*grow);
         label.castShadow=p<.28;
         const wantedTexture=p>.12 ? demo.texture : restTexture;
         if(labelMaterial.map!==wantedTexture){labelMaterial.map=wantedTexture;labelMaterial.needsUpdate=true;}
@@ -345,6 +368,7 @@
       renderer.setSize(bounds.width,bounds.height,false);
       camera.aspect=bounds.width/bounds.height;
       camera.fov=camera.aspect<1.25 ? 44 : 37;
+      overviewEye.set(0,5.4,Math.max(11.5,11.2/camera.aspect));
       galleryTarget.x=0;
       overviewTarget.x=0;
       camera.updateProjectionMatrix();
@@ -354,7 +378,7 @@
       const rect=renderer.domElement.getBoundingClientRect();
       pointer.set((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1);
       raycaster.setFromCamera(pointer,camera);
-      const objects=(view==='overview' ? stations : panels).filter(x=>x.group.visible).map(x=>x.group);
+      const objects=(view==='overview' ? stations : panels).filter(x=>x.group.visible&&(view!=='overview'||x.frontFacing)).map(x=>x.group);
       const hits=raycaster.intersectObjects(objects,true);
       for(const hit of hits) {
         let node=hit.object;
@@ -366,22 +390,42 @@
         }
       }
     }
+    host.addEventListener('pointerdown',event=>{
+      if(view!=='overview'||(event.pointerType==='mouse'&&event.button!==0))return;
+      orbitDrag={id:event.pointerId,x:event.clientX,y:event.clientY,startX:event.clientX,startY:event.clientY,last:performance.now(),moved:false};
+      orbitVelocity.set(0,0);host.setPointerCapture(event.pointerId);
+    });
     host.addEventListener('pointermove',event=>{
-      if(event.pointerType!=='mouse')return;
       const bounds=host.getBoundingClientRect();
-      driftTarget.set((event.clientX-bounds.left)/bounds.width-.5,-((event.clientY-bounds.top)/bounds.height-.5));
-      const index=hit(event);renderer.domElement.style.cursor=index===undefined ? 'default' : 'pointer';
-      if(view==='overview') {
-        setPreview(index ?? -1);
-        if(index!==undefined && index!==current)callbacks.onSelect(index);
+      if(orbitDrag&&orbitDrag.id===event.pointerId){
+        const now=performance.now(),dx=event.clientX-orbitDrag.x,dy=event.clientY-orbitDrag.y,elapsed=Math.max(.016,(now-orbitDrag.last)/1000);
+        if(Math.hypot(event.clientX-orbitDrag.startX,event.clientY-orbitDrag.startY)>5)orbitDrag.moved=true;
+        if(orbitDrag.moved){
+          event.preventDefault();setPreview(-1);orbitPointer.set(0,0);orbitBase.y+=dx*.008;orbitBase.x+=dy*.006;
+          orbitVelocity.set(Math.max(-1.1,Math.min(1.1,dy*.006/elapsed)),Math.max(-1.8,Math.min(1.8,dx*.008/elapsed)));renderer.domElement.style.cursor='grabbing';
+        }
+        Object.assign(orbitDrag,{x:event.clientX,y:event.clientY,last:now});start();return;
       }
-    },{passive:true});
+      if(event.pointerType!=='mouse')return;
+      const x=(event.clientX-bounds.left)/bounds.width-.5,y=(event.clientY-bounds.top)/bounds.height-.5;
+      driftTarget.set(x,-y);orbitPointer.set(x,-y);
+      const index=hit(event);renderer.domElement.style.cursor=index===undefined?'grab':'pointer';
+      if(view==='overview'){setPreview(index??-1);if(index!==undefined&&index!==current)callbacks.onSelect(index);}
+    },{passive:false});
+    function endOrbit(event){
+      if(!orbitDrag||orbitDrag.id!==event.pointerId)return;
+      suppressClick=orbitDrag.moved;if(event.type==='pointercancel')orbitVelocity.set(0,0);
+      orbitDrag=null;if(host.hasPointerCapture(event.pointerId))host.releasePointerCapture(event.pointerId);
+      renderer.domElement.style.cursor='grab';start();
+    }
+    host.addEventListener('pointerup',endOrbit);host.addEventListener('pointercancel',endOrbit);
     host.addEventListener('pointerleave',event=>{
-      driftTarget.set(0,0);renderer.domElement.style.cursor='default';
+      if(orbitDrag)return;driftTarget.set(0,0);orbitPointer.set(0,0);renderer.domElement.style.cursor='grab';
       if(!event.relatedTarget?.closest?.('.plugin-vault-top,.plugin-scene-controls,.plugin-inspector'))setPreview(-1);
     });
-    archive.addEventListener('pointerleave',()=>setPreview(-1));
+    archive.addEventListener('pointerleave',()=>{if(!orbitDrag)setPreview(-1);});
     host.addEventListener('click',event=>{
+      if(suppressClick){suppressClick=false;event.preventDefault();event.stopPropagation();return;}
       const target=hit(event,true);if(target){if(view==='overview')callbacks.onOpen(target.index);else if(target.action)callbacks.onAction?.(target.index);else callbacks.onSelect(target.index);}
     });
     const observer=new IntersectionObserver(([entry])=>{
@@ -412,9 +456,9 @@
     archive.querySelector('.plugin-stations').hidden=true;
     archive.querySelector('.plugin-cylinder').hidden=true;
     resize();
-    return {setState(index,nextView) {
+    return {setState(index,nextView,options={}) {
       if(current!==index){demoTime=2.4;demoLastPaint=-Infinity;}
-      if(Math.floor(current/4)!==Math.floor(index/4))setPreview(-1);
+      if(nextView==='overview'&&(view!=='overview'||options.focus))focusSphere(index);
       current=index;view=nextView;
       if(view==='records')setPreview(-1);
       if(view==='records')finishIntro();
