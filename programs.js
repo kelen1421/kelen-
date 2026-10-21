@@ -171,7 +171,7 @@
     stage.hidden = true;
     back.hidden = true;
     select(current);
-    (depth ? read : stations[current])?.focus({preventScroll:true});
+    (depth ? controls.querySelector('[data-program-next]') : stations[current])?.focus({preventScroll:true});
   }
   back.addEventListener('click',showOverview);
   archive.addEventListener('kelen-program-open',event => {
