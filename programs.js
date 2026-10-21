@@ -153,6 +153,12 @@
     (depth ? read : stations[current])?.focus({preventScroll:true});
   }
   back.addEventListener('click',showOverview);
+  archive.addEventListener('kelen-program-open',event => {
+    const index=Number(event.detail?.index);
+    if(!Number.isInteger(index) || index<0 || index>=cards.length)return;
+    open(index);
+    archive.scrollIntoView({behavior:motion.matches ? 'instant' : 'smooth',block:'start'});
+  });
   archive.addEventListener('keydown',event => {
     if (event.target.closest('details,a')) return;
     if (event.key === 'Escape' && archive.dataset.view === 'records') {

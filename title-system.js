@@ -26,7 +26,7 @@
   title('.profile-unfold-copy h3',{first:'从思考',particle:'到',second:'认识',outline:'彼此',label:'从思考，到认识彼此',caption:'PROFILE / OPEN FILE',variant:'intro'});
   title('.profile-copy h2',{first:'谢凯伦',particle:'也可以叫我',outline:'kelen',label:'谢凯伦，也可以叫我 kelen',caption:'PROFILE / WHO I AM',variant:'identity'});
   title('.archive-brand h2',{first:'个人',second:'研究',outline:'档案',label:'个人研究档案',caption:'PERSONAL RESEARCH ARCHIVE',variant:'research'});
-  title('#programs-title',{first:'个人',second:'程序',outline:'档案',label:'个人程序档案',caption:'PERSONAL TOOL ARCHIVE'});
+  title('#programs-title',{first:'程序',particle:'与',outline:'项目',label:'个人程序与项目',caption:'PERSONAL DEVELOPMENT ARCHIVE'});
   title('#resume-title',{first:'履',firstOutline:'历',label:'履历',caption:'EDITORIAL EXPERIENCE',variant:'short'});
   title('.resume-role h3',{first:'科普',particle:'内容的',second:'后期',outline:'制作',label:'科普内容的后期制作',caption:'SCIENCE / POST PRODUCTION',variant:'role'});
   title('.resume-process-heading h3',{first:'从读稿',particle:'到',firstOutline:'成片',label:'从读稿，到成片',caption:'WORKFLOW / FIVE STAGES',variant:'process'});
