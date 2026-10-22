@@ -19,6 +19,9 @@
     window.dispatchEvent(new CustomEvent('kelen-theme-change', {detail: {theme}}));
   }
   buttons.forEach(button => button.addEventListener('click', () => applyTheme(button.dataset.setTheme, true)));
+  window.addEventListener('kelen-vortex-return', event => {
+    if (event.detail?.source === 'bottom') applyTheme(root.dataset.theme === 'colors' ? 'classic' : 'colors', true);
+  });
   window.addEventListener('popstate', () => {
     const requested = new URL(location.href).searchParams.get('theme');
     if (valid(requested)) applyTheme(requested);

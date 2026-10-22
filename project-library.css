@@ -37,6 +37,20 @@
 .hall-project-copy ul{padding-left:17px;margin:0 0 13px}
 .hall-project-copy li{margin-bottom:5px}
 .hall-project-copy details p{border-left:2px solid #bfcdb3;padding-left:12px;color:#7d8c73;margin:12px 0}
+.hall-function-map{--fm-line:#bcccb0;--fm-ink:#4c6541;--fm-muted:#839578;margin:22px 0 26px;padding:16px;background:#f5f8ee;border:1px solid var(--fm-line);color:var(--fm-ink)}
+.hall-function-header{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 0 13px}
+.hall-function-header figcaption{font:10px/1.7 var(--sans);letter-spacing:.04em}
+.hall-function-header button{font:9px/1.5 var(--sans);color:inherit;background:transparent;border:1px solid var(--fm-line);padding:5px 10px;cursor:pointer}
+.hall-function-header button:focus-visible{outline:2px solid var(--fm-ink);outline-offset:3px}
+.hall-function-visual{aspect-ratio:1024/384;overflow:hidden;border-bottom:1px solid var(--fm-line);border-radius:3px}
+.hall-function-map canvas{display:block;width:100%;height:auto;aspect-ratio:1024/440;border-radius:3px}
+.hall-function-map .hall-project-flow{margin:20px 0 0;gap:18px}
+.hall-function-map .hall-project-flow li{color:var(--fm-muted);font-size:11px;transition:color .25s,border-color .25s}
+.hall-function-map .hall-project-flow li.is-active{color:var(--fm-ink);border-color:var(--fm-ink)}
+.hall-function-map .hall-project-flow li.is-active:before{background:var(--fm-ink);box-shadow:0 0 0 3px color-mix(in srgb,var(--fm-ink) 12%,transparent)}
+[data-theme=colors] .hall-function-map{--fm-line:#bccbe1;--fm-ink:#526a90;--fm-muted:#8b9bb6;background:#f5f8ff}
+[data-theme=colors] .hall-function-map canvas{filter:hue-rotate(160deg) saturate(.78)}
+@container program-gallery (max-width:430px){.hall-function-map{margin:18px -7px 21px;padding:10px}.hall-function-header{gap:8px}.hall-function-header figcaption{font-size:8px}.hall-function-header button{font-size:8px;padding:4px 6px}.hall-function-map .hall-project-flow{gap:10px;margin-top:14px}.hall-function-map .hall-project-flow li{font-size:9px}}
 [data-theme=colors] .hall-catalog{--hc-ink:#51658e;--hc-muted:#8293b1;--hc-line:#bdcbe0;--hc-paper:#f7faff;--hc-wash:#e9edf9}
 [data-theme=colors] .hall-catalog-item[aria-pressed=true]{background:linear-gradient(120deg,#e3f4fa,#f2eafa)}
 [data-theme=colors] .hall-project-copy{background:linear-gradient(125deg,#f7faff,#eef0fa);border-color:#bbc9df;color:#536b8c}

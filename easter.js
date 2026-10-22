@@ -81,7 +81,7 @@
 
   // Reach the real page end with a wheel, swipe or navigation key. Layout
   // changes and restored scroll positions alone do not reveal the secret.
-  let bottomIntentAt=0,bottomTimer,bottomFrame,touchStartY;
+  let bottomIntentAt=0,bottomTimer,bottomFrame,touchStartY,bottomArmed=true;
   function clearBottomTrigger(){
     clearTimeout(bottomTimer);cancelAnimationFrame(bottomFrame);
     bottomTimer=bottomFrame=undefined;
@@ -91,7 +91,7 @@
     return page.scrollHeight>innerHeight+80&&page.scrollHeight-page.scrollTop-innerHeight<=12;
   }
   function canRevealBottom(){
-    return !triggered&&!active&&!document.hidden&&!root.classList.contains('intro-pending')&&
+    return bottomArmed&&!active&&!document.hidden&&!root.classList.contains('intro-pending')&&
       !root.classList.contains('profile-layout-changing')&&!document.querySelector('dialog[open]');
   }
   function checkBottom(){
@@ -114,6 +114,8 @@
     if(!event.ctrlKey&&!event.defaultPrevented&&outsideReadingArea(event.target))bottomIntent(event.deltaY);
   },{passive:true});
   window.addEventListener('scroll',()=>{
+    const page=document.scrollingElement||root;
+    if(!active&&page.scrollHeight-page.scrollTop-innerHeight>240)bottomArmed=true;
     if(bottomIntentAt&&performance.now()-bottomIntentAt<1800&&!bottomFrame)bottomFrame=requestAnimationFrame(checkBottom);
   },{passive:true});
   window.addEventListener('touchstart',event=>{touchStartY=event.touches[0]?.clientY;},{passive:true});
@@ -131,9 +133,10 @@
   window.addEventListener('blur',()=>{bottomIntentAt=0;touchStartY=undefined;clearBottomTrigger();});
 
   function openPortal(source='gesture') {
-    if (active || triggered) return;
-    // A new page visit gets one discovery; Escape never rearms the gesture.
+    if (active || (source==='bottom' ? !bottomArmed : triggered)) return;
+    // The gesture is one discovery per visit; the bottom portal rearms after leaving the page end.
     triggered = true;
+    if(source==='bottom')bottomArmed=false;
     resetGesture();clearBottomTrigger();
     const hole = {x:innerWidth*.5,y:innerHeight*.48};
     const previousFocus = document.activeElement;
@@ -227,6 +230,8 @@
     function closePortal(restoreFocus = true) {
       if (!active) return;
       clearTimeout(readyTimer); cancelAnimationFrame(liquidFrame); scene.dispose();
+      if(restoreFocus&&source==='bottom')window.dispatchEvent(new CustomEvent('kelen-vortex-return',{detail:{source}}));
+      bottomIntentAt=0;clearBottomTrigger();
       animations.forEach(a => a.cancel());
       if (edgeFeather) frame.style.setProperty('--vortex-edge-feather',edgeFeather,edgePriority);
       else frame.style.removeProperty('--vortex-edge-feather');

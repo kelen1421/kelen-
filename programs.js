@@ -35,7 +35,7 @@
   const hallDetails=document.createElement('button');hallDetails.type='button';hallDetails.className='program-primary plugin-hall-primary';hallDetails.textContent='功能与状态 ↗';hallDetails.hidden=true;
   viewport.append(hallTitle,hallLink,hallDetails);
   const projectCopy=document.createElement('section');projectCopy.className='hall-project-copy';projectCopy.setAttribute('aria-label','所选项目说明');archive.append(projectCopy);
-  let lastActionRect;
+  let lastActionRect,functionMap;
   const activeAction=()=>cards[current].querySelector('a.program-primary') ? hallLink : hallDetails;
   hallDetails.addEventListener('click',()=>{const details=projectCopy.querySelector('details');details.open=true;details.scrollIntoView({block:'nearest',behavior:motion.matches?'instant':'smooth'});details.querySelector('summary').focus({preventScroll:true});});
   function syncHallAction(index) {
@@ -50,6 +50,7 @@
     hallTitle.textContent=names[index]+' · 功能演示';hallTitle.hidden=archive.dataset.view!=='records';
     hallLink.hidden=hallDetails.hidden=true;if(lastActionRect)placeHallAction(lastActionRect);
     const p=projects[index];
+    functionMap?.dispose();functionMap=null;
     projectCopy.replaceChildren();if(!p)return;
     const heading=document.createElement('div');heading.className='hall-project-heading';
     const name=document.createElement('h3');name.textContent=p.name;
@@ -58,7 +59,9 @@
     const flow=document.createElement('ol');flow.className='hall-project-flow';p.steps.forEach((text,i)=>{const li=document.createElement('li'),no=document.createElement('small');no.textContent=String(i+1).padStart(2,'0');li.append(no,text);flow.append(li);});
     const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='功能与当前状态 ＋';details.append(summary);
     const list=document.createElement('ul');p.features.forEach(text=>{const li=document.createElement('li');li.textContent=text;list.append(li);});
-    const note=document.createElement('p');note.textContent=p.note;details.append(list,note);projectCopy.append(heading,intro,flow,details);
+    const note=document.createElement('p');note.textContent=p.note;details.append(list,note);
+    if(archive.dataset.view==='records')functionMap=window.createProgramFunctionMap?.(index,{paused:demoPaused,onToggle:()=>setDemoPaused(!demoPaused)});
+    projectCopy.append(heading,intro,functionMap?.element||flow,details);
   }
   function placeHallAction(rect) {
     lastActionRect=rect;const action=activeAction();hallLink.hidden=hallDetails.hidden=true;
@@ -70,10 +73,11 @@
   demoToggle.textContent='暂停演示';demoToggle.setAttribute('aria-pressed','false');demoToggle.hidden=true;
   archive.querySelector('.plugin-vault-top').append(demoToggle);
   let demoPaused=false;
-  demoToggle.addEventListener('click',() => {
-    demoPaused=!demoPaused;demoToggle.setAttribute('aria-pressed',String(demoPaused));
-    demoToggle.textContent=demoPaused ? '播放演示' : '暂停演示';depth?.setDemoPaused(demoPaused);
-  });
+  function setDemoPaused(value){
+    demoPaused=value;demoToggle.setAttribute('aria-pressed',String(demoPaused));
+    demoToggle.textContent=demoPaused ? '播放演示' : '暂停演示';depth?.setDemoPaused(demoPaused);functionMap?.setPaused(demoPaused);
+  }
+  demoToggle.addEventListener('click',()=>setDemoPaused(!demoPaused));
   let current = 0, focusTimer, depth;
   archive.dataset.preview='idle';
   function syncPreview(index) {
@@ -91,6 +95,8 @@
     hallLink.hidden=hallDetails.hidden=true;
     cards.forEach((card,index) => {
       if(card.querySelector('.program-demo-preview') || !window.createProgramDemo)return;
+      const map=window.createProgramFunctionMap?.(index);
+      if(map){map.element.classList.add('program-demo-preview');card.querySelector('.program-art').replaceWith(map.element);return;}
       const demo=window.createProgramDemo(index),figure=document.createElement('figure'),caption=document.createElement('figcaption');
       figure.className='program-demo-preview';caption.textContent=`功能演示 · ${demo.caption}`;
       demo.canvas.setAttribute('aria-hidden','true');figure.append(demo.canvas,caption);

@@ -257,7 +257,7 @@
     const restPosition=new T.Vector3(0,.175,.6),restRotation=new T.Quaternion().setFromEuler(new T.Euler(0,-.1,0));
     const flightRotation=new T.Quaternion(),parentRotation=new T.Quaternion(),localRotation=new T.Quaternion();
     const flightEuler=new T.Euler(0,0,0,'YXZ');
-    const overviewEye=new T.Vector3(-1.8,2.7,6.4),overviewTarget=new T.Vector3(-1.8,0,0);
+    const overviewEye=new T.Vector3(0,5.4,11.5),overviewTarget=new T.Vector3(0,0,0);
     const galleryEye=new T.Vector3(0,2.08,.25),galleryTarget=new T.Vector3(0,1.92,-radius);
     const drift=new T.Vector2(),driftTarget=new T.Vector2();
     const smooth=p=>{const t=Math.max(0,Math.min(1,p));return t*t*(3-2*t);};
@@ -368,11 +368,9 @@
       renderer.setSize(bounds.width,bounds.height,false);
       camera.aspect=bounds.width/bounds.height;
       camera.fov=camera.aspect<1.25 ? 44 : 37;
-      // Close framing leaves the globe beyond the edges; rotating reveals its other side.
-      const sphereOffset=camera.aspect<1.25 ? .65 : 1.8;
-      overviewEye.set(-sphereOffset,2.7,camera.aspect<1.25 ? 7.2 : 6.4);
+      overviewEye.set(0,5.4,Math.max(11.5,11.2/camera.aspect));
       galleryTarget.x=0;
-      overviewTarget.x=-sphereOffset;
+      overviewTarget.x=0;
       camera.updateProjectionMatrix();
       start();if(motion.matches && visible)draw(performance.now());
     }
