@@ -59,6 +59,31 @@
       steps:['检索与预览','复用与调参','按需导出'],tags:['动效素材库','独立实例','逐帧预览'],
       features:['按名称与用途搜索既有动效，查看视频、多版本与原工程位置。','复用基础片头、线稿和透明标注，创建独立实例并调整支持的图层参数。','使用本地 Remotion 工程预览与渲染；目录删除支持撤销，原素材与实例分别保留。'],
       note:'工作台在本机运行。原生网页、视频素材与参数模板保留各自复用范围；透明成片需选择支持 alpha 的输出格式。'},
+    {id:'hueform',code:'HUE',name:'色序 Hueform',group:'web',platform:'WEB / COLOUR STUDIO',status:'在线体验',url:'https://hueform-color-studio.kepaniizzard400.chatgpt.site',linkLabel:'打开色序 ↗',aliases:['配色工作台','六公式','HSL','HEX','RGB','WCAG'],
+      intro:'从一个主色出发，按六种配色公式探索搭配，再把颜色放进海报、界面和比例里看效果。',
+      steps:['选定主色','公式与配色库','预览与导出'],tags:['六公式配色','22 套经典方案','黑白搭彩'],
+      features:['通过色轮、HEX 和 HSL 调整主色，切换互补、类似、三角、分裂互补、矩形四色与单色公式。','从 22 套经典配色中筛选，包含 10 套黑白搭彩；支持点击应用与本地收藏。','查看海报、界面、色彩比例和文字对比度；复制色值，导出 PNG、SVG、CSS 或 JSON。'],
+      note:'收藏保存在当前浏览器，可导出 JSON 备份。屏幕取色取决于浏览器支持；配色公式提供搭配起点，仍需结合实际设计判断。'},
+    {id:'organs',code:'CT',name:'器官空间',group:'web',platform:'LOCAL WEB / CT VOLUME',status:'本地原型',version:'2.1',aliases:['CT','X光','DICOM','NIfTI','器官重建'],
+      intro:'把 CT 切片放回三维空间，同时观察密度、器官表面和任意角度的内部剖面。',
+      steps:['导入体数据','三维与剖面','候选与导出'],tags:['物理坐标','自由剖面','肝血管预测'],
+      features:['导入 NIfTI、NRRD、MHA 或完整 DICOM 序列，按实际方向与间距还原空间。','查看三维密度、同病例标签表面与自由剖面，比较同一位置的不同视图。','在器官内提取阈值候选或运行肝血管专用模型，导出支持的 STL 与掩膜。'],
+      note:'影像在本机处理。无标签时只显示密度和切片；阈值候选不等于已确认解剖结构。当前原型未经临床效果验证，也未接入实体全息设备。'},
+    {id:'knowledge',code:'KB',name:'个人知识库',group:'web',platform:'LOCAL WEB / MARKDOWN',status:'本地原型',aliases:['知识神经网络','LLM Wiki','引用','资料地图'],
+      intro:'把资料、概念和项目连成有来源的知识网络，从一个问题回到原文，再沿关联继续找。',
+      steps:['收集资料','阅读与引用','检索与关联'],tags:['来源留存','知识网络','本地搜索'],
+      features:['将链接、笔记和文件放入收件箱，区分待整理资料与已经形成的知识页。','用 Markdown 组织来源摘要、概念、项目与问答，保留原文和引用关系。','在本地搜索并浏览知识网络；资料地图单独展示目录与文件的元数据。'],
+      note:'当前为本地知识库。收件箱保存不会自行启动后台 AI；资料盘点只读元数据，不等于逐份读完正文。此展示不公开库中的私人资料。'},
+    {id:'makgi',code:'MAK',name:'MAKGI 动作关键帧',group:'lab',platform:'LOCAL PYTHON / VIDEO',status:'实验原型',version:'0.4.3',aliases:['自适应关键帧','Motion Adaptive','插帧','RIFE'],
+      intro:'按动作和镜头变化安排图像锚帧，用插帧连接，再让质量反馈指向需要局部重做的片段。',
+      steps:['动作与镜头','锚帧与插值','风险与补帧'],tags:['锚帧预算','局部反馈','同预算对照'],
+      features:['规则规划动作阶段与相机变化，记录关键帧时刻和调用预算。','串联图像锚帧、运动估计、插值与局部补锚，输出视频和过程清单。','保存失败片段、风险项与同预算均匀方案的对照，便于继续复盘。'],
+      note:'真实图像生成路径仍需会话工具或外部结果，本地 CLI 尚不能独立全自动完成。现有实验未证明自适应稳定优于同预算均匀关键帧。'},
+    {id:'mimg',code:'MIMG',name:'MIMG 图像表示研究',group:'lab',platform:'LOCAL / RESEARCH',status:'研究原型',aliases:['数学图像表示','图像理解'],
+      intro:'探索图像表示与图像理解的另一种路径，保留方向介绍与阶段性研究状态。',
+      steps:['研究问题','原型探索','阶段记录'],tags:['图像表示','独立研究','原型探索'],
+      features:['围绕图像如何表示、如何被理解开展独立研究。','用原型探索候选思路，持续整理观察与未解决问题。','目前公开研究方向和阶段状态，具体方法与实验材料暂不展示。'],
+      note:'仍在研究与原型阶段，尚未形成通用效果结论。与 MAKGI 为独立项目。'},
     {id:'physics',code:'PHY',name:'物理模型',group:'web',platform:'WEB / 3D',status:'在线体验',hall:0,
       intro:'旋转一滴悬浮液体，改变材质和刚体尺寸，观察碰撞与流体的响应。',steps:['选择材质','调整刚体','观察响应'],tags:['液滴与刚体','三维交互'],features:['切换液体，调整密度、黏度、表面张力和刚体尺寸。','鼠标操作刚体，旋转或缩放镜头。'],note:'模型用于定性探索与观察。网页版入口位于下方交互展示厅。'},
     {id:'capture',code:'CAP',name:'截图助手',group:'desktop',platform:'MAC / APPLE SILICON',status:'可下载',version:'1.3.2',hall:1,
@@ -101,14 +126,16 @@
   archive.querySelector('.plugin-vault-top').after(host);
   const toolbar=e('div','hall-catalog-tools'),filters=e('div','hall-catalog-filters');filters.setAttribute('role','group');filters.setAttribute('aria-label','筛选展示厅项目');
   Object.entries(groups).forEach(([key,label])=>{const button=e('button','',label+' '+String(key==='all'?ordered.length:ordered.filter(p=>p.group===key).length).padStart(2,'0'));button.type='button';button.dataset.filter=key;button.setAttribute('aria-pressed',String(key==='all'));filters.append(button);});
-  const label=e('label','hall-catalog-search','搜索项目'),input=e('input');input.type='search';input.placeholder='名称 / 功能';label.append(input);toolbar.append(filters,label);
+  const label=e('label','hall-catalog-search','搜索项目'),input=e('input');input.type='search';input.placeholder='名称 / 缩写 / 功能';label.append(input);toolbar.append(filters,label);
   const chips=e('div','hall-catalog-list');chips.setAttribute('role','group');chips.setAttribute('aria-label','选择展示厅项目');
   const buttons=ordered.map((p,index)=>{const button=e('button','hall-catalog-item');button.type='button';button.append(e('small','',String(index+1).padStart(2,'0')+' / '+p.code),e('span','',p.name));button.setAttribute('aria-pressed','false');button.dataset.project=index;button.addEventListener('click',()=>archive.dispatchEvent(new CustomEvent('kelen-program-open',{detail:{index}})));chips.append(button);return button;});
   const result=e('p','hall-catalog-result');result.setAttribute('role','status');result.setAttribute('aria-live','polite');
   host.append(toolbar,chips,result);let filter='all',current=4;
+  const normalize=value=>String(value).normalize('NFKC').toLocaleLowerCase();
+  const searchText=ordered.map(p=>normalize([p.name,p.id,p.code,p.intro,p.platform,p.status,...p.tags,...p.steps,...p.features,...(p.aliases||[])].join(' ')));
   function filterProjects(){
-    const query=input.value.trim().toLocaleLowerCase(),indices=[];
-    buttons.forEach((button,index)=>{const p=ordered[index],matches=(filter==='all'||p.group===filter)&&[p.name,p.intro,...p.tags].join(' ').toLocaleLowerCase().includes(query);button.hidden=!matches;if(matches)indices.push(index);});
+    const terms=normalize(input.value).trim().split(/\s+/).filter(Boolean),indices=[];
+    buttons.forEach((button,index)=>{const p=ordered[index],matches=(filter==='all'||p.group===filter)&&terms.every(term=>searchText[index].includes(term));button.hidden=!matches;if(matches)indices.push(index);});
     result.textContent=indices.length?'可选择 '+indices.length+' 个项目 · 同一球面 / 拖动旋转':'没有找到对应项目';
     filters.querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.filter===filter)));
     archive.dispatchEvent(new CustomEvent('kelen-program-filter',{detail:{indices}}));

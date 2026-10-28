@@ -7,7 +7,7 @@
     {key:'life',name:'生命起源研究库',short:'生命起源',english:'ORIGIN OF LIFE',intro:'从随机化学组合，追问能跨越分裂的状态。',tags:['存留与积累','隔室与边界','局部化学','分裂与延续','框架与证据']},
     {key:'flight',name:'起飞与降落研究库',short:'起飞与降落',english:'FLIGHT & LANDING',intro:'沿着感知、控制与任务切换，拆解一次返回。',tags:['任务架构','状态估计','控制闭环','返回着陆','仿真与遥测']},
     {key:'population',name:'人口结构研究库',short:'人口结构',english:'POPULATION & SOCIETY',intro:'跟随一代人成长，观察结构与社会需求。',tags:['年龄结构','代际时间轴','住房需求','任务重组','照护支持']},
-    {key:'vision',name:'视觉算法研究库',short:'视觉算法',english:'VISION & REPRESENTATION',intro:'从动作锚帧到数学结构，记录原型与失败边界。',tags:['动作与镜头','同预算对照','数学结构','颜色与区域','输出一致性']},
+    {key:'vision',name:'视觉算法研究库',short:'视觉算法',english:'VISION & REPRESENTATION',intro:'从动作关键帧到图像表示，记录研究方向与阶段状态。',tags:['动作与镜头','同预算对照','图像表示','研究方向','阶段状态']},
     {key:'imaging',name:'切片与器官重建研究库',short:'切片与重建',english:'SLICES & RECONSTRUCTION',intro:'沿着切片、空间与标签，区分可见结构和推断。',tags:['物理坐标','体渲染','自由剖面','候选结构','模型范围']}
   ];
   libraries.forEach(library=>library.records=all.filter(record=>record.group===library.key));

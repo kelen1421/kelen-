@@ -188,6 +188,28 @@
         box(model,1.1,.65,.06,metal,0,.73,-.14);box(model,1,.55,.02,glass,0,.73,-.1);
         for(let i=0;i<3;i++)box(model,.18+i*.09,.045,.04,i===1?accent:warm,(i-1)*.26,.58+i*.15,-.05);
         box(model,.68,.035,.38,metal,0,.19,.35);box(model,.025,.42,.025,accent,.16,.75,-.02);
+      } else if(id==='hueform') {
+        const wheel=new T.Group();model.add(wheel);wheel.position.set(0,.74,0);wheel.rotation.x=.06;
+        [0x92b2a0,0xb4a4c3,0xc4b78b,0x8da9c0,0xc39b9b,0xa5b27e].forEach((color,i)=>{
+          const material=new T.MeshStandardMaterial({color,metalness:.18,roughness:.35});
+          const swatch=box(wheel,.3,.3,.065,material,Math.cos(i*Math.PI/3)*.32,Math.sin(i*Math.PI/3)*.32,0);swatch.rotation.z=i*Math.PI/3;
+        });mesh(wheel,new T.TorusGeometry(.47,.018,8,48),metal);mesh(wheel,new T.SphereGeometry(.12,20,12),glass,0,0,.1);
+      } else if(id==='organs') {
+        for(let i=0;i<4;i++){const sheet=box(model,.78,.75,.025,i===2?glass:metal,(i-1.5)*.1,.67,(i-1.5)*.16);sheet.rotation.y=-.3;}
+        const organ=mesh(model,new T.SphereGeometry(.29,20,14),accent,.03,.68,.29);organ.scale.set(1,.74,.37);
+        const cut=box(model,.025,.81,.64,glass,.05,.66,.1);cut.rotation.z=-.2;
+      } else if(id==='knowledge') {
+        const positions=[[-.44,.43,.04],[-.27,.94,-.08],[.07,.67,.23],[.4,1,-.04],[.47,.38,.08]];
+        for(const [x,y,z]of positions)mesh(model,new T.SphereGeometry(.105,16,12),glass,x,y,z);
+        for(const [a,b]of [[0,1],[0,2],[1,2],[2,3],[2,4],[3,4]]){
+          const av=new T.Vector3(...positions[a]),bv=new T.Vector3(...positions[b]),link=mesh(model,new T.CylinderGeometry(.018,.018,av.distanceTo(bv),10),accent);link.position.copy(av).add(bv).multiplyScalar(.5);link.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),bv.sub(av).normalize());
+        }
+      } else if(id==='makgi') {
+        for(let i=0;i<3;i++){const sheet=frame(model,.37,.48,.04,metal);sheet.position.set((i-1)*.4,.67,Math.sin(i)*.12);box(sheet,.33,.44,.015,glass);mesh(sheet,new T.SphereGeometry(.055,12,8),accent,0,.09,.04);box(sheet,.025,.15,.02,accent,0,-.05,.04);}
+        box(model,1.12,.025,.04,accent,0,.29,.05);
+      } else if(id==='mimg') {
+        const boundary=frame(model,.85,.78,.055,metal);boundary.position.set(0,.67,0);box(boundary,.81,.74,.02,glass);
+        mesh(model,new T.TorusGeometry(.23,.025,8,36),accent,0,.67,.07);mesh(model,new T.SphereGeometry(.085,16,12),glass,0,.67,.09);
       } else if(id==='pagepick'||id==='atelier') {
         for(let i=0;i<3;i++){const paper=box(model,.62,.7,.035,i===1?glass:metal,(i-1)*.17,.67,(i-1)*.18);paper.rotation.y=-.24;for(let j=0;j<3;j++)box(paper,.38,.017,.015,accent,0,.18-j*.13,.035);}
       } else {

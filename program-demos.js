@@ -205,6 +205,40 @@
         const input='公开网页内容 / HTML';text(step===0?input.slice(0,Math.max(1,Math.ceil(phase*input.length))):input,69,167,19,soft);
         ['正文','媒体与字幕','导出资料'].forEach((v,i)=>{const reveal=step===0?.08:step===1?ease((phase-i*.17)/.66):1;rect(51+i*310,210,292,116,paper,line);text(v,69+i*310,245,22);meter(70+i*310,271,234,reveal);path([[70+i*310,291],[70+i*310+199*reveal,291]],line);focusArea(51+i*310,210,292,116,i===step);});
         if(step===2){rect(713,282,226,29,'#e0ebd5',null,3);text(['TXT','Markdown','JSON'][Math.floor(t*1.1)%3]+'  ↓',732,304,17,ink);cursor(890,296);}
+      } else if(project?.id==='hueform'){
+        rect(28,79,292,278,paper,line);text('选择主色',50,116,23);
+        const hue=83+Math.sin(t*.45)*24,cx=171,cy=224,r=74;
+        for(let i=0;i<36;i++){const a=i/36*Math.PI*2;c.beginPath();c.arc(cx,cy,r,a,a+Math.PI/18+.01);c.arc(cx,cy,r-17,a+Math.PI/18+.01,a,true);c.closePath();c.fillStyle=`hsl(${i*10} 40% 64%)`;c.fill();}
+        circle(cx,cy,39,`hsl(${hue} 41% 56%)`,paper);const angle=hue/180*Math.PI;circle(cx+Math.cos(angle)*(r-8),cy+Math.sin(angle)*(r-8),7,paper,ink);
+        const formulas=['互补色','类似色','三角色','分裂互补','矩形四色','单色搭配'],mode=Math.floor(t/3.2)%6;
+        rect(347,79,649,278,paper,line);text('六公式 / 22 套经典配色',369,116,23);text(formulas[mode],812,115,20,soft);
+        const offsets=[[0,180],[-30,0,30],[0,120,240],[0,150,210],[0,60,180,240],[0,0,0]][mode];
+        offsets.forEach((offset,i)=>{const w=582/offsets.length,light=mode===5?35+i*21:56;rect(369+i*w,144,w-8,94,`hsl(${(hue+offset+360)%360} 41% ${light}%)`,null,3);});
+        rect(369,254,275,77,'#edf2e7',line,3);text('海报 / 界面 / 比例',384,283,20);meter(385,304,235,.4+.4*phase);
+        rect(668,254,302,77,step===2?'#e0ebd6':paper,line,3);text(step===2?'PNG · SVG · CSS · JSON':'文字对比度 / 本地收藏',684,283,18,step===2?ink:soft);text(step===2?'导出配色 →':'预览后再决定',684,311,20,ink);
+      } else if(project?.id==='organs'){
+        rect(28,79,279,278,paper,line);text('CT 体数据',49,116,23);
+        for(let i=0;i<4;i++){rect(63+i*15,163-i*15,150,126,i===step?'#dce8d1':paper,line,2);circle(139+i*15,224-i*15,29,null,soft);}
+        text('方向 / 间距 / 位置',51,331,18,soft);transfer(318,215,349,215,t);
+        rect(361,79,336,278,'#e8efdf',line);text('三维与自由剖面',382,116,23);
+        c.save();c.translate(526,222);c.scale(1.12,.8);circle(0,0,65,'#ccdcbf',accent);path([[-46,-30],[-11,-49],[44,-26],[57,20],[10,53],[-40,30],[-46,-30]],soft,1.7);const cut=-51+phase*102;path([[cut,-71],[cut,71]],ink,2.5);path([[-60,cut*.7],[60,cut*.7]],line,1);c.restore();
+        text('密度 / 同例标签 / 切面',384,331,17,soft);rect(725,79,271,278,paper,line);text('候选与导出',747,116,23);
+        ['原始密度','标签表面','候选结构'].forEach((v,i)=>{rect(746,143+i*58,227,43,i===step?'#dbe7cf':paper,line,3);text(v,763,171+i*58,21,i===step?ink:soft);});text('示意 / 不含病例影像',746,335,17,soft);
+      } else if(project?.id==='knowledge'){
+        rect(28,79,253,278,paper,line);text('收件箱',50,116,23);['链接','笔记','文件'].forEach((v,i)=>{rect(48,144+i*57,213,43,i===step?'#dfead5':paper,line,3);text(v,65,172+i*57,21);});
+        rect(309,79,421,278,'#e9f0e1',line);text('保留来源的知识网络',330,116,23);const nodes=[[359,238,'来源'],[461,163,'概念'],[563,260,'项目'],[662,178,'问答']];
+        [[0,1],[0,2],[1,2],[1,3],[2,3]].forEach(([a,b],i)=>{const av=nodes[a],bv=nodes[b];path([[av[0],av[1]],[bv[0],bv[1]]],line,1.5);const progress=(t*.3+i*.19)%1;circle(av[0]+(bv[0]-av[0])*progress,av[1]+(bv[1]-av[1])*progress,3,accent);});
+        nodes.forEach(([x,y,name],i)=>{circle(x,y,i===step?17:12,paper,i===step?accent:soft);text(name,x-20,y+39,18,soft);});
+        rect(758,79,238,278,paper,line);text('本地检索',779,116,23);rect(779,143,196,38,'#e6eedf',line,3);text('问题 → 引用',790,169,18);for(let i=0;i<3;i++){path([[780,211+i*40],[969-i*20,211+i*40]],i===step?accent:line,3);}text('示意 / 不公开库内资料',779,335,15,soft);
+      } else if(project?.id==='makgi'){
+        rect(28,79,968,278,paper,line);text('动作计划 → 图像锚帧 → 局部反馈',50,115,23);const xs=[83,348,613,909];path([[xs[0],300],[xs[3],300]],line,2);
+        [0,1,2].forEach((i)=>{const x=68+i*316;rect(x,139,262,126,i===step?'#e6eedf':paper,line,4);person(x+131,212,.45,t,i===step);text(['起始','转折','收束'][i],x+14,163,16,soft);circle(xs[i],300,7,i===step?accent:paper,soft);});circle(xs[3],300,7,paper,soft);
+        const feedback=step===2;path([[773,278],[773,329],[509,329],[509,275]],feedback?accent:line,2);text(feedback?'风险反馈 / 局部补锚':'检查遮挡与镜头变化',374,345,18,feedback?ink:soft);
+      } else if(project?.id==='mimg'){
+        rect(28,79,968,278,paper,line);text('MIMG / 独立研究',51,116,23);text('图像表示与理解',51,153,18,soft);
+        const nodes=[184,511,838];path([[nodes[0],225],[nodes[2],225]],line,1.5);
+        nodes.forEach((x,i)=>{circle(x,225,39,paper,i===step?accent:line);circle(x,225,10+i*3,i===step?accent:line);text(['研究问题','原型探索','阶段记录'][i],x-43,302,21,i===step?ink:soft);});
+        text('方向与状态概览 / 暂不展示具体方法和实验材料',301,340,18,soft);
       } else if(project?.id==='actors'){
         rect(28,79,488,278,paper,line);text('个人 / 连续周程',49,116,23);
         ['读本','排练','拍摄'].forEach((v,i)=>{
