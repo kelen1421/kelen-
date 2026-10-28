@@ -33,6 +33,8 @@
     case 14:return vesicle(121,174,62)+dot(106,154,7,'rs-accent-dot')+dot(145,193,7,'rs-accent-dot')+arrow(196,158,348,111)+arrow(196,189,348,237)+vesicle(420,107,43)+vesicle(420,243,43)+dot(412,105,7,'rs-accent-dot')+text(477,111,'保留关键组分')+text(477,247,'组分可能丢失')+text(64,290,'原有状态');
     case 15:return vesicle(100,170,34)+arrow(147,170,242,170)+vesicle(287,116,29)+vesicle(287,226,29)+arrow(324,116,425,85)+arrow(324,226,425,250)+vesicle(472,86,23)+vesicle(472,250,23)+path('M457 286C271 335 141 309 98 215','rs-dash')+text(185,310,'补给、损失与再次分裂',true)+text(59,76,'第 1 轮')+text(249,54,'第 2 轮')+text(439,39,'后续轮次');
     case 16:return path('M101 82l14-35 14 35-14 35Z','rs-wash')+arrow(151,83,250,124)+vesicle(325,175,77,true)+arrow(148,238,249,209)+particles(113,242,5,26)+arrow(403,175,506,175)+particles(542,175,5,25,'rs-faint-dot')+text(58,30,'自由能输入')+text(53,302,'物质补给')+text(452,273,'产物与损失')+text(267,69,'反应耦合',true);
+    case 18:return box(48,69,157,70,'局部环境')+arrow(216,104,275,104)+vesicle(337,108,39)+arrow(387,108,449,108,'rs-dash')+box(462,69,132,70,'候选事件')+path('M337 166V216H109M337 216H528','rs-dash')+text(59,251,'材料与条件')+text(286,251,'机制可行')+text(461,251,'历史依据')+text(152,318,'三层问题，分别核对',true);
+    case 19:return vesicle(149,163,62)+molecule(148,162)+arrow(220,163,298,163)+vesicle(367,163,62)+molecule(365,162)+particles(370,158,4,33)+arrow(365,62,365,93)+arrow(440,163,509,163)+text(55,285,'初始包入')+text(300,285,'生成与滞留')+text(494,285,'流失')+text(304,43,'持续供给',true)+text(194,332,'净积累 = 生成 − 损失',true);
     default:return box(76,53,480,62,'核心关系：存留、反馈与延续')+box(104,139,424,62,'候选实现：隔室与局部化学')+box(132,225,368,62,'历史延伸：后续分支')+path('M74 86H52V257H122','rs-dash')+text(119,332,'依据 / 假设 / 未知，需要分别标记',true);
   }}
   function flight(i){switch(i){
@@ -49,8 +51,25 @@
     case 3:return person(124,119,1.06)+box(257,75,136,56,'任务 A')+box(257,151,136,56,'任务 B')+box(257,227,136,56,'任务 C')+path('M456 115h104v116H456ZM480 115V94h56v21M476 143h12m40 0h12M479 188h56M472 231v24m72-24v24','rs-paper')+arrow(180,171,243,171)+arrow(407,171,445,171)+text(66,319,'劳动者')+text(275,319,'任务重组')+text(470,319,'技术辅助');
     default:return person(116,125,.85)+person(310,108,1.05)+person(511,139,.72)+path('M92 244H535M116 237v26m194-38v38m201-26v26')+text(61,311,'家庭照护')+text(265,311,'专业服务')+text(462,311,'公共支持')+text(213,59,'谁提供支持，怎样分配？');
   }}
+
+  const frame=(x,y,pose=0)=>`<g transform="translate(${x} ${y})">${box(0,0,114,126,'')}${circle(57,35,10,'rs-wash')}${path(`M57 46v34M57 58L${36-pose*5} ${70-pose*12}M57 58L${78+pose*5} ${70-pose*13}M57 80L${43-pose*6} 109M57 80L${71+pose*6} 109`)}</g>`;
+  function vision(i){switch(i){
+    case 0:return frame(63,65,0)+frame(261,65,1)+frame(459,65,2)+arrow(190,124,245,124)+arrow(390,124,444,124)+path('M119 238H518')+[119,318,518].map(x=>dot(x,238,6)).join('')+text(82,278,'起始姿态')+text(282,278,'动作转折')+text(482,278,'收束姿态')+text(176,326,'动作 / 镜头 / 风险反馈',true);
+    case 1:return text(53,75,'均匀分配')+text(53,193,'自适应分配')+path('M180 104H580M180 222H580')+[190,317,444,571].map(x=>dot(x,104,7)).join('')+[190,351,392,571].map(x=>dot(x,222,7)).join('')+path('M332 165H412V259H332Z','rs-wash')+text(344,287,'风险段',true)+text(178,328,'相同锚帧预算，比较实际结果',true);
+    case 2:return frame(51,79,0)+frame(264,79,1)+frame(477,79,2)+path('M308 65h47v157h-47Z','rs-wash')+arrow(179,143,249,143,'rs-dash')+arrow(391,143,462,143,'rs-dash')+circle(321,143,64,'rs-fine')+text(62,269,'进入遮挡')+text(272,269,'局部风险')+text(488,269,'重现检查')+text(178,328,'补锚点后，仍需逐段复查',true);
+    case 3:return box(51,79,135,137,'')+path('M67 183 120 100 171 183Z','rs-wash')+arrow(200,146,253,146)+molecule(323,148)+circle(323,148,69,'rs-fine')+arrow(403,146,452,146)+box(466,79,129,137,'结构模板')+text(74,267,'RGB 输入')+text(269,267,'图元与关系')+text(476,267,'标签判断')+text(160,327,'表示误差与识别结果分别验收',true);
+    case 4:return box(61,78,176,150,'')+circle(145,150,45,'rs-wash')+dot(145,150,5)+path('M106 183 84 205M185 113l25-25','rs-dash')+arrow(254,150,322,150)+`<g transform="translate(348 79)">${Array.from({length:5},(_,row)=>Array.from({length:5},(_,col)=>`<rect x="${col*29}" y="${row*29}" width="29" height="29" class="${row===2&&col===2?'rs-accent-dot':Math.abs(row-2)+Math.abs(col-2)<3?'rs-wash':'rs-paper'}"/>`).join('')).join('')}</g>`+text(73,273,'稳定区域 / 边缘')+text(351,273,'小区域放大示意')+text(140,328,'分辨率、混色与门槛共同检查',true);
+    default:return box(49,125,112,62,'同一输入')+arrow(177,145,242,97)+arrow(177,174,242,245)+box(253,67,154,62,'原计算流程')+box(253,215,154,62,'减少重复')+arrow(420,98,478,148)+arrow(420,245,478,185)+box(490,126,104,62,'一致？')+text(231,325,'图元 / 关系 / 决策 / 实际编码流',true);
+  }}
+  const organ=(x,y,scale=1)=>`<g transform="translate(${x} ${y}) scale(${scale})">${path('M-67-32C-62-67-16-73 16-55C45-64 79-46 78-15C78 10 45 30 21 33C1 37-2 67-28 59C-56 55-77 12-67-32Z','rs-wash')}</g>`;
+  function imaging(i){switch(i){
+    case 0:return [0,1,2,3].map(k=>path(`M${67+k*14} ${107-k*14}l120-19 47 69-120 19Z`,'rs-paper')).join('')+arrow(285,144,352,144)+path('M421 223V79M421 223H568M421 223l-60 55')+arrow(421,103,421,76)+arrow(540,223,572,223)+text(432,87,'Z')+text(576,229,'X')+text(344,294,'Y')+dot(471,163,7)+path('M471 163V223M471 163H421','rs-dash')+text(57,288,'切片位置与间距')+text(398,328,'方向 / 原点 / 尺度',true);
+    case 1:return organ(118,140,.72)+Array.from({length:12},(_,k)=>dot(90+(k%4)*18,112+Math.floor(k/4)*22,3,'rs-faint-dot')).join('')+organ(323,140,.72)+path('M278 120q45 18 90 0M284 147q42 20 77-2M309 102q-14 46 9 76','rs-fine')+organ(528,140,.72)+path('M475 182l15-96 95 22-15 96Z','rs-paper')+path('M493 149q35-41 72 2','rs-dash')+labels('密度体渲染','标签表面','自由剖面')+text(180,51,'同一空间，三种观察方式',true);
+    case 2:return path('M73 194V75M73 194H262')+[27,45,88,107,76,49,29].map((h,k)=>`<rect x="${88+k*23}" y="${194-h}" width="16" height="${h}" class="rs-wash"/>`).join('')+path('M167 79V222','rs-dash')+arrow(285,149,351,149)+organ(433,151,.72)+circle(452,151,23,'rs-fine')+text(526,162,'?')+text(64,276,'密度阈值')+text(376,276,'候选区域')+text(133,328,'高亮形状 ≠ 已确认的解剖名称',true);
+    default:return organ(131,146,.82)+text(93,150,'肝掩膜',true)+arrow(209,146,276,146)+organ(349,146,.82)+path('M351 102V147l-35 35M351 147l35 21M351 124l-28-7M351 139l31-22')+arrow(422,146,484,146)+box(495,109,103,72,'复查范围')+text(56,276,'匹配的输入')+text(298,276,'血管预测')+text(491,276,'输出边界')+text(141,328,'示意图 / 未细分静脉或重建胆管',true);
+  }}
   window.KelenResearchScene=(record,cover=false)=>{
-    const i=record.localIndex||0,art=record.group==='life'?life(cover?7:i):record.group==='flight'?flight(cover?3:i):population(cover?4:i);
+    const i=record.localIndex||0,art=record.group==='life'?life(cover?7:i):record.group==='flight'?flight(cover?3:i):record.group==='vision'?vision(cover?3:i):record.group==='imaging'?imaging(cover?1:i):population(cover?4:i);
     return `<svg viewBox="0 0 640 360" role="img" aria-label="${esc(cover?record.field+'档案库封面':record.title)}的研究示意图"><g class="rs-registration">${path('M25 48V25h23M592 25h23v23M25 312v23h23M592 335h23v-23')}</g><g class="rs-art">${art}</g></svg>`;
   };
 })();

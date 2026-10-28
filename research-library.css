@@ -141,3 +141,20 @@
 .research-section,.library-vault-host .interest-archive{overflow-anchor:none}
 
 .library-vault-host .archive-back{top:112px;left:auto;right:6.2%;z-index:10;background:#f7f6eecc;padding:6px 10px!important}
+
+/* Current research notes keep provenance beside the reading, inside the vault. */
+.library-vault-host .research-evidence{border-top:1px solid var(--research-line);margin-top:17px;padding-top:12px}
+.library-vault-host .research-evidence small{display:block;font:7px/1.6 var(--mono);letter-spacing:.035em;opacity:.75;margin-bottom:6px}
+.library-vault-host .research-evidence p{font-size:9px;line-height:1.8}
+.library-vault-host .research-evidence a{display:block;width:fit-content;margin-top:9px;font:9px/1.7 var(--sans);color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.library-vault-host .research-evidence a:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+.library-card[data-library="vision"]{--research-ink:#566a65;--research-mid:#879d92;--library-paper:#f1f5ef;--library-shade:#d9e3da}
+.library-card[data-library="imaging"]{--research-ink:#696955;--research-mid:#a0a28a;--library-paper:#f7f7ec;--library-shade:#e2e3d0}
+[data-theme=colors] .library-card[data-library="vision"]{--research-ink:#6d69a3;--research-mid:#a8a0cc;--library-paper:#f2f1fc;--library-shade:#e0ddf4}
+[data-theme=colors] .library-card[data-library="imaging"]{--research-ink:#4f8291;--research-mid:#91bac6;--library-paper:#eef8fb;--library-shade:#d6e9f0}
+@container research-library (min-width:721px){
+ .library-card-grid{grid-template-columns:repeat(6,minmax(0,1fr));row-gap:34px}
+ .library-card{grid-column:span 2}
+ .library-card:nth-child(4){grid-column:2 / span 2}
+ .library-card:nth-child(5){grid-column:4 / span 2}
+}

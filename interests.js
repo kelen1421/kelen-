@@ -114,6 +114,14 @@
       const flow=document.createElement('div');flow.className='research-flow';record.labels.forEach((label,i)=>{const item=document.createElement('span'),number=document.createElement('small');number.textContent=String(i+1).padStart(2,'0');item.append(number,label);flow.append(item);});panel.append(flow);
       const text=document.createElement('p');text.textContent=key==='feeling'?record.feeling:record.overview;panel.append(text);
     }
+    panel.scrollTop=0;
+    if(key==='overview'&&record.review){
+      const note=document.createElement('aside');note.className='research-evidence';
+      const label=document.createElement('small');label.textContent='记录边界 · 更新 '+record.updated;
+      const scope=document.createElement('p');scope.textContent=record.review;note.append(label,scope);
+      (record.references||[]).forEach(reference=>{const link=document.createElement('a');link.href=reference.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=reference.label+' ↗';note.append(link);});
+      panel.append(note);
+    }
   }
 
   function setRecord(index, animate = true, pointerDriven = false) {
