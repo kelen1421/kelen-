@@ -54,11 +54,15 @@
     const total=cards.length,number=index=>String(index+1).padStart(2,'0');
     const overview = new T.Group(),gallery = new T.Group();scene.add(overview,gallery);
     const orbital=new T.Group();overview.add(orbital);
-    const sphereRadius=2.9,stationScale=.62;
+    const sphereRadius=2.9,stationScale=.62*Math.min(1,Math.sqrt(12/total));
     const orbitBase=new T.Vector2(.1,-.25),orbit=new T.Vector2(.1,-.25),orbitPointer=new T.Vector2(),orbitVelocity=new T.Vector2();
     let orbitDrag=null,suppressClick=false;
     const phi=(1+Math.sqrt(5))/2;
-    const directions=[[0,1,phi],[0,-1,phi],[0,1,-phi],[0,-1,-phi],[1,phi,0],[-1,phi,0],[1,-phi,0],[-1,-phi,0],[phi,0,1],[-phi,0,1],[phi,0,-1],[-phi,0,-1]].map(v=>new T.Vector3(...v).normalize());
+    const icosahedron=[[0,1,phi],[0,-1,phi],[0,1,-phi],[0,-1,-phi],[1,phi,0],[-1,phi,0],[1,-phi,0],[-1,-phi,0],[phi,0,1],[-phi,0,1],[phi,0,-1],[-phi,0,-1]].map(v=>new T.Vector3(...v).normalize());
+    const directions=total===12?icosahedron:Array.from({length:total},(_,i)=>{
+      const y=1-2*(i+.5)/total,r=Math.sqrt(1-y*y),angle=i*Math.PI*(3-Math.sqrt(5));
+      return new T.Vector3(Math.cos(angle)*r,y,Math.sin(angle)*r);
+    });
     const shadow = new T.Mesh(new T.PlaneGeometry(22,22),new T.ShadowMaterial({opacity:.13}));
     shadow.rotation.x=-Math.PI/2;shadow.position.y=-.12;shadow.receiveShadow=true;shadow.visible=false;overview.add(shadow);
     const grid = new T.GridHelper(16,16,0xbdbfb0,0xbdbfb0);
@@ -172,6 +176,18 @@
         mesh(model,new T.SphereGeometry(.13,20,16),glass,.05,.88,.12);box(model,.22,.26,.13,accent,.05,.63,.12);
       } else if(id==='mobile') {
         box(model,.45,.9,.12,metal,.3,.69,.06);box(model,.37,.72,.015,glass,.3,.72,.13);box(model,.48,.5,.4,warm,-.32,.45,-.1);for(let i=0;i<3;i++)box(model,.28,.02,.03,accent,-.32,.4+i*.1,.12);
+      } else if(id==='actors') {
+        box(model,1.08,.71,.055,metal,0,.72,-.25);
+        for(let row=0;row<2;row++)for(let col=0;col<4;col++)box(model,.15,.14,.02,(row+col)%3===0?accent:glass,-.35+col*.23,.57+row*.23,-.21);
+        for(const x of [-.25,.25]){mesh(model,new T.SphereGeometry(.115,18,12),glass,x,.63,.25);box(model,.17,.25,.13,metal,x,.39,.25);}
+      } else if(id==='computer') {
+        box(model,.97,.61,.07,metal,.09,.75,-.1);box(model,.86,.49,.02,glass,.09,.75,-.05);
+        box(model,.06,.22,.06,edge,.09,.35,-.1);box(model,.55,.04,.25,warm,.09,.23,-.03);box(model,.76,.035,.28,metal,.04,.18,.38);
+        for(let i=0;i<3;i++)mesh(model,new T.SphereGeometry(.045,12,8),accent,-.24+i*.31,.75,-.015);
+      } else if(id==='motion') {
+        box(model,1.1,.65,.06,metal,0,.73,-.14);box(model,1,.55,.02,glass,0,.73,-.1);
+        for(let i=0;i<3;i++)box(model,.18+i*.09,.045,.04,i===1?accent:warm,(i-1)*.26,.58+i*.15,-.05);
+        box(model,.68,.035,.38,metal,0,.19,.35);box(model,.025,.42,.025,accent,.16,.75,-.02);
       } else if(id==='pagepick'||id==='atelier') {
         for(let i=0;i<3;i++){const paper=box(model,.62,.7,.035,i===1?glass:metal,(i-1)*.17,.67,(i-1)*.18);paper.rotation.y=-.24;for(let j=0;j<3;j++)box(paper,.38,.017,.015,accent,0,.18-j*.13,.035);}
       } else {

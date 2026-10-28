@@ -33,7 +33,7 @@
       intro:'电脑继续执行项目，手机接着看对话、写草稿和回复，把工作带到另一块屏幕。',
       steps:['电脑桥接','手机配对','续接对话'],tags:['手机界面','同一对话','实时回复'],
       features:['扫码配对，搜索本机对话、按项目筛选并查看历史。','通过电脑上的 Codex 接回原对话，发送文本、接收实时回复。','处理支持的审批与提问，保留草稿并支持撤销设备配对。'],
-      note:'需要电脑保持运行并配置本地桥接服务。手机真机、网络切换和远程模式仍需按实际环境验收。'},
+      note:'需要电脑保持运行并配置桥接服务。支持局域网续聊，跨网络模式需自行配置访问认证；手机真机、断网重连及公网链路仍需按实际环境验收。'},
     {id:'pagepick',code:'PICK',name:'拾页 PagePick',group:'web',platform:'WEB / CONTENT TOOL',status:'受限访问',
       intro:'把公开网页里的正文、媒体和字幕拾起来，整理成可预览、复制与导出的资料。',
       steps:['链接或源码','内容识别','预览与导出'],tags:['HTML 导入','正文与媒体','多格式导出'],
@@ -44,14 +44,31 @@
       steps:['编辑分镜','时间轴预览','导出工程'],tags:['逐帧预览','分镜编辑','工程导出'],
       features:['添加、复制和删除分镜，调整时长、光点、颜色与缓动。','播放、暂停、拖动、逐帧和速度控制，显示画面安全框。','导出 PNG、无声 WebM、时间轴与动画工程 ZIP。'],
       note:'当前为受限访问项目。动画编辑与工程导出可独立使用；共享分镜功能按原有访问权限开放。'},
+    {id:'actors',code:'ACT',name:'演员 A/B 工作台',group:'web',platform:'WEB DEMO / MACOS',status:'公开演示',version:'A 2.0 / B 4.0',url:'https://kelen1421.github.io/actor-studio-proposal/',linkLabel:'打开公开演示 ↗',
+      intro:'把个人日程、剧本与台词练习，接到团队申请、审批和执行回执里，让每一次变动都有来路。',
+      steps:['个人与团队','申请与审批','执行与回执'],tags:['A / B 协作','周程与月程','剧本与台词'],
+      features:['A 端整理个人日程、剧本和台词练习；B 端承接团队项目、准备事项与执行留痕。','日程变更展示修改前后与当前冲突，经确认后更新正式安排。','本机应用支持账号连接、项目授权、任务接受与完成回执；公开题案提供两端操作教程。'],
+      note:'公开网页使用虚构资料，演示记录仅存当前浏览器；本机 A/B 应用使用本地服务与数据库，跨设备团队协作服务尚未部署。'},
+    {id:'computer',code:'DOT',name:'Dot 电脑桥',group:'desktop',platform:'MAC / MCP STDIO',status:'本机工具',version:'1.0.0',
+      intro:'把屏幕、应用与本机文件接成可调用的电脑工具，在菜单栏随时查看权限、暂停操作。',
+      steps:['查看状态','调用电脑工具','暂停与恢复'],tags:['屏幕与应用','文件与命令','菜单栏暂停'],
+      features:['通过本机 MCP 提供截图、应用切换、鼠标键盘与中文输入。','支持文件读取、目录浏览和命令执行；写入已有文件需要明确允许覆盖。','菜单栏显示授权与暂停状态，可与 ai工作台的电脑开关配合使用。'],
+      note:'截图和鼠标键盘操作需要相应 macOS 权限。菜单栏暂停后拒绝后续调用；本机工具可用与外部客户端已经连接是两种状态。'},
+    {id:'motion',code:'MOT',name:'动效工作台',group:'web',platform:'LOCAL WEB / REMOTION',status:'本地工作台',
+      intro:'把做过的动效整理成能搜索、预览和继续编辑的长期素材库，从独立实例开始复用。',
+      steps:['检索与预览','复用与调参','按需导出'],tags:['动效素材库','独立实例','逐帧预览'],
+      features:['按名称与用途搜索既有动效，查看视频、多版本与原工程位置。','复用基础片头、线稿和透明标注，创建独立实例并调整支持的图层参数。','使用本地 Remotion 工程预览与渲染；目录删除支持撤销，原素材与实例分别保留。'],
+      note:'工作台在本机运行。原生网页、视频素材与参数模板保留各自复用范围；透明成片需选择支持 alpha 的输出格式。'},
     {id:'physics',code:'PHY',name:'物理模型',group:'web',platform:'WEB / 3D',status:'在线体验',hall:0,
       intro:'旋转一滴悬浮液体，改变材质和刚体尺寸，观察碰撞与流体的响应。',steps:['选择材质','调整刚体','观察响应'],tags:['液滴与刚体','三维交互'],features:['切换液体，调整密度、黏度、表面张力和刚体尺寸。','鼠标操作刚体，旋转或缩放镜头。'],note:'模型用于定性探索与观察。网页版入口位于下方交互展示厅。'},
-    {id:'capture',code:'CAP',name:'截图助手',group:'desktop',platform:'MAC / APPLE SILICON',status:'可下载',hall:1,
+    {id:'capture',code:'CAP',name:'截图助手',group:'desktop',platform:'MAC / APPLE SILICON',status:'可下载',version:'1.3.2',hall:1,
       intro:'截图、录屏和滚动长截图，都从一个悬浮球开始，把屏幕上的灵感留下来。',steps:['选择区域','截图或录屏','保存与拖出'],tags:['滚动长截图','区域录屏'],features:['通过悬浮球选择截图、录屏或长截图。','内容保存到本机，从暂存区直接拖出。'],note:'下载与安装说明位于交互展示厅。'},
-    {id:'recorder',code:'REC',name:'口播工具箱',group:'desktop',platform:'MAC / APPLE SILICON',status:'可下载',hall:2,
+    {id:'recorder',code:'REC',name:'口播工具箱',group:'desktop',platform:'MAC / APPLE SILICON',status:'可下载',version:'1.0.4',hall:2,
       intro:'摄像头预览、自动滚动提词与录制，让准备好的故事说得更从容。',steps:['准备文稿','预览与提词','录制导出'],tags:['浮窗提词','摄像头录制'],features:['粘贴口播稿，调整字号与滚动速度。','选择摄像头和麦克风，录制并保存 MOV。'],note:'提词文字不会进入视频；下载入口位于交互展示厅。'},
-    {id:'progress',code:'AI',name:'ai 工作台',group:'desktop',platform:'MAC / APPLE + INTEL',status:'可下载',hall:3,
-      intro:'在其他应用里工作，也能从浮窗看见 Codex 任务进度，随时回到当前对话。',steps:['读取任务','浮窗看进度','回到对话'],tags:['任务浮窗','进度与续聊'],features:['以方框、列表或圆球显示本机任务的处理阶段。','固定任务，切换个性化外观，从浮窗打开对应对话。'],note:'进度表示任务阶段，不预测精确剩余时间；下载入口位于交互展示厅。'}
+    {id:'progress',code:'AI',name:'ai 工作台',group:'desktop',platform:'MAC / APPLE + INTEL',status:'可下载',version:'1.9.8',downloadVersion:'1.9.6',hall:3,
+      intro:'用桌面浮窗查看任务阶段，打开轻量内置对话继续工作，也能管理本机电脑桥的调用开关。',steps:['查看任务','内置续聊','管理电脑桥'],tags:['任务浮窗','内置对话','电脑调用开关'],
+      features:['四宫格、条式列表与圆球展示任务阶段，支持固定任务、颜色和背景透明度。','通过本机 Codex 接回原对话，查看最近消息、流式回复，并处理支持的审批。','开发版加入 Dot 电脑桥的开启与暂停入口；辅助功能授权修复改为主动触发。'],
+      note:'本机开发版为 1.9.8，公开下载包为 1.9.6；电脑桥开关等新增功能需开发版。进度表示当前任务阶段，不预测精确剩余时间。'}
   ];
   const e=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
   const ordered=[...projects.filter(p=>p.hall!==undefined).sort((a,b)=>a.hall-b.hall),...projects.filter(p=>p.hall===undefined)];
@@ -65,7 +82,7 @@
       const art=e('div','program-art');art.setAttribute('aria-hidden','true');
       const copy=e('div','program-copy');copy.append(e('h3','',p.name),e('p','',p.intro));
       const tags=e('div','program-tags');p.tags.forEach(tag=>tags.append(e('span','',tag)));copy.append(tags);
-      const actions=e('div','program-actions');const action=e(p.url?'a':'button','program-primary',p.url?'打开网站 ↗':'查看功能与状态 ↗');
+      const actions=e('div','program-actions');const action=e(p.url?'a':'button','program-primary',p.url?(p.linkLabel||'打开网站 ↗'):'查看功能与状态 ↗');
       if(p.url){action.href=p.url;action.target='_blank';action.rel='noopener noreferrer';}else action.type='button';
       actions.append(action,e('span','program-version',p.version?'V '+p.version:p.status));
       const help=e('details','program-help'),summary=e('summary','',p.name+' · 功能与状态');help.append(summary);
@@ -73,6 +90,10 @@
       if(!p.url)action.addEventListener('click',()=>{help.open=true;summary.focus();});
       card.append(top,art,copy,actions,help);grid.append(card);
     }
+    card.querySelector('h3').textContent=p.name;card.querySelector('.program-copy p').textContent=p.intro;
+    card.querySelector('.program-platform').textContent=p.platform;
+    if(p.downloadVersion)card.querySelector('.program-version').textContent='下载 V '+p.downloadVersion+' / 开发 V '+p.version;
+    else if(p.version)card.querySelector('.program-version').textContent='V '+p.version;
     card.dataset.projectId=p.id;card.dataset.projectCode=p.code;
     p.action=card.querySelector('.program-primary').textContent.trim();
   });
@@ -96,7 +117,8 @@
   filters.addEventListener('click',event=>{const button=event.target.closest('button[data-filter]');if(button){filter=button.dataset.filter;filterProjects();}});input.addEventListener('input',filterProjects);
   window.KelenProgramCatalog={select(index){current=index;buttons.forEach((button,i)=>button.setAttribute('aria-pressed',String(i===index)));},projects:ordered};
   const stamp=document.querySelector('.programs-stamp');stamp.setAttribute('aria-label',ordered.length+' 个程序与项目');stamp.querySelector('b').textContent=ordered.length;
-  document.querySelector('.programs-footer>span').textContent=ordered.length+' PROJECTS / MADE BY KELEN';
+  document.querySelector('.programs-footer>span').textContent=ordered.length+' PROJECTS / UPDATED 2026.10.29';
+  const heading=document.querySelector('.project-hall-heading>span');if(heading)heading.textContent=ordered.length+' INTERACTIVE PROJECTS';
   archive.querySelector('.plugin-vault-top>span').textContent="KELEN'S LAB / "+ordered.length+' PROJECTS';
   filterProjects();
 })();

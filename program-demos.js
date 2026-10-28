@@ -3,7 +3,7 @@
     '移动刚体，观察液滴形变；调整材质与尺寸。',
     '从悬浮球框选区域，截取画面并存入暂存区。',
     '摄像头预览与滚动提词同时显示，录制口播。',
-    '在剪辑工作区上方，用浮窗查看不同任务的进度。'
+    '查看任务阶段，内置续聊；开发版接入电脑桥开关。'
   ];
   window.createProgramDemo = index => {
     const canvas = document.createElement('canvas');
@@ -137,7 +137,9 @@
         text(p>.985 ? '完成' : '进行中',x+340,y+79+i*62,16,p>.985 ? accent : soft);
         rect(x+18,y+94+i*62,415,5,'#dce5d3',null,2);rect(x+18,y+94+i*62,415*p,5,p>.985 ? '#8fad6b' : '#85a795',null,2);
       });
-      text('在其他应用工作，也能看见任务状态',24,420,18,soft);
+      rect(52,341,153,29,'#e2ecda',line,4);text('内置对话 ↗',67,362,17,ink);
+      rect(219,341,177,29,'#e2ecda',line,4);circle(236,355,4,accent);text('电脑调用开关',249,362,17,ink);
+      text('任务进度 · 内置续聊 · 电脑桥管理',24,420,18,soft);
     }
     const project=window.KelenProgramProjects?.[index];
     function waveform(x,y,width,t,phase=0){for(let i=0;i<34;i++){const h=8+Math.abs(Math.sin(i*.57+t*1.8+phase)*Math.cos(i*.31+phase))*65;rect(x+i*width/34,y-h/2,4,h,accent,null,2);}}
@@ -203,6 +205,37 @@
         const input='公开网页内容 / HTML';text(step===0?input.slice(0,Math.max(1,Math.ceil(phase*input.length))):input,69,167,19,soft);
         ['正文','媒体与字幕','导出资料'].forEach((v,i)=>{const reveal=step===0?.08:step===1?ease((phase-i*.17)/.66):1;rect(51+i*310,210,292,116,paper,line);text(v,69+i*310,245,22);meter(70+i*310,271,234,reveal);path([[70+i*310,291],[70+i*310+199*reveal,291]],line);focusArea(51+i*310,210,292,116,i===step);});
         if(step===2){rect(713,282,226,29,'#e0ebd5',null,3);text(['TXT','Markdown','JSON'][Math.floor(t*1.1)%3]+'  ↓',732,304,17,ink);cursor(890,296);}
+      } else if(project?.id==='actors'){
+        rect(28,79,488,278,paper,line);text('个人 / 连续周程',49,116,23);
+        ['读本','排练','拍摄'].forEach((v,i)=>{
+          rect(49+i*149,140,132,182,i===step?'#e3eddb':paper,line,4);
+          text(['周一','周二','周三'][i],66+i*149,171,18,soft);text(v,66+i*149,219,24,ink);
+          path([[66+i*149,245],[147+i*149,245]],line);path([[66+i*149,266],[126+i*149,266]],line);
+        });
+        transfer(528,218,557,218,t);
+        rect(572,79,424,278,paper,line);text('团队 / 协作流程',594,116,23);
+        ['提出日程变更','对比与本人确认','执行与完成回执'].forEach((v,i)=>{
+          const y=139+i*65;rect(593,y,380,52,i===step?'#dce9d0':paper,line,4);text(String(i+1).padStart(2,'0'),609,y+32,17,soft,'monospace');text(v,650,y+32,21,i===step?ink:soft);if(i<step)text('✓',942,y+32,23,accent);
+        });
+        focusArea(572,79,424,278,step===2);
+      } else if(project?.id==='computer'){
+        rect(28,79,307,278,paper,line);text('屏幕与应用',49,116,23);rect(53,139,258,147,'#e6eedf',soft,4);
+        for(let i=0;i<3;i++){rect(69+i*77,164,62,67,i===step?'#cfddc2':paper,line,3);text(['屏幕','文件','输入'][i],78+i*77,205,17,ink);}
+        path([[178,287],[178,310],[133,310],[223,310]],soft,2);
+        rect(365,79,295,278,paper,line);text('本机工具调用',387,116,23);
+        ['截取当前屏幕','读取与写入文件','鼠标键盘操作'].forEach((v,i)=>{const y=145+i*60;rect(386,y,253,44,i===step?'#e0ebd5':paper,line,3);text(v,402,y+29,19,i===step?ink:soft);});
+        const paused=step===2&&phase>.5;transfer(341,216,358,216,paused?0:t);
+        rect(689,79,307,278,paper,line);text('随时暂停',711,116,23);
+        rect(758,161,167,66,paused?'#d9ded4':'#b8cda9',soft,33);circle(paused?793:890,194,25,paper,soft);
+        text(paused?'调用已暂停':'电脑工具可用',741,277,24,ink);text('菜单栏 / 权限与状态',712,327,18,soft);
+      } else if(project?.id==='motion'){
+        rect(28,79,252,278,paper,line);text('动效素材库',49,116,23);
+        ['片头','线稿','透明标注'].forEach((v,i)=>{const y=144+i*60;rect(48,y,210,45,i===step?'#dce8d2':paper,line,3);circle(69,y+22,6,i===step?accent:line);text(v,88,y+29,21,i===step?ink:soft);});
+        rect(309,79,429,278,'#e8efdf',line);text('独立实例 / 预览',330,116,23);
+        const amount=.5+.3*Math.sin(t*.8);c.save();c.beginPath();c.rect(326,133,396,167);c.clip();
+        circle(522,214,35+amount*37,'#b9cda8',accent);path([[394,248],[453,185],[510,230],[570,164],[648,246]],ink,3);circle(394+cycle/9.6*254,246,5,accent);c.restore();
+        for(let i=0;i<3;i++)rect(330+i*128,317,112,15,i===step?accent:'#cad8bd',null,2);path([[330+cycle/9.6*368,308],[330+cycle/9.6*368,341]],ink,2);
+        rect(767,79,229,278,paper,line);text('参数与导出',788,116,23);text('图层大小',789,161,19,soft);meter(789,179,181,amount);text('时间与节奏',789,227,19,soft);meter(789,244,181,cycle/9.6);rect(789,283,181,42,step===2?'#d5e4ca':paper,line,3);text('按需导出 ↗',805,311,21,ink);
       } else if(project?.id==='atelier'){
         const position=.5+.4*Math.sin(t*.85),orbX=170+position*310,orbY=218+Math.sin(t*1.1)*27;
         rect(28,78,607,279,'#e6eddf',line);path([[96,218],[566,218]],line);circle(orbX,orbY,31,'#a8bea0',accent);text('分镜预览',50,113,22);
