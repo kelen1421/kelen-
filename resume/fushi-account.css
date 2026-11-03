@@ -1,0 +1,98 @@
+.fushi-data{--bg:#191919;--surface:#242424;--ink:#eeeee9;--soft:#aaa9a2;--paper:#eeeee9;--accent:#f4d96c;--accent-ink:#191919;--s:12px;--b:15px;--l:21px;--h:clamp(32px,4vw,56px);position:relative;z-index:3;padding:80px 0 100px;color:var(--ink);scroll-margin-top:100px}
+.fushi-data .home-section-head{margin-bottom:28px}
+.fushi-data .home-section-head h2{font-size:clamp(38px,5vw,64px)}
+.fushi-data .account-metrics dd{margin:0;color:var(--accent)}
+.fushi-data .data-intro{color:var(--soft);font-size:var(--s);max-width:64em;margin-top:-20px;margin-bottom:30px}
+.fushi-data .data-toolbar{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.fushi-data .platform-tabs{display:flex;gap:4px}
+.fushi-data .platform-tabs button{padding:10px 24px;color:var(--soft);background:var(--surface);font-size:var(--b);transition:background .2s,color .2s}
+.fushi-data .platform-tabs button.active{background:var(--accent);color:var(--accent-ink)}
+.fushi-data .asof{font-size:var(--s);color:var(--soft)}
+.fushi-data .account-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:36px 0 52px}
+.fushi-data .account-metrics dt{font-size:var(--s);color:var(--soft);margin-bottom:10px}
+.fushi-data .account-metrics dd{font-size:var(--h);font-variant-numeric:tabular-nums;line-height:1.2}
+.fushi-data .account-metrics dd small{font-size:var(--b);margin-left:8px}
+.fushi-data .charts-layout{display:grid;grid-template-columns:1.35fr 1fr;gap:clamp(32px,5vw,72px)}
+.fushi-data .charts-layout>div{min-width:0}
+.fushi-data .chart-head{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.fushi-data .chart-head h3{font-size:var(--l)}
+.fushi-data .chart-head label,.fushi-data .chart-head>span{font-size:var(--s);color:var(--soft);white-space:nowrap}
+.fushi-data .chart-head label{display:flex;align-items:center;gap:7px}
+.fushi-data .chart-head input{accent-color:var(--accent);width:16px;height:16px}
+.fushi-data .chart-legend{font-size:var(--s);color:var(--soft);display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:18px}
+.fushi-data .chart-legend span{display:inline-flex;align-items:center;gap:6px}
+.fushi-data .chart-legend i{display:inline-block}
+.fushi-data .line-key{width:20px;height:2px;background:var(--accent)}
+.fushi-data .band-key{width:16px;height:9px;background:var(--accent);opacity:.2}
+.fushi-data .dot-key{width:7px;height:7px;border-radius:50%;background:var(--paper)}
+.fushi-data .growth-chart{position:relative;min-height:300px;margin-top:12px}
+.fushi-data .growth-chart svg{display:block;width:100%;height:auto;overflow:visible}
+.fushi-data .growth-chart svg text{fill:var(--soft);font-family:inherit;font-size:13px}
+.fushi-data .growth-chart svg .direct-label{fill:var(--ink)}
+.fushi-data .chart-readout{font-size:var(--s);color:var(--soft);min-height:48px;margin-top:6px;font-variant-numeric:tabular-nums}
+.fushi-data .chart-mode{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.fushi-data .chart-mode button{font-size:var(--s);padding:8px 12px;color:var(--soft);background:transparent}
+.fushi-data .chart-mode button.active{color:var(--ink);background:var(--surface)}
+.fushi-data .ranking-chart{margin-top:24px}
+.fushi-data .rank-row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;margin-top:13px;position:relative;padding-bottom:8px}
+.fushi-data .rank-title{font-size:var(--s);white-space:nowrap;text-overflow:ellipsis;overflow:hidden;max-width:100%}
+.fushi-data .rank-value{font-size:var(--s);font-variant-numeric:tabular-nums}
+.fushi-data .rank-track{grid-column:1/-1;background:rgba(243,240,228,.08);height:5px}
+.fushi-data .rank-fill{display:block;height:100%;background:var(--accent);transform-origin:left;transition:width .4s}
+.fushi-data .rank-row:hover .rank-title{text-decoration:underline;text-underline-offset:4px}
+.fushi-data .ranking-footnote{font-size:var(--s);color:var(--soft);margin-top:22px}
+.fushi-data .methodology{margin-top:38px;background:var(--surface);padding:20px 24px;font-size:var(--s);color:var(--soft)}
+.fushi-data summary{cursor:pointer;color:var(--ink);padding-block:4px}
+.fushi-data .method-content{padding-top:16px}
+.fushi-data .method-content p+p{margin-top:12px}
+.fushi-data .method-content ul{padding-left:20px}
+.fushi-data .method-content li{margin-block:7px}
+.fushi-data .method-content a{text-decoration:underline;text-underline-offset:4px}
+.fushi-data .data-links{display:flex;gap:24px;flex-wrap:wrap;margin-top:22px}
+.fushi-data .methodology{background:transparent;border-top:1px solid #ffffff24;padding:20px 0}
+.fushi-data .platform-tabs button{border-radius:0}
+.fushi-data .chart-mode button{border-radius:0}
+.fushi-data .account-metrics{border-top:1px solid #ffffff24;padding-top:24px}
+.fushi-data button:focus-visible,.fushi-data a:focus-visible{outline:1px solid var(--accent);outline-offset:5px}
+.career-account-data{--h:clamp(28px,3vw,44px);padding:34px 0 4px;border-top:1px solid #ffffff24;margin-top:34px;z-index:auto}
+.career-account-data .wrap{width:100%;max-width:none;padding:0;margin:0}
+.account-subhead{display:flex;justify-content:space-between;align-items:baseline;gap:18px;margin-bottom:22px}
+.account-subhead h4{font-size:14px;font-weight:400}
+.account-subhead>span,.account-subhead .asof{font-size:10px;color:#85887d}
+.career-account-data .platform-tabs button{font-size:11px;padding:8px 20px}
+.career-account-data .account-metrics{margin:24px 0 30px;padding-top:20px;gap:16px}
+.career-account-data .account-metrics dt{font-size:11px}
+.career-account-data .chart-head h3,.career-account-data .chart-head h4{font-size:15px;font-weight:400}
+.career-account-data .charts-layout{gap:32px}
+.career-account-data .chart-readout{min-height:20px;font-size:10px}
+.career-account-data .growth-chart{min-height:250px}
+.career-account-data .chart-legend{font-size:10px;gap:8px 12px}
+.career-account-data .growth-chart svg text{font-size:11px}
+.career-account-data .rank-title,.career-account-data .rank-value{font-size:10px}
+.career-account-data .chart-head label,.career-account-data .chart-head>span{font-size:10px}
+.career-account-data .chart-mode button{font-size:10px}
+.yao-data{--accent:#f4d96c}
+.yao-data .account-metrics{margin-top:0}
+.yao-month-chart svg{display:block;width:100%;height:auto;margin-top:22px}
+.yao-month-chart svg text{fill:#a7aa9e;font:10px Arial,sans-serif}
+.yao-category-chart{margin-top:28px}
+.yao-category{display:grid;grid-template-columns:1fr auto;gap:9px 15px;margin-bottom:22px;font-size:11px;color:#bfc2b5}
+.yao-category>b{font-weight:400;font-variant-numeric:tabular-nums}
+.yao-category>i{grid-column:1/-1;display:block;height:5px;background:#ffffff12}
+.yao-category>i>i{display:block;height:100%;background:var(--accent)}
+@media(max-width:1200px){.career-account-data .charts-layout{grid-template-columns:1fr;gap:30px}.career-account-data .ranking-chart{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}}
+@media(max-width:660px){.career-account-data{padding:28px 0 0;margin-top:28px}.career-account-data .account-metrics{gap:10px;margin-bottom:28px}.career-account-data .account-metrics dd{font-size:26px}.career-account-data .account-metrics dt{font-size:10px}.career-account-data .ranking-chart{display:block}}
+@media(max-width:1000px){.fushi-data .charts-layout{grid-template-columns:1fr;gap:44px}.fushi-data .ranking-chart{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}}
+@media(max-width:660px){.fushi-data{--b:14px;--l:19px;--h:32px;padding:55px 0 65px}.fushi-data .account-metrics{gap:12px;margin:28px 0 38px}.fushi-data .account-metrics dd{font-size:clamp(24px,6.4vw,32px)}.fushi-data .account-metrics dd small{font-size:12px;margin-left:3px}.fushi-data .data-intro{margin-top:-10px}.fushi-data .data-toolbar{gap:14px}.fushi-data .platform-tabs button{padding:9px 23px}.fushi-data .asof{flex-basis:100%}.fushi-data .ranking-chart{display:block}.fushi-data .growth-chart{min-height:280px}.fushi-data .home-section-head{align-items:baseline;gap:14px}.fushi-data .home-section-head .text-link{flex:none}.career-work-links{gap:0 16px}.career-work-links a{font-size:11px}}
+@media print{.fushi-data{break-before:page;color:#111;--ink:#111;--soft:#555;--accent:#333;--surface:#eee;--paper:#111;--bg:#fff;padding:10mm 0}.fushi-data .home-section-head h2{font-size:25pt}.fushi-data .platform-tabs,.fushi-data .chart-mode,.fushi-data .chart-head label,.fushi-data .text-link{display:none}.fushi-data .charts-layout{grid-template-columns:1fr 1fr;gap:8mm}.fushi-data .rank-row,.career-work-links a{color:#333}}
+.yao-fan-head h3{font-size:17px;font-weight:400}.yao-assumptions{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:24px;font-size:11px;color:#a6a99c}.yao-assumptions label{display:flex;align-items:center;gap:9px}.yao-assumptions input,.yao-assumptions select{font:inherit;color:#eeeee9;background:#242424;border:1px solid #ffffff26;padding:9px 10px;border-radius:0;min-height:36px}.yao-assumptions input{width:68px}.yao-assumptions button{color:#d4d6c8;margin-left:auto;font-size:11px}.yao-error{color:#edb589;font-size:11px;margin-top:10px}.yao-error:empty{display:none}.yao-data .yao-scenario-metrics{grid-template-columns:repeat(4,minmax(0,1fr));margin:28px 0 20px}.yao-data .yao-scenario-metrics dd{font-size:clamp(25px,2.5vw,39px)}.yao-fan-chart svg{display:block;width:100%;height:auto}.yao-fan-chart svg text{font:11px Arial,sans-serif;fill:#9da18f}.yao-fan-chart svg .yao-end-label{fill:#eeeee9;font-size:14px}.yao-density-head,.yao-profile-head{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-top:35px}.yao-density-head h4,.yao-profile-head h4{font-size:14px;font-weight:400}.yao-density-head>span{font-size:10px;color:#959988}.yao-density{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:16px;padding-top:24px}.yao-density>div{display:grid;justify-items:center;gap:10px;font-size:11px;color:#a5aa96}.yao-density b{color:#e5e8da;font-weight:400}.yao-density>div>i{width:100%;height:80px;background:#ffffff0c;display:flex;align-items:end}.yao-density>div>i>i{display:block;width:100%;background:#d4bd7c}.yao-density small{font-size:10px}.yao-profile-head{border-top:1px solid #ffffff24;padding-top:28px;margin-top:34px;flex-wrap:wrap}.yao-profile-head .chart-mode{margin:0}.yao-profile-chart{padding-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:0 42px}.yao-profile-chart .yao-category>i>i{background:#d4bd7c}
+@media(max-width:660px){.yao-assumptions{gap:12px}.yao-assumptions button{margin-left:0}.yao-data .yao-scenario-metrics{grid-template-columns:1fr 1fr;gap:22px}.yao-density{gap:10px}.yao-profile-chart{grid-template-columns:1fr}.yao-profile-head{gap:12px}.yao-density>div>i{height:60px}}
+
+/* Yao uses the same golden data treatment as the Fushi account. */
+.yao-data .yao-scenario-metrics dd{font-size:var(--h)}
+.yao-data .yao-fan-chart{min-height:0;margin-top:12px}
+.yao-data .yao-fan-chart svg text{font:11px var(--resume-reading-font);fill:var(--soft)}
+.yao-data .yao-fan-chart svg .yao-end-label{fill:var(--ink);font-size:12px}
+.yao-data .yao-profile-chart .yao-category>i>i{background:var(--accent);transform-origin:left;transition:width .4s}
+.yao-data .yao-profile-head .chart-mode button.active{color:var(--accent)}
+@media(max-width:660px){.yao-data .yao-scenario-metrics dd{font-size:26px}}

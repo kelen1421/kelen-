@@ -1,0 +1,16 @@
+/* Native responsibility diagrams sit within the existing career timeline. */
+#career-ai{row-gap:32px}
+.career-ai-visual{grid-column:1/-1;min-width:0;width:100%;max-width:1390px;margin-inline:auto;color:#e5e6db}
+.career-ai-visual>h4{font:400 12px/1.5 var(--resume-reading-font);color:#aeb0a6;margin:0 0 18px}
+.career-ai-visual .ai-responsibilities{margin-top:0}
+.career-ai-visual .ai-duty{scroll-margin-top:110px;padding:42px 0}
+.career-ai-visual .ai-duty:first-child{border-top:1px solid var(--ai-line)}
+.career-ai-visual :where(h4,h6,figure){margin:0}
+.career-ai-visual .ai-duty-heading p{white-space:normal}
+.career-ai-visual .ai-profile-comparison{width:100%}
+.career-ai-visual .content-series-tabs button{border-radius:0}
+.career-ai-evidence{grid-column:2;min-width:0}
+.career-ai-evidence>.career-work-heading{margin-top:0}
+@media(max-width:1000px){.career-ai-visual .ai-duty{gap:27px}.career-ai-visual .ai-duty-heading p{font-size:11px}}
+@media(max-width:600px){#career-ai{row-gap:25px}.career-ai-evidence{grid-column:1}.career-ai-visual .ai-duty{padding:31px 0;scroll-margin-top:85px}.career-ai-visual .ai-profile-comparison figcaption{gap:5px}.career-ai-visual .ai-profile-comparison figcaption strong{font-size:15px}.career-ai-visual .ai-profile-comparison figcaption span{font-size:8px}}
+@media print{#career-ai{break-inside:auto}.career-ai-visual{grid-column:1/-1}.career-ai-visual .ai-duty{break-inside:avoid;opacity:1;transform:none}.career-ai-visual .ai-content-duty{break-inside:auto}.career-ai-evidence{grid-column:1/-1}}

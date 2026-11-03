@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KELEN — 已选结构库</title>
+  <meta name="description" content="浏览 Lieflat Charts 与 motion-web 的模板结构，预览交互，去除不喜欢的，保存自己的筛选清单。">
+  <link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="template-assets/library.css?v=stars-2">
+  <script type="module" src="template-assets/library.js?v=stars-2"></script>
+</head>
+<body data-catalog="template-assets/selected-catalog.json" data-library="selected-20261029">
+  <a class="skip" href="#gallery">跳至模板</a>
+  <header class="masthead"><a href="index.html" class="brand" aria-label="Kelen 首页"><img src="assets/kelen-mark.svg" alt=""><span>kelen</span></a><span class="edition">SELECTED LIBRARY / 106</span><a href="./#cases">查看简历 ↗</a></header>
+  <main>
+    <section class="intro"><div><p class="eyebrow">LIEFLAT CHARTS × MOTION-WEB</p><h1>你的结构收藏库<span>。</span></h1><p class="lead">已收录你留下的 106 个结构。可继续星标、预览与筛选。</p></div><div class="selection-total"><strong id="total">—</strong><span>个结构，一页浏览</span></div></section>
+    <section class="controls" aria-label="模板筛选工具">
+      <div class="toolbar"><div class="view-tabs" aria-label="选择状态" role="group"><button data-view="kept" aria-pressed="true">已收录 <span id="keep-count">—</span></button><button data-view="starred" aria-pressed="false">☆ 星标 <span id="star-count">0</span></button><button data-view="excluded" aria-pressed="false">已去除 <span id="exclude-count">0</span></button><button data-view="all" aria-pressed="false">全部</button></div><div class="actions"><button id="undo" disabled>撤销</button><button id="restore-all" disabled>全部恢复</button><button id="export" class="primary">导出筛选清单 <span aria-hidden="true">↓</span></button></div></div>
+      <div class="filter-row"><div id="categories" class="categories" aria-label="模板类别" role="group"></div><label class="search"><span aria-hidden="true">⌕</span><input type="search" id="search" placeholder="搜索名称或编号" aria-label="搜索名称或编号"></label></div>
+    </section>
+    <div class="results-line"><p id="results" aria-live="polite">正在整理模板…</p><p>图中均为模板演示数据</p></div>
+    <div id="gallery" class="gallery" tabindex="-1"></div>
+    <div class="empty" id="empty" hidden><h2>这里暂时没有模板</h2><p id="empty-copy">换个分类或关键词试试。</p><button id="clear-filter">清除筛选</button></div>
+    <p class="storage-note" id="storage-note">选择自动保存在当前浏览器；导出清单可发给我继续使用。</p>
+  </main>
+  <footer><div><strong>KELEN / 结构筛选</strong><p>同结构的语言与配色版本合并展示。整页报告、演示页与独立图表分别保留。</p></div><div><a href="https://github.com/larashero3-dotcom/lieflat-charts" target="_blank" rel="noopener">Lieflat Charts · 躺在废墟里 ↗</a><a href="https://github.com/feitangyuan/motion-web" target="_blank" rel="noopener">motion-web · 泡椒肥汤圆 ↗</a><a href="template-assets/NOTICE.txt" target="_blank" rel="noopener">来源与许可</a></div></footer>
+  <dialog id="preview-dialog" aria-labelledby="preview-title"><div class="dialog-head"><div><span id="preview-id"></span><h2 id="preview-title"></h2></div><button id="close-preview" aria-label="关闭预览">关闭 ×</button></div><div class="dialog-tools"><p id="preview-hint"></p><div><button id="reload-preview">重播 ↻</button><button id="modal-star" aria-pressed="false">☆ 星标</button><button id="modal-select">去除</button><a id="original-link" target="_blank" rel="noopener">原始来源 ↗</a></div></div><div id="large-preview"></div><p class="dialog-foot">在画面内移动鼠标、点击或滚动体验。示例数字与文字不代表个人履历。</p></dialog>
+  <div id="toast" class="toast" hidden role="status"><span id="toast-text"></span><button id="toast-undo">撤销</button></div>
+  <noscript><p>请启用 JavaScript 来浏览模板、预览动效和保存筛选。</p></noscript>
+</body></html>

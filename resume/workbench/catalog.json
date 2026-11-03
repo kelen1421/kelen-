@@ -1,0 +1,373 @@
+{
+  "tools": [
+    {
+      "id": "global-capture",
+      "name": "截图助手",
+      "subtitle": "截取灵感，收集素材。",
+      "features": "截图 / 录屏 / 滚动长图",
+      "description": "点击截图助手悬浮球展开卡片面板，按截图、录屏、长截图分组，支持系统声音开关、保存目录和录制状态。",
+      "version": "1.3.2",
+      "category": "屏幕采集",
+      "icon": "assets/global-capture.svg",
+      "kind": "plugin",
+      "prompt": "打开截图助手",
+      "build": "132",
+      "bundleID": "local.codex.globalcapture",
+      "pluginVersion": "1.3.2"
+    },
+    {
+      "id": "global-translate",
+      "name": "全局翻译",
+      "subtitle": "让语言不再挡住视线。",
+      "features": "区域识字 / 持续翻译 / 覆盖译文",
+      "description": "选定屏幕范围后持续识字，文字变化自动翻译，译文覆盖原文并允许鼠标穿透。支持暂停、重新框选、选中文字和剪贴板翻译。macOS 本地翻译，无需 API Key。",
+      "version": "1.0.7",
+      "category": "阅读翻译",
+      "icon": "assets/global-translate.svg",
+      "kind": "plugin",
+      "prompt": "打开全局翻译",
+      "build": "107",
+      "bundleID": "local.codex.globaltranslate",
+      "pluginVersion": "1.0.7"
+    },
+    {
+      "id": "talking-recorder",
+      "name": "口播工具箱",
+      "subtitle": "把想法说清楚。",
+      "features": "摄像头 / 麦克风 / 滚动提词",
+      "description": "打开 Mac 口播工作室，选择摄像头和麦克风、编辑口播稿、调整提词速度并保存视频到本机。",
+      "version": "1.0.4",
+      "category": "口播录制",
+      "icon": "assets/talking-recorder.svg",
+      "kind": "plugin",
+      "prompt": "打开口播工具箱",
+      "pluginVersion": "1.0.4",
+      "bundleID": "local.codex.talkingrecorder",
+      "build": "1"
+    },
+    {
+      "id": "virtual-studio",
+      "name": "口播虚拟直播间",
+      "subtitle": "为你的表达，准备一个空间。",
+      "features": "人物抠像 / 场景合成 / 五秒预览",
+      "description": "本机独立窗口。导入MOV或MP4，选择横竖画幅，分析人物面光并自动调整8组灯光；支持人物构图与肤色调整；导出带原音频的5秒MP4预览。",
+      "version": "1.9.0",
+      "category": "虚拟场景",
+      "icon": "assets/virtual-studio.svg",
+      "kind": "plugin",
+      "prompt": "打开口播虚拟直播间",
+      "build": "190",
+      "bundleID": "local.codex.virtualstudio",
+      "pluginVersion": "1.9.0"
+    },
+    {
+      "id": "task-processing-progress",
+      "name": "ai工作台",
+      "subtitle": "把任务进展，留在视野中。",
+      "features": "任务浮窗 / 多聊天进度 / 完成提示",
+      "description": "可个性化的桌面任务工作台，四宫格或条式列表显示 Codex 聊天任务进度，可缩成进度圆球，任务完成时高亮。支持条形、圆环、分段进度，进行中/完成/界面背景自定义颜色及四套预设方案。默认单击打开任务、双击最小化聊天窗口，单击打开和双击打开可独立勾选，也可同时开启；双击打开未展开的窗口，已展开时最小化，右键也可最小化。任务可固定，完成保留至查看；空位可新建或进入任务。设置自动保存，覆盖安装自动检测旧版并保留个性化、固定任务和窗口大小。macOS 13 及以上，支持 Apple 芯片和 Intel Mac。 支持背景透明度与轻量内置对话；打开位置和单双击方式独立配置，最近消息可选 5/10/20 条。内置聊天通过本机 Codex CLI 及既有登录发送和执行，支持流式回复、停止和审批。",
+      "version": "1.9.6",
+      "category": "任务管理",
+      "icon": "assets/task-processing-progress.svg",
+      "kind": "plugin",
+      "prompt": "打开ai工作台浮窗",
+      "build": "20",
+      "bundleID": "local.codex.progress",
+      "pluginVersion": "1.9.6"
+    },
+    {
+      "id": "personal-programs",
+      "name": "我的个人程序",
+      "subtitle": "自己的程序，一个入口。",
+      "features": "动态扫描 / 本机应用 / 快速打开",
+      "description": "管理本机「个人程序」文件夹的应用入口：列出已有应用、按名称打开应用，或显示选择窗口。自动识别后来放入的应用，支持直接打开物理模型。",
+      "version": "1.0.0",
+      "category": "应用入口",
+      "icon": "assets/personal-programs.svg",
+      "kind": "plugin",
+      "prompt": "打开我的个人程序",
+      "pluginVersion": "1.0.0"
+    }
+  ],
+  "skills": [
+    {
+      "id": "hyperframes",
+      "name": "HyperFrames",
+      "group": "视频与动效",
+      "description": "从分镜、动效到视频成片",
+      "prompt": "请使用 HyperFrames 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "general-video",
+      "name": "自定义视频",
+      "group": "视频与动效",
+      "description": "品牌短片、蒙太奇和多镜头视频",
+      "prompt": "请使用 自定义视频 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "motion-graphics",
+      "name": "动态设计",
+      "group": "视频与动效",
+      "description": "标题、Logo、图表和短动效",
+      "prompt": "请使用 动态设计 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "faceless-explainer",
+      "name": "知识解说视频",
+      "group": "视频与动效",
+      "description": "将主题或文案做成无出镜解说",
+      "prompt": "请使用 知识解说视频 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "media-use",
+      "name": "媒体与声音",
+      "group": "视频与动效",
+      "description": "旁白、字幕、素材与音频处理",
+      "prompt": "请使用 媒体与声音 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "hyperframes-animation",
+      "name": "镜头与动画",
+      "group": "视频与动效",
+      "description": "可控的时间线、转场和动画编排",
+      "prompt": "请使用 镜头与动画 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "hyperframes-audio",
+      "name": "音频混音",
+      "group": "视频与动效",
+      "description": "人声、配乐与音效的混合",
+      "prompt": "请使用 音频混音 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "remotion-create",
+      "name": "Remotion 视频",
+      "group": "视频与动效",
+      "description": "用代码创建视频",
+      "prompt": "请使用 Remotion 视频 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "remotion-captions",
+      "name": "视频字幕",
+      "group": "视频与动效",
+      "description": "识别、排版与动画字幕",
+      "prompt": "请使用 视频字幕 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "remotion-render",
+      "name": "视频导出",
+      "group": "视频与动效",
+      "description": "渲染并导出 Remotion 视频",
+      "prompt": "请使用 视频导出 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "hyperframes-core",
+      "name": "视频工程结构",
+      "group": "视频与动效",
+      "description": "时间线、轨道、素材与可渲染工程约定",
+      "prompt": "请使用 视频工程结构 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "hyperframes-creative",
+      "name": "视频创意与分镜",
+      "group": "视频与动效",
+      "description": "视觉方向、脚本节奏、字体与色彩",
+      "prompt": "请使用 视频创意与分镜 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "hyperframes-cli",
+      "name": "视频预览与渲染",
+      "group": "视频与动效",
+      "description": "检查工程、预览、渲染与输出诊断",
+      "prompt": "请使用 视频预览与渲染 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "hyperframes-registry",
+      "name": "动效组件库",
+      "group": "视频与动效",
+      "description": "查找并接入已有转场、图表与视觉组件",
+      "prompt": "请使用 动效组件库 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "hyperframes-studio",
+      "name": "视频协作与审阅",
+      "group": "视频与动效",
+      "description": "分镜审阅、时间线组织与画面安全区",
+      "prompt": "请使用 视频协作与审阅 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "documents",
+      "name": "文档制作",
+      "group": "文档与数据",
+      "description": "Word 文档、排版与修订",
+      "prompt": "请使用 文档制作 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "pdf",
+      "name": "PDF 工具",
+      "group": "文档与数据",
+      "description": "阅读、创建与检查 PDF",
+      "prompt": "请使用 PDF 工具 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "presentations",
+      "name": "演示文稿",
+      "group": "文档与数据",
+      "description": "PowerPoint 与演示设计",
+      "prompt": "请使用 演示文稿 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "spreadsheets",
+      "name": "电子表格",
+      "group": "文档与数据",
+      "description": "公式、数据整理与可视化",
+      "prompt": "请使用 电子表格 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "sites",
+      "name": "Sites 网页制作",
+      "group": "网页与视觉",
+      "description": "网页、仪表盘与实用交互工具",
+      "prompt": "请使用 Sites 网页制作 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "visualize",
+      "name": "交互可视化",
+      "group": "网页与视觉",
+      "description": "把复杂问题变成可操作的可视化",
+      "prompt": "请使用 交互可视化 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "imagegen",
+      "name": "图像创作",
+      "group": "网页与视觉",
+      "description": "创作图片、编辑素材与生成视觉方案",
+      "prompt": "请使用 图像创作 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "aihot",
+      "name": "AIHOT 资讯",
+      "group": "资讯与工作流",
+      "description": "实时 AI 资讯与中文选题整理",
+      "prompt": "请使用 AIHOT 资讯 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "skill-creator",
+      "name": "技能创建",
+      "group": "资讯与工作流",
+      "description": "把重复工作整理为可复用技能",
+      "prompt": "请使用 技能创建 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "skill-installer",
+      "name": "技能安装",
+      "group": "资讯与工作流",
+      "description": "查找和安装可用技能",
+      "prompt": "请使用 技能安装 技能，帮我完成以下任务：\n\n"
+    },
+    {
+      "id": "macos-app-install-permissions",
+      "name": "macOS 安装与授权",
+      "group": "资讯与工作流",
+      "description": "应用升级、设置保留与权限诊断",
+      "prompt": "请使用 macOS 安装与授权 技能，帮我完成以下任务：\n\n"
+    }
+  ],
+  "brand": "KELEN",
+  "edition": "01",
+  "updated": "2026-10-16",
+  "apps": [
+    {
+      "id": "app:物理模型.app",
+      "name": "物理模型",
+      "kind": "app",
+      "subtitle": "探索液滴、碰撞与形变。",
+      "description": "可交互的液滴与刚体碰撞模拟，用于定性探索。",
+      "features": "液滴 / 碰撞 / 形变",
+      "available": true,
+      "running": false,
+      "bundleID": "local.personal.physics-model",
+      "version": "1.0.0",
+      "build": "1",
+      "category": "个人程序"
+    },
+    {
+      "id": "app:local.codex.globalcapture",
+      "name": "截图助手",
+      "kind": "app",
+      "available": true,
+      "running": false,
+      "bundleID": "local.codex.globalcapture",
+      "version": "1.3.2",
+      "build": "132",
+      "category": "插件配套应用",
+      "subtitle": "截取灵感，收集素材。",
+      "description": "点击截图助手悬浮球展开卡片面板，按截图、录屏、长截图分组，支持系统声音开关、保存目录和录制状态。",
+      "features": "截图 / 录屏 / 滚动长图",
+      "icon": "assets/global-capture.svg"
+    },
+    {
+      "id": "app:local.codex.globaltranslate",
+      "name": "全局翻译",
+      "kind": "app",
+      "available": true,
+      "running": false,
+      "bundleID": "local.codex.globaltranslate",
+      "version": "1.0.7",
+      "build": "107",
+      "category": "插件配套应用",
+      "subtitle": "让语言不再挡住视线。",
+      "description": "选定屏幕范围后持续识字，文字变化自动翻译，译文覆盖原文并允许鼠标穿透。支持暂停、重新框选、选中文字和剪贴板翻译。macOS 本地翻译，无需 API Key。",
+      "features": "区域识字 / 持续翻译 / 覆盖译文",
+      "icon": "assets/global-translate.svg"
+    },
+    {
+      "id": "app:local.codex.talkingrecorder",
+      "name": "口播工具箱",
+      "kind": "app",
+      "available": true,
+      "running": false,
+      "bundleID": "local.codex.talkingrecorder",
+      "version": "1.0.4",
+      "build": "1",
+      "category": "插件配套应用",
+      "subtitle": "把想法说清楚。",
+      "description": "打开 Mac 口播工作室，选择摄像头和麦克风、编辑口播稿、调整提词速度并保存视频到本机。",
+      "features": "摄像头 / 麦克风 / 滚动提词",
+      "icon": "assets/talking-recorder.svg"
+    },
+    {
+      "id": "app:local.codex.virtualstudio",
+      "name": "口播虚拟直播间",
+      "kind": "app",
+      "available": true,
+      "running": false,
+      "bundleID": "local.codex.virtualstudio",
+      "version": "1.9.0",
+      "build": "190",
+      "category": "插件配套应用",
+      "subtitle": "为你的表达，准备一个空间。",
+      "description": "本机独立窗口。导入MOV或MP4，选择横竖画幅，分析人物面光并自动调整8组灯光；支持人物构图与肤色调整；导出带原音频的5秒MP4预览。",
+      "features": "人物抠像 / 场景合成 / 五秒预览",
+      "icon": "assets/virtual-studio.svg"
+    },
+    {
+      "id": "app:local.codex.progress",
+      "name": "ai工作台",
+      "kind": "app",
+      "available": true,
+      "running": false,
+      "bundleID": "local.codex.progress",
+      "version": "1.9.6",
+      "build": "20",
+      "category": "插件配套应用",
+      "subtitle": "把任务进展，留在视野中。",
+      "description": "可个性化的桌面任务工作台，四宫格或条式列表显示 Codex 聊天任务进度，可缩成进度圆球，任务完成时高亮。支持条形、圆环、分段进度，进行中/完成/界面背景自定义颜色及四套预设方案。默认单击打开任务、双击最小化聊天窗口，单击打开和双击打开可独立勾选，也可同时开启；双击打开未展开的窗口，已展开时最小化，右键也可最小化。任务可固定，完成保留至查看；空位可新建或进入任务。设置自动保存，覆盖安装自动检测旧版并保留个性化、固定任务和窗口大小。macOS 13 及以上，支持 Apple 芯片和 Intel Mac。 支持背景透明度与轻量内置对话；打开位置和单双击方式独立配置，最近消息可选 5/10/20 条。内置聊天通过本机 Codex CLI 及既有登录发送和执行，支持流式回复、停止和审批。",
+      "features": "任务浮窗 / 多聊天进度 / 完成提示",
+      "icon": "assets/task-processing-progress.svg"
+    }
+  ],
+  "workbenchVersion": "1.1",
+  "workbenchBuild": "6",
+  "syncedAt": 1792145811.728539
+}

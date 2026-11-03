@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f6f3">
+  <meta name="description" content="色序 Hueform，用六种色彩公式找到和谐搭配。探索经典高级配色，实时预览，收藏并导出色卡。">
+  <title>色序 Hueform · 配色工作台</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#studio" aria-label="色序首页"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2a14 14 0 1 0 14 14H16Z" fill="currentColor"/><circle cx="23" cy="9" r="7" fill="none" stroke="currentColor" stroke-width="2"/></svg><strong>色序<span>Hueform</span></strong></a>
+    <nav aria-label="主要导航"><button data-view="studio" class="nav-item active">配色工作台</button><button data-view="classics" class="nav-item">经典高级配色</button><button data-view="saved" class="nav-item">我的收藏<span id="saved-count">0</span></button></nav>
+    <button id="help-button" class="help-button" aria-label="配色原理与使用帮助">?</button>
+  </header>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="side-heading"><h2>从一个颜色开始</h2><span class="live-label"><i></i>实时配色</span></div>
+      <p class="side-intro">拖动色轮，找到你的灵感起点。</p>
+      <div class="wheel-wrap"><canvas id="wheel" width="520" height="520" aria-hidden="true"></canvas><svg id="wheel-overlay" viewBox="0 0 260 260" aria-hidden="true"></svg><div id="wheel-control" role="slider" tabindex="0" aria-label="主色色相，使用方向键调整" aria-valuemin="0" aria-valuemax="359" aria-valuenow="0"></div></div>
+      <div class="color-input-row"><label class="native-picker" title="打开系统选色器"><input id="native-color" type="color" aria-label="系统选色器" value="#B5C88F"><span id="current-chip"></span></label><div class="hex-field"><label for="hex-input">主色 HEX</label><input id="hex-input" value="#B5C88F" maxlength="7" spellcheck="false" autocomplete="off" aria-describedby="hex-error"></div><button id="copy-base" class="icon-button" aria-label="复制主色色值" title="复制主色"></button></div>
+      <p id="hex-error" class="field-error" hidden>请输入 3 位或 6 位 HEX 色值</p>
+      <div class="slider-field"><label for="hue">色相 <span><input id="hue-number" type="number" min="0" max="359" aria-label="色相数值">°</span></label><input type="range" id="hue" min="0" max="359" step="1" aria-label="色相"></div>
+      <div class="slider-field"><label for="saturation">饱和度 <span id="saturation-value"></span></label><input type="range" id="saturation" min="0" max="100" step="1"></div>
+      <div class="slider-field"><label for="lightness">明度 <span id="lightness-value"></span></label><input type="range" id="lightness" min="0" max="100" step="1"></div>
+      <div class="side-actions"><button id="random-button" class="button"></button><button id="eyedropper-button" class="button"></button></div>
+      <section class="recent-section"><div class="side-heading"><h3>最近使用</h3><span>点击重新选色</span></div><div id="recent-colors" class="recent-colors"></div></section>
+      <div class="side-note"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 18h6M10 21h4M8 12a6 6 0 1 1 8 0c-1 1-1 3-1 3H9s0-2-1-3Z"/></svg><p>好的配色，不止是选对颜色。<br>试试让主色多一点，点缀少一点。</p></div>
+    </aside>
+    <main class="sheet">
+      <section id="studio-view" class="view">
+        <div class="page-heading"><div><h1>配色工作台</h1><p>一个主色，六种和谐的可能。</p></div><div class="toolbar"><button id="undo-button" class="icon-button" title="撤销上一步" aria-label="撤销上一步" disabled></button><button id="save-button" class="button"></button><button id="export-button" class="button primary"></button></div></div>
+        <div id="formula-tabs" class="formula-tabs" role="group" aria-label="六种配色公式"></div>
+        <div class="palette-heading"><div><h2 id="palette-title"></h2><span id="palette-description"></span></div><div class="format-control"><label for="color-format">色值</label><select id="color-format"><option value="hex">HEX</option><option value="rgb">RGB</option><option value="hsl">HSL</option></select><button id="copy-all" class="icon-button" aria-label="复制整组配色" title="复制整组配色"></button></div></div>
+        <div id="palette" class="palette" aria-label="当前配色方案"></div>
+        <div class="formula-note"><span id="formula-rule"></span><span>点击色值复制 · 点击箭头设为主色</span></div>
+        <section class="preview-section"><div class="section-heading"><h2>让颜色落在设计里</h2><div class="segmented" aria-label="预览类型"><button data-preview="poster" class="active">品牌海报</button><button data-preview="ui">界面设计</button><button data-preview="ratio">色彩比例</button></div></div><div class="preview-grid"><div id="design-preview" class="design-preview"></div><div class="contrast-panel"><div class="side-heading"><h3>文字可读性</h3><span>sRGB</span></div><div class="contrast-sample" id="contrast-sample"><span>Aa</span><small>让每个字，清晰可见。</small></div><div class="contrast-selector"><label>文字<select id="contrast-foreground" aria-label="对比度文字颜色"></select></label><button id="swap-contrast" class="icon-button" aria-label="交换文字与背景颜色"></button><label>背景<select id="contrast-background" aria-label="对比度背景颜色"></select></label></div><div class="contrast-result"><strong id="contrast-ratio"></strong><span id="contrast-status"></span></div><p id="contrast-detail"></p></div></div></section>
+        <div class="bottom-note"><span id="usage-note"></span><button data-view="classics">看看经典配色 <span>↗</span></button></div>
+      </section>
+      <section id="classics-view" class="view" hidden><div class="page-heading"><div><h1>经典高级配色</h1><p>从经典色调出发，为设计找到恰当的气质。</p></div><span class="library-total">精选配色方案</span></div><div class="gallery-toolbar"><div id="gallery-filters" class="gallery-filters"><button class="active" data-filter="全部">全部</button><button data-filter="黑白搭彩">黑白搭彩</button><button data-filter="低饱和">低饱和</button><button data-filter="浓郁">浓郁</button><button data-filter="极简">极简</button></div><p>点击方案，进入工作台预览</p></div><div id="preset-grid" class="preset-grid"></div><p class="gallery-note">以经典色系为灵感的精选方案。屏幕与实体材料会呈现不同的色彩，印刷前建议打样。</p></section>
+      <section id="saved-view" class="view" hidden><div class="page-heading"><div><h1>我的收藏</h1><p>把喜欢的搭配，留给下一次灵感。</p></div><button id="saved-export" class="button">导出收藏 JSON</button></div><p class="storage-note">收藏保存在当前浏览器，可导出备份。</p><div id="saved-grid" class="preset-grid"></div><div id="saved-empty" class="empty-state"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 8h22v34L24 34 13 42Z"/><path d="M19 18h10M24 13v10"/></svg><h2>给灵感留个位置</h2><p>在工作台点击「收藏方案」，喜欢的配色就会出现在这里。</p><button class="button primary" data-view="studio">开始配色</button></div></section>
+      <footer class="app-footer"><span>色序 Hueform <span class="footer-dot">·</span> 让颜色，相处得刚刚好。</span><button id="principles-button">配色原理</button></footer>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <dialog id="export-dialog"><div class="dialog-header"><h2>带走这组颜色</h2><button class="icon-button close-dialog" aria-label="关闭">×</button></div><p>为你的设计，准备好下一步。</p><div class="export-options"><button data-export="png"><strong>PNG 色卡</strong><span>高清色卡，含名称与色值</span><span>↓</span></button><button data-export="svg"><strong>SVG 色卡</strong><span>可在设计工具里继续编辑</span><span>↓</span></button><button data-export="css"><strong>CSS 变量</strong><span>复制并用于网页设计</span><span>↗</span></button><button data-export="json"><strong>JSON 数据</strong><span>完整色值与配色记录</span><span>↓</span></button></div></dialog>
+  <dialog id="help-dialog"><div class="dialog-header"><h2>从色轮，找到和谐</h2><button class="icon-button close-dialog" aria-label="关闭">×</button></div><p>这六种公式以数字 HSL 色轮计算：H 为色相角度，S 为饱和度，L 为明度。公式保持 S、L 不变，单色公式通过明度变化生成层次。数字色轮的互补关系与传统颜料色轮有所不同。</p><div id="help-formulas"></div><p>无彩色（黑、白、灰）没有明确色相，旋转色相不会产生彩色。可以先增加饱和度、调整明度，再探索搭配。</p><p>文字可读性使用 WCAG 相对亮度公式计算。普通文字 AA 要求 ≥ 4.5:1、AAA 要求 ≥ 7:1；大号文字 AA 要求 ≥ 3:1。色彩和谐不代表文字对比度一定合格。</p><div class="help-links"><a href="https://www.adobe.com/uk/creativecloud/design/discover/color-palette.html" target="_blank" rel="noreferrer">Adobe 色彩搭配指南 ↗</a><a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html" target="_blank" rel="noreferrer">W3C 文字对比度标准 ↗</a></div></dialog>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

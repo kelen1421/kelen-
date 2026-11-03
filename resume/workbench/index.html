@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>KELEN 工作台</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<aside class="sidebar">
+ <a class="brand" href="#overview" aria-label="KELEN 工作台首页"><svg viewBox="340 250 600 660" aria-hidden="true"><image href="assets/logo-source.png" width="1254" height="1254"/></svg><span>KELEN<sup>01</sup></span></a>
+ <div class="side-caption">PERSONAL CREATIVE SYSTEM</div>
+ <div class="side-line"></div><div class="workspace-label"><i></i> 我的创作空间 <span>LOCAL</span></div>
+ <nav aria-label="工作台导航">
+ <button data-page="overview" aria-label="工作台总览" class="nav-item active"><span class="nav-icon">◈</span>工作台总览<small>01</small></button>
+ <button data-page="tools" aria-label="插件工具" class="nav-item"><span class="nav-icon">⌘</span>插件工具<small id="nav-tools">06</small></button>
+ <button data-page="apps" aria-label="本机应用" class="nav-item"><span class="nav-icon">▦</span>本机应用<small id="nav-apps">—</small></button>
+ <button data-page="skills" aria-label="技能组" class="nav-item"><span class="nav-icon">⌬</span>技能组<small id="nav-skills">—</small></button>
+ <button data-page="flows" aria-label="创作工作流" class="nav-item"><span class="nav-icon">⇄</span>创作工作流<small id="nav-flows">06</small></button>
+ <button data-page="favorites" aria-label="我的收藏" class="nav-item"><span class="nav-icon">☆</span>我的收藏<small id="nav-favorites">00</small></button>
+ </nav>
+ <div class="side-bottom"><button id="open-personal-folder"><span>↗</span>个人程序文件夹</button><button id="about-button"><span>ⓘ</span>关于工作台</button><div class="local-state"><span class="led"></span><b id="bridge-label">正在连接本机</b><span id="app-version">v1.1</span></div></div>
+</aside>
+<div class="shell">
+ <header class="topbar"><div class="breadcrumb"><span>我的空间</span><i>/</i><strong id="page-label">工作台总览</strong></div><div class="top-actions"><button id="search-trigger" aria-label="搜索工具与技能"><span>⌕</span>搜索工具、应用、技能<kbd>⌘ K</kbd></button><button class="icon-button" id="refresh-button" aria-label="同步内容与状态">↻</button><span class="avatar">K</span></div></header>
+ <main id="main" tabindex="-1">
+ <section class="hero" id="overview-hero">
+  <div class="hero-copy"><div class="eyebrow"><i></i> KELEN / CREATIVE WORKBENCH</div><h1>让想法，<em>即刻就位。</em></h1><p>工具、应用与技能，在同一个创作空间协作。</p><div class="hero-actions"><button class="primary" id="quick-start">开始一次创作 <span>↗</span></button><button class="text-button" id="intro-button">查看工具介绍 <span>▷</span></button></div><div class="hero-coordinates">PERSONAL SYSTEM <span>—</span> OPEN TO THE UNKNOWN</div></div>
+  <div class="system-orbit" aria-label="创作工具轨道入口"><div class="orbital-grid"></div><div class="orbit-label"><span>SYSTEM / 001</span><span><i></i> ONLINE</span></div><div class="orbit-plane"><div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div><div class="orbit-ring ring-three"></div><div class="scan-line"></div></div><svg class="system-mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M12 8h13v19L13 44 39 8h15L26 40v16H12ZM35 34l20 22H40L28 41Z" fill="#d7dad6"/></svg><div id="orbit-tools"></div><div class="orbit-foot"><span>CONNECTED CAPABILITIES</span><span id="orbit-count">06 / NODES</span></div></div>
+ </section>
+ <section class="system-strip" id="system-strip" aria-label="本机资源概览"><div><span class="strip-icon">⌘</span><strong id="tool-count">06</strong><p>个人插件<span>随时调用</span></p></div><div><span class="strip-icon">▦</span><strong id="app-count">01</strong><p>本机应用<span>直接打开</span></p></div><div><span class="strip-icon">⌬</span><strong id="skill-count">—</strong><p>可用技能<span>组合使用</span></p></div><div class="connection"><span class="led"></span><p id="connection-copy">正在读取本机资源</p><small id="native-caption">本机连接</small></div></section>
+ <div class="content-layout"><div class="content-primary">
+  <section class="catalog-section"><div class="section-heading"><div><div class="eyebrow" id="section-kicker">YOUR CREATIVE EQUIPMENT</div><h2 id="section-title">常用工具<span class="orange-dot"></span></h2></div><button class="text-button" id="show-all-tools">全部工具 <span>↗</span></button></div>
+  <div class="catalog-toolbar"><div class="filters" id="filters"></div><label class="inline-search"><span>⌕</span><input id="inline-search" type="search" placeholder="查找当前分类" aria-label="查找当前分类"><kbd>/</kbd></label></div><div id="catalog" class="tool-grid" aria-live="polite"></div></section>
+  <section class="workflow-overview" id="workflow-overview"><div class="section-heading"><div><div class="eyebrow">FROM AN IDEA TO SOMETHING REAL</div><h2>让能力，接力。</h2></div><button class="text-button" data-go="flows">查看工作流 ↗</button></div><div class="flow-rail" id="flow-rail"></div></section>
+ </div><aside class="right-rail" id="right-rail"><section class="quick-panel"><div class="rail-heading"><h3>快速开始</h3><span>↗</span></div><p>从一件具体的事开始。</p><div id="quick-flows"></div><button class="prepare-blank" id="prepare-blank">＋ 自定义技能任务</button></section><section class="recent-panel"><div class="rail-heading"><h3>最近打开</h3><span id="recent-count">00</span></div><div id="recent-list"></div></section><section class="focus-note"><div class="mini-mark">K<span>·</span></div><p>让工具处理繁琐，<br>把注意力留给创作。</p><span>KEEP EXPLORING.</span></section></aside></div>
+ <footer><span><i class="led"></i><b id="footer-status">LOCAL WORKSPACE</b></span><span class="sync-stamp" id="sync-stamp"></span><span>KELEN — WORK IN PROGRESS, ALWAYS.</span><button id="motion-toggle" aria-pressed="false">动态效果：开启</button></footer>
+ </main>
+</div>
+<dialog id="search-dialog" class="search-dialog"><div class="search-dialog-top"><span>⌕</span><input id="global-search" type="search" placeholder="搜索工具、应用和技能…" aria-label="全局搜索"><button data-close aria-label="关闭搜索">ESC</button></div><div id="search-results"></div><div class="dialog-foot">搜索名称、用途或关键词 <span>↵ 选择并打开详情</span></div></dialog>
+<dialog id="detail-dialog" class="detail-dialog"><div class="dialog-top"><span class="eyebrow" id="detail-kicker">TOOL / DETAIL</span><button data-close aria-label="关闭详情">×</button></div><div id="detail-content"></div></dialog>
+<dialog id="task-dialog" class="task-dialog"><div class="dialog-top"><span class="eyebrow">NEW / CREATIVE TASK</span><button data-close aria-label="关闭任务准备">×</button></div><h2 id="task-heading">准备一次创作。</h2><p class="dialog-description">选好技能，写下要做的事。</p><div id="selected-skills"></div><div id="project-field" hidden><label class="field-label" for="project-input">项目目录（选填）</label><div class="project-row"><input id="project-input" type="text" placeholder="选择现有项目，或填写新项目路径"><button id="choose-project">选择目录 ↗</button></div></div><label class="field-label" for="task-input">这次想完成什么？</label><textarea id="task-input" rows="6" placeholder="例如：做一支 30 秒竖屏视频，介绍我的新工具，风格简洁、有科技感。"></textarea><div class="task-note"><i></i>任务会复制到剪贴板，并打开 Codex。粘贴后由你发送。</div><button class="primary full" id="prepare-task">复制任务并打开 Codex <span>↗</span></button></dialog>
+<dialog id="video-dialog" class="video-dialog"><div class="dialog-top"><span class="eyebrow">MY / CREATIVE TOOLKIT</span><button data-close aria-label="关闭视频">×</button></div><video id="intro-video" src="assets/toolkit-intro.mp4" controls playsinline preload="none"></video></dialog>
+<div id="toast" role="status" aria-live="polite"></div><script src="catalog.js"></script><script src="app.js"></script>
+</body></html>

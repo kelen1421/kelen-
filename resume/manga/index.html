@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f5f7"><meta name="description" content="叙帧 AI漫剧工作台。从故事到分镜，让每一帧有据可依。">
+  <title>叙帧 · AI漫剧工作台</title>
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app"></div><div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <dialog id="dialog"></dialog>
+  <input hidden id="image-input" type="file" accept="image/png,image/jpeg,image/webp">
+  <input hidden id="backup-input" type="file" accept="application/json,.json">
+  <input hidden id="skill-input" type="file" accept=".md,.txt" multiple>
+  <script type="module" src="app.mjs"></script>
+</body></html>

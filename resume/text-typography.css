@@ -1,0 +1,62 @@
+/* Reading text uses the user's installed YaHei family; display lettering stays intact. */
+:root{--resume-reading-font:"Microsoft YaHei","微软雅黑","Microsoft YaHei UI","PingFang SC",sans-serif}
+.single-page main p:not(.contact-statement):not(.contact-email):not(.work-orbit-phrase),.single-page summary,.single-page dt,.single-page dd,.single-page label,.single-page input,.single-page select,.single-page textarea,.single-page figcaption,.single-page .career-category,.single-page .career-work-metrics,.single-page .career-work-caption>span,.single-page .contact-facts,.single-page .account-subhead,.single-page .asof,.single-page .rank-title,.single-page .rank-value,.single-page .chart-legend,.single-page .yao-category,.single-page .yao-profile-head,.single-page .project-directory-head>span,.single-page .directory-preview-meta,.single-page .media-credit,.project-detail-dialog p:not(.contact-statement),.project-detail-dialog summary,.project-detail-dialog .visual-role,.project-detail-dialog .screenshot-caption{font-family:var(--resume-reading-font)}
+.single-page .career-duties h4,.single-page .career-work-heading h4,.single-page .fushi-data h3,.single-page .fushi-data h4,.single-page .fushi-data button,.single-page .fushi-data svg text,.project-detail-top,.project-detail-jump,.directory-preview-action,.project-live-body .workbench-preview-bar,.project-live-body .resume-details{font-family:var(--resume-reading-font)!important}
+.entry-identity p{font-family:Georgia,"Times New Roman",serif!important}
+
+/* A modest reading-size lift; display type and the phone illustrations retain their scale. */
+@media screen{
+ .single-page .career-intro{font-size:17px}
+ .single-page .career-summary,.single-page .skill-answer p{font-size:16px}
+ .single-page .career-duties p,.single-page .career-details p{font-size:15px}
+ .single-page .career-role{font-size:14px}
+ .single-page .career-category,.single-page .career-tools{font-size:13px}
+ .single-page .career-duties h4,.single-page .career-work-heading h4,.single-page .career-ai-visual>h4{font-size:14px}
+ .single-page .career-work-caption h4{font-size:15px}
+ .single-page .career-portrait-grid .career-work-caption h4{font-size:14px}
+ .single-page .career-work-metrics,.single-page .career-portrait-grid .career-work-metrics{font-size:12px}
+ .single-page .career-team dt,.single-page .career-project-visual figcaption{font-size:12px}
+ .single-page .career-team dd{font-size:15px}
+ .single-page .ai-duty-heading p,.single-page .review-path p{font-size:13px}
+ .single-page .ai-lane-options>span{font-size:14px}
+ .single-page .ai-lane-target small{font-size:12px}
+ .single-page .ai-lane-target p{font-size:13px!important}
+ .single-page .content-flow-label,.single-page .content-source>small,.single-page .content-source-result,.single-page .content-series-tabs small,.single-page .content-beats>li>p{font-size:12px}
+ .single-page .content-source>p{font-size:14px}
+ .single-page .content-source figcaption,.single-page .content-breakdown>header p{font-size:13px}
+ .single-page .content-beat-title strong{font-size:14px}
+ .single-page .content-kit-caption,.single-page .content-method-caption,.single-page .content-breakdown>header small,.single-page .content-value-line>small{font-size:11px}
+ .single-page .content-value-line>strong{font-size:15px}
+ .single-page .ai-profile-comparison figcaption span,.single-page .profile-comparison-key{font-size:12px}
+ .single-page .profile-comparison-key>small{font-size:11px}
+ .single-page .review-production,.single-page .review-return>span,.single-page .review-return>strong{font-size:12px}
+ .single-page .review-signal-tabs strong{font-size:14px}
+ .single-page .review-signal-tabs small,.single-page .review-context,.single-page .review-edit>span,.single-page .review-one-change{font-size:11px}
+ .single-page .account-subhead h4{font-size:16px}
+ .single-page .career-account-data .account-metrics dt,.single-page .yao-category{font-size:13px}
+ .single-page .career-account-data .chart-readout,.single-page .career-account-data .chart-legend,.single-page .career-account-data .rank-title,.single-page .career-account-data .rank-value,.single-page .career-account-data .chart-head>span,.single-page .account-subhead>span{font-size:12px}
+ .single-page .career-account-data .growth-chart svg text,.single-page .yao-fan-chart svg text{font-size:13px}
+ .single-page .resume-details p{font-size:17px}
+ .project-detail-dialog .project-live-body .resume-details p{font-size:16px}
+ .single-page .visual-role{font-size:14px}
+ .project-detail-copy .visual-lead{font-size:18px!important}
+ .project-detail-copy .visual-role{font-size:13px!important}
+ .project-detail-dialog .screenshot-caption,.project-detail-dialog .content-research-columns p{font-size:14px}
+}
+@media screen and (max-width:700px){
+ .single-page .career-intro{font-size:13px}
+ .single-page .career-summary,.single-page .career-duties p,.single-page .career-details p{font-size:15px}
+ .single-page .career-role{font-size:12px}
+ .single-page .career-category,.single-page .career-tools{font-size:12px}
+ .single-page .career-work-caption h4,.single-page .career-portrait-grid .career-work-caption h4{font-size:14px}
+ .single-page .career-work-metrics,.single-page .career-portrait-grid .career-work-metrics{font-size:11px}
+ .single-page .content-flow-label,.single-page .content-series-tabs small,.single-page .content-source-result,.single-page .content-source>small{font-size:10px}
+ .single-page .content-source>p{font-size:13px}
+ .single-page .content-source figcaption,.single-page .content-breakdown>header p{font-size:12px}
+ .single-page .content-beats>li>p,.single-page .content-beats>li:has(.content-frame-art)>p{font-size:11px}
+ .single-page .content-beats>li:has(.content-frame-art)>.content-kit-caption,.single-page .content-beats>li:has(.content-frame-art)>.content-method-caption{font-size:9px;flex-wrap:wrap}
+ .single-page .content-flow-label,.single-page .review-production{flex-wrap:wrap}
+ .single-page .ai-profile-comparison figcaption span{font-size:10px}
+ .single-page .career-account-data .growth-chart svg text,.single-page .yao-fan-chart svg text{font-size:12px}
+ .project-detail-copy .visual-lead{font-size:16px!important}
+}

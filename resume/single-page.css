@@ -1,0 +1,38 @@
+/* One background and grid continue from the orbit scene through the résumé. */
+:root{--resume-base:#191919;--resume-white:#eeeee9;--resume-rule:#ffffff2b}
+body.single-page{background:var(--resume-base);color:var(--resume-white)}
+.single-page>.grid-lines{display:grid;z-index:0;--line:#ffffff24}
+.single-page .site-header.light{color:var(--resume-white)}
+.single-page .site-header.light .kelen-mark{filter:none}
+.single-page .marquee,.single-page .home-projects,.single-page .resume-overview,.single-page .original-card-stack,.single-page .resume-background,.single-page .resume-reserved,.single-page .reel-section,.single-page .process-section,.single-page .detail-contact,.single-page .detail-footer{background:transparent;color:var(--resume-white)}
+.single-page .home-projects{padding-bottom:85px}
+.single-page .home-projects .home-section-head{color:var(--resume-white)}
+.single-page .original-card-stack .project-index{background:transparent;color:var(--resume-white);border-color:var(--resume-rule)}
+.single-page .original-card-stack .project-index a{color:#bdbdb7}
+.single-page .original-card-stack .project-index a:hover{color:#fff}
+.single-page .ability-rail details,.single-page .resume-overview .resume-details,.single-page .resume-background article,.single-page .resume-reserved summary,.single-page .process-card{border-color:var(--resume-rule)}
+.single-page .ability-num,.single-page .resume-background article>span,.single-page .resume-background p,.single-page .reserved-fields .empty-area:empty:before{color:#aaa9a1}
+.single-page .process-progress{background:#ffffff24}
+.single-page .process-progress span{background:#eeeee9}
+.single-page .detail-footer{position:relative;z-index:3}
+.closing-statement{position:relative;z-index:3;padding:80px var(--edge) 100px;border-top:1px solid var(--resume-rule);color:var(--resume-white);scroll-margin-top:110px}
+.closing-statement p{max-width:25em;margin:0 auto;text-align:center;font-size:clamp(26px,3.5vw,58px);font-weight:300;line-height:1.55;letter-spacing:-.04em;white-space:pre-line;text-wrap:balance}
+.detail-contact.contact-composition{position:relative;min-height:calc(100svh - 70px);padding:120px var(--edge) 70px;display:grid;grid-template-rows:auto 1fr auto;gap:42px;scroll-margin-top:0;border-top:1px solid var(--resume-rule)}
+.contact-composition .contact-anchor{position:absolute;inset:0 auto auto 0;width:0;height:0}
+.detail-contact.contact-composition h2{font-size:clamp(36px,5vw,80px);line-height:1;letter-spacing:-.065em;justify-self:start;margin:0}
+.contact-composition .contact-statement{place-self:center;margin:0;max-width:25em;text-align:center;font-size:clamp(26px,3.5vw,58px);font-weight:300;line-height:1.6;letter-spacing:-.04em;white-space:pre-line;text-wrap:balance;padding:40px 0 60px}
+.contact-composition .contact-bottom{justify-self:end;max-width:100%}
+.contact-composition .contact-email-row{display:flex;align-items:center;justify-content:flex-end;gap:26px}
+.contact-composition .contact-email{font-size:clamp(24px,3vw,48px);line-height:1.3;letter-spacing:-.055em;overflow-wrap:anywhere;margin:0}
+.contact-composition .contact-circle{width:58px;height:58px;font-size:28px;flex:none}
+.contact-composition .contact-facts{display:flex;justify-content:flex-end;gap:28px;flex-wrap:wrap;font-size:12px;line-height:1.8;margin-top:20px;padding:0;border:0}
+@media(max-width:700px){.detail-contact.contact-composition{min-height:85svh;padding:100px var(--edge) 50px;gap:34px}.detail-contact.contact-composition h2{font-size:40px}.contact-composition .contact-statement{font-size:clamp(23px,5.7vw,34px);line-height:1.75;padding:40px 0}.contact-composition .contact-email-row{gap:16px}.contact-composition .contact-circle{width:42px;height:42px;font-size:23px}.contact-composition .contact-facts{font-size:11px;gap:22px;margin-top:18px}}
+@media print{.detail-contact.contact-composition{min-height:0;display:block;padding:8mm 0;color:#111;border-color:#bbb}.detail-contact.contact-composition h2{font-size:20pt}.contact-composition .contact-statement{font-size:15pt;padding:8mm 0}.contact-composition .contact-bottom{text-align:right}.contact-composition .contact-email{font-size:14pt}.contact-composition .contact-circle{display:none}}
+@media(max-width:700px){.closing-statement{padding:55px var(--edge) 65px}.closing-statement p{font-size:clamp(23px,5.6vw,32px);line-height:1.65}}
+@media print{.closing-statement{padding:8mm 0;border-color:#ccc;color:#111;break-inside:avoid}.closing-statement p{font-size:15pt}}
+@media(max-width:700px){.single-page .home-projects{padding-bottom:50px}}
+@media print{
+ body.single-page{background:#fff!important;color:#111!important}
+ .single-page>.grid-lines{display:none!important}
+ .single-page .resume-overview,.single-page .resume-background,.single-page .resume-reserved,.single-page .detail-contact{color:#111!important;background:#fff!important}
+}

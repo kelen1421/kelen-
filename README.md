@@ -11,3 +11,7 @@ Open `index.html` in a browser.
 GitHub Actions publishes this site to GitHub Pages whenever changes are pushed to `main`.
 
 Site URL: <https://kelen1421.github.io/kelen-/>
+
+## Current résumé
+
+[View Kelen résumé](https://kelen1421.github.io/kelen-/resume/) · [Source](resume/)
