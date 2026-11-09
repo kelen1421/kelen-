@@ -43,9 +43,26 @@
  function goTo(hash,smooth=true){scrollAnimating=false;const target=document.querySelector('.project-scroll-anchor[data-for="'+hash.replace('#','')+'"]')||document.getElementById(hash.replace('#',''));if(!target||target.closest('#project-store'))return;const anchorCard=target.dataset.for&&document.getElementById(target.dataset.for);const inset=anchorCard?(parseFloat(getComputedStyle(anchorCard).top)||(innerWidth<=700?83:110)):(target.matches(".career-row,.career-account-data,.career-ai-visual .ai-duty")?(innerWidth<=700?83:110):0);const top=target.getBoundingClientRect().top+window.scrollY-inset;scrollTarget=Math.max(0,Math.min(top,document.documentElement.scrollHeight-innerHeight));window.scrollTo({top:scrollTarget,behavior:smooth&&!reduced?'smooth':'instant'});history.replaceState(null,'',hash)}
  $$('a[href^="#"]').forEach(link=>link.addEventListener('click',event=>{const hash=link.getAttribute('href');if(hash.length>1&&document.getElementById(hash.slice(1))){event.preventDefault();goTo(hash)}}));
  const stackCards=$$('.stack-card'),cardStack=$('.original-card-stack');
- function layoutStack(){stackCards.forEach((card,i)=>{const top=((innerWidth<=700?83:110)+i*7)+'px';card.style.top=top;card.style.setProperty('--stack-top',top)})}
+ let stackDirty=true;
+ function layoutStack(){
+  stackCards.forEach((card,i)=>{card.style.setProperty('--stack-top',((innerWidth<=700?82:96)+Math.min(i,5)*6)+'px')});
+  stackDirty=true;
+ }
  layoutStack();
- function drawStack(){if(!stackCards.length)return;const rects=stackCards.map(card=>card.getBoundingClientRect());if(!rects.some(r=>r.top<innerHeight&&r.bottom>0))return;const scales=stackCards.map((card,i)=>{const next=rects[i+1];return (1-(next?clamp((innerHeight-next.top)/Math.max(1,innerHeight-110)):0)*.045).toFixed(5)});stackCards.forEach((card,i)=>{const value='scale('+scales[i]+')';if(card.style.transform!==value)card.style.transform=value})}
+ window.addEventListener('scroll',()=>{stackDirty=true},{passive:true});
+ function drawStack(){
+  if(reduced||!stackCards.length||!stackDirty)return;
+  stackDirty=false;
+  const bounds=cardStack.getBoundingClientRect();
+  if(bounds.top>=innerHeight||bounds.bottom<=0)return;
+  const positions=stackCards.map(card=>card.getBoundingClientRect().top);
+  stackCards.forEach((card,i)=>{
+   const next=positions[i+1];
+   const scale=next===undefined?1:1-clamp((innerHeight-next)/Math.max(1,innerHeight-96))*.045;
+   const value='scale('+scale.toFixed(5)+')';
+   if(card.style.transform!==value)card.style.transform=value;
+  });
+ }
  // Interactive card scenes use native scrolling so embedded app scrolling never fights page inertia.
  if(!reduced&&matchMedia('(pointer:fine)').matches){window.addEventListener('wheel',event=>{if(event.ctrlKey||editing||$('.media-dialog').open||$('.project-detail-dialog')?.open||event.target.closest('.detail-menu.open')||Math.abs(event.deltaX)>Math.abs(event.deltaY))return;if(cardStack){const r=cardStack.getBoundingClientRect();if(r.top<innerHeight&&r.bottom>0){scrollAnimating=false;scrollTarget=window.scrollY;return}}event.preventDefault();if(!scrollAnimating)scrollTarget=window.scrollY;scrollTarget=clamp(scrollTarget+event.deltaY,0,document.documentElement.scrollHeight-innerHeight);scrollAnimating=true},{passive:false});window.addEventListener('keydown',event=>{if(['PageDown','PageUp','Home','End','ArrowDown','ArrowUp',' '].includes(event.key)&&!editing){scrollAnimating=false;scrollTarget=window.scrollY}});window.addEventListener('pointerdown',()=>{scrollAnimating=false})}
  function activeProject(index){slideIndex=index;const box=$('.project-info');box.classList.add('changing');setTimeout(()=>{box.href='#'+['workbench','hueform','reel'][index];const name=$('[data-active-project-title]'),category=$('[data-active-project-category]');name.textContent=state.fields['projects.'+index+'.title'];name.dataset.field='projects.'+index+'.title';category.textContent=state.fields['projects.'+index+'.category'];category.dataset.field='projects.'+index+'.category';editFields();formatDisplayHeadings();box.classList.remove('changing')},350);for(const button of $$('[data-slide]'))button.setAttribute('aria-current',String(Number(button.dataset.slide)===index))}
