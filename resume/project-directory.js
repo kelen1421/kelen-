@@ -38,20 +38,34 @@ function tick(){
  }
 
 }
-function settle(offset,velocity,draw,finish){
- const rate=16; // Critical damping with a natural frequency of 16 rad/s.
- const initial=performance.now();
+const springRate=16; // Natural frequency of a critically damped spring (ζ = 1).
+const edgeTravel=44;
+const restitution=.55;
+
+function settle(position,velocity,draw,finish,edge=0){
+ const started=performance.now();
+ let previous=started,id;
  function frame(now){
-  const t=(now-initial)/1000;
-  const slope=velocity+rate*offset,decay=Math.exp(-rate*t);
-  const value=(offset+slope*t)*decay;
-  const speed=(velocity-rate*slope*t)*decay;
-  if(t>=.8||(Math.abs(value)<.35&&Math.abs(speed)<5)){draw(0);finish?.();return 0}
-  draw(value);
-  return requestAnimationFrame(step);
+  if(now-started>=800){draw(0);finish?.();return}
+  let remaining=(now-previous)/1000;
+  previous=now;
+  // Small time steps at the boundary keep the collision stable on slow frames.
+  while(remaining>0){
+   const dt=edge?Math.min(remaining,1/240):remaining;
+   remaining-=dt;
+   const slope=velocity+springRate*position,decay=Math.exp(-springRate*dt);
+   position=(position+slope*dt)*decay;
+   velocity=(velocity-springRate*slope*dt)*decay;
+   if(edge*position>=edgeTravel){
+    position=edge*edgeTravel;
+    if(edge*velocity>0)velocity*=-restitution;
+   }
+  }
+  if(Math.abs(position)<.35&&Math.abs(velocity)<5){draw(0);finish?.();return}
+  draw(position);
+  id=requestAnimationFrame(frame);
  }
- let id=requestAnimationFrame(step);
- function step(now){id=frame(now)}
+ id=requestAnimationFrame(frame);
  return ()=>cancelAnimationFrame(id);
 }
 let stopFlip=null;
@@ -81,6 +95,7 @@ for(const [index,card] of cards.entries()){
  }
  if(reduced)continue;
  const surface=$('.project-page-surface',card),link=$('.project-page-image',card);
+ const edge=index===0?1:index===cards.length-1?-1:0;
  let gesture=null,stopSettle=null;
  const tilt=value=>{
   surface.style.setProperty('--page-drag',value.toFixed(2)+'px');
@@ -89,8 +104,7 @@ for(const [index,card] of cards.entries()){
  link.addEventListener('dragstart',event=>event.preventDefault());
  link.addEventListener('pointerdown',event=>{
   if(event.button!==0||!event.isPrimary||event.metaKey||event.ctrlKey||event.shiftKey)return;
-  const startOffset=parseFloat(surface.style.getPropertyValue('--page-drag'))||0;
-  gesture={id:event.pointerId,x:event.clientX,y:event.clientY,lastX:event.clientX,time:event.timeStamp,dx:0,velocity:0,offset:0,startOffset,dragging:false};
+  gesture={id:event.pointerId,x:event.clientX,y:event.clientY,lastX:event.clientX,time:event.timeStamp,dx:0,velocity:0,offset:0,startOffset:0,dragging:false};
  });
  link.addEventListener('pointermove',event=>{
   if(!gesture||event.pointerId!==gesture.id)return;
@@ -99,12 +113,13 @@ for(const [index,card] of cards.entries()){
    if(Math.abs(dy)>9&&Math.abs(dy)>Math.abs(dx)){gesture=null;return}
    if(Math.abs(dx)<9||Math.abs(dx)<=Math.abs(dy))return;
    stopSettle?.();cancelFlip();flipFrame=0;
+   gesture.startOffset=parseFloat(surface.style.getPropertyValue('--page-drag'))||0;
    link.setPointerCapture(event.pointerId);gesture.dragging=true;
   }
-  const edge=dx>0?index===0:index===cards.length-1;
+  const outward=edge*dx>0;
   gesture.velocity=.45*gesture.velocity+.55*(event.clientX-gesture.lastX)*1000/Math.max(8,event.timeStamp-gesture.time);
   gesture.dx=dx;gesture.lastX=event.clientX;gesture.time=event.timeStamp;
-  gesture.offset=clamp(gesture.startOffset+dx*(edge?.17:.35),-90,90);
+  gesture.offset=clamp(gesture.startOffset+dx*(outward?.17:.35),edge===-1?-edgeTravel:-90,edge===1?edgeTravel:90);
   tilt(gesture.offset);
  });
  function endGesture(event){
@@ -116,11 +131,10 @@ for(const [index,card] of cards.entries()){
   const intent=released.dx+clamp(velocity,-1100,1100)*.09;
   const next=index+(intent<0?1:-1);
   const pageTurn=event.type==='pointerup'&&Math.abs(intent)>52&&next>=0&&next<cards.length;
-  const atEdge=next<0||next>=cards.length;
-  const speed=clamp(velocity*.17,-300,300);
+  const speed=clamp(velocity*(edge*released.dx>0?.17:.35),-300,300);
   stopSettle=settle(released.offset,speed,value=>tilt(
-   atEdge?clamp(value,-90,90):released.offset<0?Math.min(value,0):Math.max(value,0)
-  ));
+   edge?value:released.offset<0?Math.min(value,0):Math.max(value,0)
+  ),undefined,edge);
   if(pageTurn)moveTo(next,-velocity*1.3);
  }
  link.addEventListener('pointerup',endGesture);
