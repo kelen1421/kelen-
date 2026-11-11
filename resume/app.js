@@ -143,7 +143,7 @@
   }
   requestAnimationFrame(frame);
  }
- const entryTasks=[firstSlideLoad,lens?.ready,document.fonts.ready].filter(Boolean);
+ const entryTasks=[firstSlideLoad,lens?.ready].filter(Boolean);
  const resources=Promise.allSettled(entryTasks);
  if(reduced||cover.dataset.ready==='true'){
   finishEntry();
@@ -157,7 +157,8 @@
   let completed=0,showingProgress=false;
   function updateProgress(){
    if(showingProgress&&cover.dataset.ready!=='true'){
-    ring.style.strokeDashoffset=String(ringLength*(1-completed/entryTasks.length));
+    const remaining=entryTasks.length?1-completed/entryTasks.length:0;
+    ring.style.strokeDashoffset=String(ringLength*remaining);
    }
   }
   function completeTask(){
