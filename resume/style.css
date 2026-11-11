@@ -73,6 +73,3 @@ html{scroll-padding-top:0}
 .site-header.orbit-scroll-away{transform:translateY(-120%)}
 
 .entry-complete .site-header{transition-delay:0s}
-
-/* The entry effect is opt-in so the page stays visible without JavaScript. */
-html:not(.entry-enabled) .page-cover{display:none}

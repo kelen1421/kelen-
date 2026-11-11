@@ -1,6 +1,6 @@
 (()=>{'use strict';
  const $=(s,root=document)=>root.querySelector(s),$$=(s,root=document)=>[...root.querySelectorAll(s)];
- const {LensSlideshow,OrbitDisc,MovieWall,clamp=(value,min=0,max=1)=>Math.max(min,Math.min(max,value))}=window.ResumeEffects||{};
+ const {LensSlideshow,OrbitDisc,MovieWall,clamp}=window.ResumeEffects;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const KEY='kelen-reference-v2';
  const flat=(obj,prefix='',out={})=>{for(const [key,value] of Object.entries(obj)){const path=prefix?prefix+'.'+key:key;if(value&&typeof value==='object')flat(value,path,out);else out[path]=String(value??'')}return out};
@@ -16,10 +16,6 @@
  try{const stored=localStorage.getItem(KEY);if(stored){const previous=JSON.parse(stored);merge(previous);if(!previous.contentRevision){const placeholders=new Set(['YOUR PROFESSION','YOUR NAME','所在城市','PROJECT FOUR','VOLCANO','SEASIDE','BLACK HOLE','视觉场景','项目角色','专业能力','创意方向','使用工具','工作方法','个人介绍待补充\n在此填写你的创作方向与经历']);for(const key of Object.keys(defaults)){if(state.fields[key]===''||placeholders.has(state.fields[key]))state.fields[key]=defaults[key]}}}}catch{}
  if(state.fields.experience==='[公司／机构]｜[岗位]｜[起止时间]\n待补充实际职责、代表项目及可核实成果。')state.fields.experience=defaults.experience;
  if(state.fields.closingStatement==='AI 把重复的工作带走，\n让人重新回到最需要人的地方。')state.fields.closingStatement=defaults.closingStatement;
- ['volcano','seaside','blackhole'].forEach((name,i)=>{
-  const key='projects.'+i+'.image';
-  if(state.fields[key]==='assets/'+name+'.png')state.fields[key]=defaults[key];
- });
  const fieldUpgrades={"profession":["AI 操盘手"],"direction":["AI 应用落地与内容生产"],"bio":["AI 应用落地与内容生产\n把需求拆成步骤把创意推进到交付"],"education":["[学校]｜[专业]｜[学历]｜[起止时间]"],"legalName":["姓名待补充"],"email":["邮箱待补充"],"phone":["手机待补充"],"closingStatement":["AI 把重复的工作带走\n让人重新回到最需要人的地方"],"career.2.period":["2026年—2026.08"],"career.2.category":["团队经历"],"career.2.title":["IP 团队","AI 知识类 IP 转型"],"career.2.role":["IP 整体结构完善"],"career.2.summary":["2026年初开始研究 AI，随后加入 IP 团队，参与完善 IP 整体结构。"],"career.2.detail":["2026年8月离职。入职月份、团队名称、正式岗位及具体职责成果后续补充。"],"projects.3.title":["AI 资讯多渠道内容"],"projects.3.category":["内容流程 渠道适配"],"projects.3.role":["选题要求 渠道适配与 AI 协作整理"],"projects.3.description":["一份经过核对的资料两种适合渠道的表达"],"projects.3.detail":["围绕 AIHOT 资讯建立资料检索、来源核对、主题筛选、写作和文稿交付流程。\n将同一主题分别整理为微信公众号长文与小红书分页文案，适配不同渠道的信息密度和表达结构。\n积累可编辑文稿与内容结构模板，强调事实依据、信息时效及内容价值，依据当日资料决定是否成稿。"]};for(const [key,old] of Object.entries(fieldUpgrades))if(old.includes(state.fields[key]))state.fields[key]=defaults[key];
  let editing=false,saveTimer,toastTimer,lens,orbit,movieWall,slideIndex=0,activeUpload=0,scrollTarget=window.scrollY,scrollAnimating=false;
  const images=()=>[0,1,2].map(i=>state.fields['projects.'+i+'.image']);
@@ -44,7 +40,7 @@
  $$('[data-upload]').forEach(button=>button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();activeUpload=Number(button.dataset.upload);imageInput.click()}));
  imageInput.addEventListener('change',async()=>{const file=imageInput.files[0];imageInput.value='';if(!file)return;if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>15000000){toast('请选择 15 MB 以下的 JPG、PNG 或 WebP 图片');return}try{const bitmap=await createImageBitmap(file),ratio=Math.min(1,1600/Math.max(bitmap.width,bitmap.height)),canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*ratio);canvas.height=Math.round(bitmap.height*ratio);const context=canvas.getContext('2d');context.fillStyle='#222';context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();state.fields['projects.'+activeUpload+'.image']=canvas.toDataURL('image/jpeg',.88);persist();applyFields();await Promise.all([lens?.setImages(images()),orbit?.setImages(images())]);toast('图片已更新')}catch{toast('图片读取失败，请换一张重试')}});
  document.addEventListener('click',event=>{if(editing&&event.target.closest('a')&&event.target.closest('[data-field]'))event.preventDefault()});
- function goTo(hash,smooth=true){scrollAnimating=false;const id=hash.slice(1);const target=document.querySelector('.project-scroll-anchor[data-for="'+CSS.escape(id)+'"]')||document.getElementById(id);if(!target||target.closest('#project-store'))return;const anchorCard=target.dataset.for&&document.getElementById(target.dataset.for);const inset=anchorCard?(parseFloat(getComputedStyle(anchorCard).top)||(innerWidth<=700?83:110)):(target.matches(".career-row,.career-account-data,.career-ai-visual .ai-duty")?(innerWidth<=700?83:110):0);const top=target.getBoundingClientRect().top+window.scrollY-inset;scrollTarget=Math.max(0,Math.min(top,document.documentElement.scrollHeight-innerHeight));window.scrollTo({top:scrollTarget,behavior:smooth&&!reduced?'smooth':'instant'});history.replaceState(null,'',hash)}
+ function goTo(hash,smooth=true){scrollAnimating=false;const target=document.querySelector('.project-scroll-anchor[data-for="'+hash.replace('#','')+'"]')||document.getElementById(hash.replace('#',''));if(!target||target.closest('#project-store'))return;const anchorCard=target.dataset.for&&document.getElementById(target.dataset.for);const inset=anchorCard?(parseFloat(getComputedStyle(anchorCard).top)||(innerWidth<=700?83:110)):(target.matches(".career-row,.career-account-data,.career-ai-visual .ai-duty")?(innerWidth<=700?83:110):0);const top=target.getBoundingClientRect().top+window.scrollY-inset;scrollTarget=Math.max(0,Math.min(top,document.documentElement.scrollHeight-innerHeight));window.scrollTo({top:scrollTarget,behavior:smooth&&!reduced?'smooth':'instant'});history.replaceState(null,'',hash)}
  $$('a[href^="#"]').forEach(link=>link.addEventListener('click',event=>{const hash=link.getAttribute('href');if(hash.length>1&&document.getElementById(hash.slice(1))){event.preventDefault();goTo(hash)}}));
  const stackCards=$$('.stack-card'),cardStack=$('.original-card-stack');
  let stackDirty=true;
@@ -70,9 +66,9 @@
  // Interactive card scenes use native scrolling so embedded app scrolling never fights page inertia.
  if(!reduced&&matchMedia('(pointer:fine)').matches){window.addEventListener('wheel',event=>{if(event.ctrlKey||editing||$('.media-dialog').open||$('.project-detail-dialog')?.open||event.target.closest('.detail-menu.open')||Math.abs(event.deltaX)>Math.abs(event.deltaY))return;if(cardStack){const r=cardStack.getBoundingClientRect();if(r.top<innerHeight&&r.bottom>0){scrollAnimating=false;scrollTarget=window.scrollY;return}}event.preventDefault();if(!scrollAnimating)scrollTarget=window.scrollY;scrollTarget=clamp(scrollTarget+event.deltaY,0,document.documentElement.scrollHeight-innerHeight);scrollAnimating=true},{passive:false});window.addEventListener('keydown',event=>{if(['PageDown','PageUp','Home','End','ArrowDown','ArrowUp',' '].includes(event.key)&&!editing){scrollAnimating=false;scrollTarget=window.scrollY}});window.addEventListener('pointerdown',()=>{scrollAnimating=false})}
  function activeProject(index){slideIndex=index;const box=$('.project-info');box.classList.add('changing');setTimeout(()=>{box.href='#'+['workbench','hueform','reel'][index];const name=$('[data-active-project-title]'),category=$('[data-active-project-category]');name.textContent=state.fields['projects.'+index+'.title'];name.dataset.field='projects.'+index+'.title';category.textContent=state.fields['projects.'+index+'.category'];category.dataset.field='projects.'+index+'.category';editFields();formatDisplayHeadings();box.classList.remove('changing')},350);for(const button of $$('[data-slide]'))button.setAttribute('aria-current',String(Number(button.dataset.slide)===index))}
- if(LensSlideshow&&$('.lens-canvas')){lens=new LensSlideshow($('.lens-canvas'),images(),activeProject);if($('.orbit-canvas'))orbit=new OrbitDisc($('.orbit-canvas'),images());activeProject(0);$$('[data-slide]').forEach(button=>button.addEventListener('click',()=>lens.go(Number(button.dataset.slide))));$('.pause').addEventListener('click',event=>{lens.paused=!lens.paused;event.currentTarget.textContent=lens.paused?'▷':'Ⅱ';event.currentTarget.setAttribute('aria-pressed',String(lens.paused));event.currentTarget.setAttribute('aria-label',lens.paused?'恢复自动轮播':'暂停自动轮播')})}
+ if($('.lens-canvas')){lens=new LensSlideshow($('.lens-canvas'),images(),activeProject);if($('.orbit-canvas'))orbit=new OrbitDisc($('.orbit-canvas'),images());activeProject(0);$$('[data-slide]').forEach(button=>button.addEventListener('click',()=>lens.go(Number(button.dataset.slide))));$('.pause').addEventListener('click',event=>{lens.paused=!lens.paused;event.currentTarget.textContent=lens.paused?'▷':'Ⅱ';event.currentTarget.setAttribute('aria-pressed',String(lens.paused));event.currentTarget.setAttribute('aria-label',lens.paused?'恢复自动轮播':'暂停自动轮播')})}
 
- if(MovieWall&&$('.movie-wall'))movieWall=new MovieWall($('.movie-wall'),$('.movie-source'),images());
+ if($('.movie-wall'))movieWall=new MovieWall($('.movie-wall'),$('.movie-source'),images());
  const menu=$('.detail-menu');
  function toggleMenu(value){if(!menu)return;menu.classList.toggle('open',value);$('.menu-toggle').setAttribute('aria-expanded',String(value));$('#detail-nav').inert=!value}
  if(menu){$('.menu-toggle').addEventListener('click',()=>toggleMenu(!menu.classList.contains('open')));menu.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>toggleMenu(false)));document.addEventListener('pointerdown',event=>{if(!menu.contains(event.target))toggleMenu(false)});menu.addEventListener('keydown',event=>{if(event.key==='Escape'){toggleMenu(false);$('.menu-toggle').focus()}})}
@@ -109,46 +105,10 @@
  let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{lens?.resize();orbit?.resize();movieWall?.resize();fitTitles();layoutStack()},80)});
  window.addEventListener('keydown',event=>{if(event.key==='Escape'&&editing)setEditing(false)});
  const cover=$('.page-cover');let internalNavigation=false;try{internalNavigation=sessionStorage.getItem('kelen-internal-navigation')==='1';sessionStorage.removeItem('kelen-internal-navigation')}catch{}
- function finishEntry(){
-  cover.classList.add('hidden');
-  cover.dataset.ready='true';
-  document.body.classList.remove('entry-loading');
-  document.body.classList.add('entry-complete');
-  if(location.hash)goTo(location.hash,false);
- }
- function revealEntry(){
-  if(cover.dataset.ready==='true')return;
-  const started=performance.now();
-  document.body.classList.add('entry-revealing');
-  function frame(now){
-   if(cover.dataset.ready==='true')return;
-   const progress=clamp((now-started)/1500);
-   const eased=progress<.5?8*progress**4:1-(-2*progress+2)**4/2;
-   const radius=eased*105;
-   const mask=`radial-gradient(circle at center,transparent ${radius}%,#000 ${radius}%)`;
-   cover.style.maskImage=mask;
-   cover.style.webkitMaskImage=mask;
-   if(progress<1)requestAnimationFrame(frame);
-   else finishEntry();
-  }
-  requestAnimationFrame(frame);
- }
- const resources=Promise.allSettled([lens?.ready,orbit?.ready,document.fonts.ready]);
- if(reduced||cover.dataset.ready==='true'){
-  finishEntry();
- }else if(internalNavigation){
-  cover.classList.add('internal-entry');
-  setTimeout(revealEntry,150);
- }else{
-  document.body.classList.add('entry-loading');
-  const entryDelay=new Promise(resolve=>setTimeout(resolve,800));
-  Promise.race([resources,entryDelay]).then(()=>{
-   if(cover.dataset.ready==='true')return;
-   cover.classList.add('resources-ready');
-   setTimeout(revealEntry,1200);
-  });
- }
+ const revealEntry=()=>{const started=performance.now();document.body.classList.add('entry-revealing');const duration=reduced?0:1500;const frame=now=>{const p=clamp((now-started)/Math.max(1,duration));const ease=p<.5?8*p*p*p*p:1-Math.pow(-2*p+2,4)/2;const mask='radial-gradient(circle at center,transparent '+(ease*105)+'%,#000 '+(ease*105)+'%)';cover.style.maskImage=mask;cover.style.webkitMaskImage=mask;if(p<1)requestAnimationFrame(frame);else{if(location.hash)goTo(location.hash,false);cover.classList.add('hidden');cover.dataset.ready='true';document.body.classList.add('entry-complete')}};requestAnimationFrame(frame)};
+ if(reduced){cover.classList.add('hidden');cover.dataset.ready='true';document.body.classList.add('entry-complete')}else if(internalNavigation){cover.classList.add('internal-entry');setTimeout(revealEntry,150)}else{document.body.classList.add('entry-loading');const resources=lens?lens.ready:Promise.resolve();Promise.all([resources,document.fonts.ready]).catch(()=>{}).then(()=>{requestAnimationFrame(()=>cover.classList.add('resources-ready'));setTimeout(revealEntry,1200)})}
  document.addEventListener('click',event=>{const link=event.target.closest('a');if(!link||event.defaultPrevented||editing||link.target==='_blank'||event.metaKey||event.ctrlKey||event.shiftKey)return;const url=new URL(link.href,location.href);if(url.origin!==location.origin||!/\/(index|profile|project)\.html$/.test(url.pathname))return;if(url.pathname===location.pathname&&url.search===location.search){if(url.hash){event.preventDefault();goTo(url.hash)}return;}event.preventDefault();try{sessionStorage.setItem('kelen-internal-navigation','1')}catch{}cover.style.maskImage='none';cover.style.webkitMaskImage='none';cover.removeAttribute('data-ready');cover.classList.add('leaving');cover.classList.remove('hidden');setTimeout(()=>location.assign(url.href),reduced?0:450)});
  window.addEventListener('hashchange',()=>{if(location.hash)goTo(location.hash,false)});
+ if(location.hash)document.fonts.ready.then(()=>goTo(location.hash,false));
  if(new URLSearchParams(location.search).has('print'))setTimeout(()=>{setEditing(false);window.print()},1200);
 })();

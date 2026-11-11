@@ -21,7 +21,7 @@ window.RESUME_DEFAULTS={
       "category": "macOS 工具 工作流程",
       "role": "需求策划 流程设计与 AI 协作落地",
       "description": "把分散的创作工具组织成一个工作入口",
-      "image": "assets/volcano.webp",
+      "image": "assets/volcano.png",
       "detail": "围绕创作工具分散、任务入口不统一的使用场景，策划并推进 macOS 本机工作台，整合截图、翻译、口播录制、虚拟场景等工具入口。\n梳理软件开发、视频制作、IP 调研、口播视频、网页工具、AI 资讯六类任务流程，明确各阶段输入、处理步骤与交付检查。\n推进搜索、收藏、最近打开、运行状态等功能迭代，形成可安装应用、源码包和操作界面；工作流入口支持生成任务文本并跳转，由使用者确认提交。"
     },
     {
@@ -29,7 +29,7 @@ window.RESUME_DEFAULTS={
       "category": "网页工具 配色设计",
       "role": "产品需求 视觉方向与 AI 协作迭代",
       "description": "从一枚主色走到可预览 可导出的配色方案",
-      "image": "assets/seaside.webp",
+      "image": "assets/seaside.png",
       "detail": "从设计配色需求出发，将主色选择、配色推荐、场景预览、收藏和导出组织为完整使用流程。\n推进六种配色公式、22 套预设方案及黑白搭彩分类的实现，结合海报、界面和色彩比例预览评估实际效果。\n迭代移动端布局与操作体验，形成网页版本及离线使用包，支持 PNG、SVG、CSS、JSON 等输出形式。"
     },
     {
@@ -37,7 +37,7 @@ window.RESUME_DEFAULTS={
       "category": "影像 程序化动效",
       "role": "需求与风格设定 迭代反馈与成片验收",
       "description": "让脚本 画面 声音和动效形成一份完整表达",
-      "image": "assets/blackhole.webp",
+      "image": "assets/blackhole.png",
       "detail": "围绕工具介绍、知识表达和个人视觉形象等主题，组织脚本、分镜、生成素材、配音、剪辑与动效制作。\n结合 HyperFrames、Remotion 等制作方式开展 AI 协作实践，针对节奏、构图、字幕、声音和参考风格提出修改要求并持续迭代。\n项目成果包括 60 秒竖屏《我的 AI 创作工作台》介绍片，以及片头、动效和其他视频作品；保留成片、字幕、分镜及可编辑工程，便于后续修改。"
     },
     {
