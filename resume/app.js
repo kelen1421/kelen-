@@ -1,6 +1,6 @@
 (()=>{'use strict';
  const $=(s,root=document)=>root.querySelector(s),$$=(s,root=document)=>[...root.querySelectorAll(s)];
- const {LensSlideshow,OrbitDisc,MovieWall,clamp=(value,min=0,max=1)=>Math.max(min,Math.min(max,value))}=window.ResumeEffects||{};
+ const {LensSlideshow,OrbitDisc,MovieWall,loadImage,clamp=(value,min=0,max=1)=>Math.max(min,Math.min(max,value))}=window.ResumeEffects||{};
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const KEY='kelen-reference-v2';
  const flat=(obj,prefix='',out={})=>{for(const [key,value] of Object.entries(obj)){const path=prefix?prefix+'.'+key:key;if(value&&typeof value==='object')flat(value,path,out);else out[path]=String(value??'')}return out};
@@ -19,6 +19,12 @@
  const fieldUpgrades={"profession":["AI 操盘手"],"direction":["AI 应用落地与内容生产"],"bio":["AI 应用落地与内容生产\n把需求拆成步骤把创意推进到交付"],"education":["[学校]｜[专业]｜[学历]｜[起止时间]"],"legalName":["姓名待补充"],"email":["邮箱待补充"],"phone":["手机待补充"],"closingStatement":["AI 把重复的工作带走\n让人重新回到最需要人的地方"],"career.2.period":["2026年—2026.08"],"career.2.category":["团队经历"],"career.2.title":["IP 团队","AI 知识类 IP 转型"],"career.2.role":["IP 整体结构完善"],"career.2.summary":["2026年初开始研究 AI，随后加入 IP 团队，参与完善 IP 整体结构。"],"career.2.detail":["2026年8月离职。入职月份、团队名称、正式岗位及具体职责成果后续补充。"],"projects.3.title":["AI 资讯多渠道内容"],"projects.3.category":["内容流程 渠道适配"],"projects.3.role":["选题要求 渠道适配与 AI 协作整理"],"projects.3.description":["一份经过核对的资料两种适合渠道的表达"],"projects.3.detail":["围绕 AIHOT 资讯建立资料检索、来源核对、主题筛选、写作和文稿交付流程。\n将同一主题分别整理为微信公众号长文与小红书分页文案，适配不同渠道的信息密度和表达结构。\n积累可编辑文稿与内容结构模板，强调事实依据、信息时效及内容价值，依据当日资料决定是否成稿。"]};for(const [key,old] of Object.entries(fieldUpgrades))if(old.includes(state.fields[key]))state.fields[key]=defaults[key];
  let editing=false,saveTimer,toastTimer,lens,orbit,movieWall,slideIndex=0,activeUpload=0,scrollTarget=window.scrollY,scrollAnimating=false;
  const images=()=>[0,1,2].map(i=>state.fields['projects.'+i+'.image']);
+ const previousSlidePaths=['assets/seaside.png','assets/blackhole.png'];
+ previousSlidePaths.forEach((path,i)=>{
+  const key='projects.'+(i+1)+'.image';
+  if(state.fields[key]===path)state.fields[key]=defaults[key];
+ });
+ let firstSlideLoad,beginBackgroundSlides;
  function toast(text){$('.toast').textContent=text;$('.toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('.toast').classList.remove('show'),3200)}
  function persist(){clearTimeout(saveTimer);try{localStorage.setItem(KEY,JSON.stringify(state));$('.edit-status').textContent='已保存到此浏览器'}catch{$('.edit-status').textContent='请保存资料副本，保留当前修改'}}
  function fitTitles(){for(const el of $$('.title-name')){el.style.fontSize='';const size=parseFloat(getComputedStyle(el).fontSize),r=document.createRange();r.selectNodeContents(el);const w=r.getBoundingClientRect().width,available=el.clientWidth-4;if(w>available)el.style.fontSize=Math.max(26,size*available/w)+'px'}}
@@ -66,7 +72,14 @@
  // Interactive card scenes use native scrolling so embedded app scrolling never fights page inertia.
  if(!reduced&&matchMedia('(pointer:fine)').matches){window.addEventListener('wheel',event=>{if(event.ctrlKey||editing||$('.media-dialog').open||$('.project-detail-dialog')?.open||event.target.closest('.detail-menu.open')||Math.abs(event.deltaX)>Math.abs(event.deltaY))return;if(cardStack){const r=cardStack.getBoundingClientRect();if(r.top<innerHeight&&r.bottom>0){scrollAnimating=false;scrollTarget=window.scrollY;return}}event.preventDefault();if(!scrollAnimating)scrollTarget=window.scrollY;scrollTarget=clamp(scrollTarget+event.deltaY,0,document.documentElement.scrollHeight-innerHeight);scrollAnimating=true},{passive:false});window.addEventListener('keydown',event=>{if(['PageDown','PageUp','Home','End','ArrowDown','ArrowUp',' '].includes(event.key)&&!editing){scrollAnimating=false;scrollTarget=window.scrollY}});window.addEventListener('pointerdown',()=>{scrollAnimating=false})}
  function activeProject(index){slideIndex=index;const box=$('.project-info');box.classList.add('changing');setTimeout(()=>{box.href='#'+['workbench','hueform','reel'][index];const name=$('[data-active-project-title]'),category=$('[data-active-project-category]');name.textContent=state.fields['projects.'+index+'.title'];name.dataset.field='projects.'+index+'.title';category.textContent=state.fields['projects.'+index+'.category'];category.dataset.field='projects.'+index+'.category';editFields();formatDisplayHeadings();box.classList.remove('changing')},350);for(const button of $$('[data-slide]'))button.setAttribute('aria-current',String(Number(button.dataset.slide)===index))}
- if(LensSlideshow&&$('.lens-canvas')){lens=new LensSlideshow($('.lens-canvas'),images(),activeProject);if($('.orbit-canvas'))orbit=new OrbitDisc($('.orbit-canvas'),images());activeProject(0);$$('[data-slide]').forEach(button=>button.addEventListener('click',()=>lens.go(Number(button.dataset.slide))));$('.pause').addEventListener('click',event=>{lens.paused=!lens.paused;event.currentTarget.textContent=lens.paused?'▷':'Ⅱ';event.currentTarget.setAttribute('aria-pressed',String(lens.paused));event.currentTarget.setAttribute('aria-label',lens.paused?'恢复自动轮播':'暂停自动轮播')})}
+ if(LensSlideshow&&$('.lens-canvas')){
+  const sources=images();
+  const entryFinished=new Promise(resolve=>{beginBackgroundSlides=resolve});
+  const slideLoads=sources.map((src,index)=>index===0?loadImage(src):entryFinished.then(()=>loadImage(src)));
+  firstSlideLoad=slideLoads[0];
+  lens=new LensSlideshow($('.lens-canvas'),sources,activeProject,slideLoads);
+  if($('.orbit-canvas'))orbit=new OrbitDisc($('.orbit-canvas'),sources,slideLoads);
+  activeProject(0);$$('[data-slide]').forEach(button=>button.addEventListener('click',()=>lens.go(Number(button.dataset.slide))));$('.pause').addEventListener('click',event=>{lens.paused=!lens.paused;event.currentTarget.textContent=lens.paused?'▷':'Ⅱ';event.currentTarget.setAttribute('aria-pressed',String(lens.paused));event.currentTarget.setAttribute('aria-label',lens.paused?'恢复自动轮播':'暂停自动轮播')})}
 
  if(MovieWall&&$('.movie-wall'))movieWall=new MovieWall($('.movie-wall'),$('.movie-source'),images());
  const menu=$('.detail-menu');
@@ -110,6 +123,7 @@
   cover.dataset.ready='true';
   document.body.classList.remove('entry-loading');
   document.body.classList.add('entry-complete');
+  beginBackgroundSlides?.();
   if(location.hash)goTo(location.hash,false);
  }
  function revealEntry(){
@@ -129,7 +143,7 @@
   }
   requestAnimationFrame(frame);
  }
- const entryTasks=[...new Set([...(lens?.imageLoads||[]),...(orbit?.imageLoads||[]),lens?.ready,orbit?.ready,document.fonts.ready].filter(Boolean))];
+ const entryTasks=[firstSlideLoad,lens?.ready,document.fonts.ready].filter(Boolean);
  const resources=Promise.allSettled(entryTasks);
  if(reduced||cover.dataset.ready==='true'){
   finishEntry();

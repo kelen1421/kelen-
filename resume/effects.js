@@ -17,17 +17,30 @@
  }
  const cover=(ctx,img,x,y,w,h)=>{if(!img)return;const iw=img.videoWidth||img.naturalWidth||img.width,ih=img.videoHeight||img.naturalHeight||img.height;if(!iw||!ih)return;const scale=Math.max(w/iw,h/ih);ctx.drawImage(img,x+(w-iw*scale)/2,y+(h-ih*scale)/2,iw*scale,ih*scale)};
  class LensSlideshow {
-  constructor(canvas, images, onChange) {
+  constructor(canvas, images, onChange, imageLoads=images.map(loadImage)) {
    Object.assign(this,{canvas,images,onChange,index:0,next:0,transitioning:false,paused:matchMedia('(prefers-reduced-motion: reduce)').matches,lastChange:performance.now(),mouse:[0,0],smoothMouse:[0,0],clock:0,lastFrame:0});
    // The visible inner lens rotates clockwise; the outer lens rotates counterclockwise.
    // Geometry, refraction and the image transition each retain their own clock.
    this.layers=[{type:'outer',size:1,speed:-.4},{type:'rim',size:1.1825,speed:-.8,phase:.25},{type:'middle',size:1.16,speed:.04},{type:'rim',size:.6925,speed:.8,phase:.5},{type:'small',size:.68,speed:0}];
    this.palettes=[[[.75,.37,.23],[.44,.49,.55]],[[.55,.67,.72],[.16,.37,.43]],[[.62,.39,.24],[.22,.29,.40]]];
-   this.ready=this.init();
+   this.textures=[];
+   this.failedSlides=new Set();
+   this.ready=this.init(imageLoads[0]);
+   for(let index=1;index<images.length;index++){
+    imageLoads[index].then(img=>{
+     if(!this.gl||this.images[index]!==images[index]||this.textures[index])return;
+     this.textures[index]=this.createTexture(img);
+     if(this.pendingSlide===index)this.go(index);
+    }).catch(()=>{
+     if(this.images[index]!==images[index]||this.textures[index])return;
+     this.failedSlides.add(index);
+     if(this.pendingSlide===index)this.pendingSlide=undefined;
+    });
+   }
    canvas.parentElement.addEventListener('pointermove',e=>{const r=canvas.getBoundingClientRect();this.mouse=[e.clientX/r.width*2-1,(e.clientY-r.top)/r.height*2-1]});
    canvas.parentElement.addEventListener('pointerleave',()=>this.mouse=[0,0]);
   }
-  async init(){
+  async init(firstImage){
    const gl=this.canvas.getContext('webgl',{alpha:false,antialias:true,powerPreference:'high-performance'});if(!gl)return;
    this.gl=gl;
    const vertex=`attribute vec2 aPosition; varying vec2 vUv; uniform vec2 uViewport;uniform vec2 uMeshResolution;uniform vec2 uOffset;uniform float uAngle;
@@ -40,21 +53,68 @@
      const uniforms={};for(let i=0;i<gl.getProgramParameter(program,gl.ACTIVE_UNIFORMS);i++){const info=gl.getActiveUniform(program,i);uniforms[info.name]={location:gl.getUniformLocation(program,info.name),type:info.type}}this.programs[type]={program,uniforms,position:gl.getAttribLocation(program,'aPosition')};
     }
     this.buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-.5,-.5,.5,-.5,-.5,.5,-.5,.5,.5,-.5,.5,.5]),gl.STATIC_DRAW);
-    this.imageLoads=this.images.map(loadImage);
-    this.loaded=await Promise.all(this.imageLoads);
-    this.textures=this.loaded.map(img=>{
-     const crop=document.createElement('canvas');crop.width=crop.height=1024;cover(crop.getContext('2d'),img,0,0,1024,1024);
-     const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.MIRRORED_REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.MIRRORED_REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,crop);return tex;
-    });
+    this.textures[0]=this.createTexture(await firstImage);
     gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);this.resize();this.isReady=true;this.canvas.previousElementSibling.style.opacity='0';this.canvas.dataset.renderer='layered-lens';new ResizeObserver(()=>this.resize()).observe(this.canvas);this.lastChange=performance.now();
-   }catch(error){console.warn('Lens fallback:',error.message);this.gl=null;}
+   }catch(error){console.warn('Lens fallback:',error.message);this.gl=null;this.pendingSlide=undefined;}
+  }
+  createTexture(img){
+   const gl=this.gl,crop=document.createElement('canvas');
+   crop.width=crop.height=1024;
+   cover(crop.getContext('2d'),img,0,0,1024,1024);
+   const tex=gl.createTexture();
+   gl.bindTexture(gl.TEXTURE_2D,tex);
+   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.MIRRORED_REPEAT);
+   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.MIRRORED_REPEAT);
+   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
+   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+   gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,crop);
+   return tex;
   }
   resize(){if(!this.gl)return;const r=this.canvas.getBoundingClientRect();this.w=r.width;this.h=r.height;const d=Math.min(devicePixelRatio||1,1.5);this.canvas.width=Math.round(this.w*d);this.canvas.height=Math.round(this.h*d);this.gl.viewport(0,0,this.canvas.width,this.canvas.height)}
-  async setImages(images){const loaded=await Promise.all(images.map(loadImage));const gl=this.gl;if(!gl)return;const textures=loaded.map(img=>{const crop=document.createElement('canvas');crop.width=crop.height=1024;cover(crop.getContext('2d'),img,0,0,1024,1024);const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.MIRRORED_REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.MIRRORED_REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,crop);return tex});this.textures.forEach(tex=>gl.deleteTexture(tex));this.images=images;this.loaded=loaded;this.textures=textures;}
-  go(index){if(this.transitioning||index===this.index)return;this.next=index;this.direction=index===(this.index+1)%this.images.length?1:-1;this.start=performance.now();this.transitioning=true;this.onChange?.(index);if(!this.isReady){this.index=index;this.transitioning=false;this.canvas.previousElementSibling.src=this.images[index]}this.lastChange=performance.now()}
+  async setImages(images){
+   const loaded=await Promise.all(images.map(loadImage)),gl=this.gl;
+   if(!gl)return;
+   const textures=loaded.map(img=>this.createTexture(img));
+   this.textures.forEach(texture=>gl.deleteTexture(texture));
+   this.images=images;
+   this.textures=textures;
+   this.failedSlides.clear();
+   this.pendingSlide=undefined;
+  }
+  go(index){
+   if(this.transitioning||this.failedSlides.has(index))return;
+   if(index===this.index){
+    this.pendingSlide=undefined;
+    return;
+   }
+   if(this.gl&&!this.textures[index]){
+    this.pendingSlide=index;
+    return;
+   }
+   this.pendingSlide=undefined;
+   this.next=index;
+   this.direction=index===(this.index+1)%this.images.length?1:-1;
+   this.start=performance.now();
+   this.transitioning=true;
+   this.onChange?.(index);
+   if(!this.isReady){
+    this.index=index;
+    this.transitioning=false;
+    this.canvas.previousElementSibling.src=this.images[index];
+   }
+   this.lastChange=performance.now();
+  }
   uniforms(pass,values){const gl=this.gl;for(const [key,value] of Object.entries(values)){const u=pass.uniforms[key];if(!u)continue;const loc=u.location;if(u.type===gl.FLOAT_VEC2)gl.uniform2fv(loc,value);else if(u.type===gl.FLOAT_VEC3)gl.uniform3fv(loc,value);else if(u.type===gl.BOOL||u.type===gl.INT||u.type===gl.SAMPLER_2D)gl.uniform1i(loc,value);else gl.uniform1f(loc,value)}}
   draw(time){
-   if(!this.paused&&!this.transitioning&&time-this.lastChange>5000)this.go((this.index+1)%this.images.length);
+   if(!this.paused&&!this.transitioning&&this.pendingSlide===undefined&&time-this.lastChange>5000){
+    for(let step=1;step<this.images.length;step++){
+     const next=(this.index+step)%this.images.length;
+     if(this.failedSlides.has(next))continue;
+     this.go(next);
+     break;
+    }
+   }
    if(!this.gl||!this.isReady)return;
    const dt=this.lastFrame?Math.min(.06,(time-this.lastFrame)/1000):0;this.lastFrame=time;if(!matchMedia('(prefers-reduced-motion: reduce)').matches)this.clock+=dt;
    const elapsed=this.transitioning?(time-this.start)/1000:0;
@@ -86,11 +146,24 @@
  }
  class OrbitDisc{
   async setImages(images){this.images=images;this.loaded=await Promise.all(images.map(loadImage))}
-  constructor(canvas,images){this.canvas=canvas;this.ctx=canvas.getContext('2d');this.images=images;this.loaded=[];this.pointer=[0,0];this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;this.imageLoads=images.map(loadImage);this.ready=Promise.all(this.imageLoads).then(imgs=>this.loaded=imgs);canvas.parentElement.addEventListener('pointermove',e=>{const r=canvas.getBoundingClientRect();this.pointer=[(e.clientX/r.width-.5)*.14,(e.clientY/r.height-.5)*.14]});this.resize();new ResizeObserver(()=>this.resize()).observe(canvas);}
+  constructor(canvas,images,imageLoads=images.map(loadImage)){
+   this.canvas=canvas;
+   this.ctx=canvas.getContext('2d');
+   this.images=images;
+   this.loaded=new Array(images.length);
+   this.pointer=[0,0];
+   this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+   imageLoads.forEach((load,index)=>load.then(img=>{
+    if(this.images[index]===images[index])this.loaded[index]=img;
+   },()=>{}));
+   canvas.parentElement.addEventListener('pointermove',e=>{const r=canvas.getBoundingClientRect();this.pointer=[(e.clientX/r.width-.5)*.14,(e.clientY/r.height-.5)*.14]});
+   this.resize();
+   new ResizeObserver(()=>this.resize()).observe(canvas);
+  }
   resize(){const r=this.canvas.getBoundingClientRect();this.w=r.width;this.h=r.height;const d=Math.min(devicePixelRatio||1,1.6);this.canvas.width=r.width*d;this.canvas.height=r.height*d;this.ctx.setTransform(d,0,0,d,0,0)}
   draw(time){const ctx=this.ctx,w=this.w,h=this.h;if(!w||!h)return;ctx.clearRect(0,0,w,h);const t=this.reduced?2.5:time/1000;const r=w>700?(w-64)*.25:(w-16)*.5;const cx=w*.5,cy=h*.5;ctx.lineWidth=1;ctx.setLineDash([2,2]);for(let i=0;i<5;i++){ctx.beginPath();ctx.strokeStyle=i===2?'rgba(255,255,255,.8)':'rgba(255,255,255,.29)';ctx.ellipse(cx+(i-2)*r,cy,r,r,0,0,Math.PI*2);ctx.stroke()}
    const angle=t*.24,tilt=t*.15;const ellipses=[{rx:r*Math.max(.018,.52+.48*Math.cos(angle*1.5)),ry:r,a:angle+.66+this.pointer[0]},{rx:r*Math.max(.018,.52+.48*Math.cos(tilt*1.5+2.3)),ry:r,a:-tilt-1.17+this.pointer[1]}];
-   const img=this.loaded[Math.floor(t/3)%Math.max(1,this.loaded.length)];if(img){ctx.save();for(const el of ellipses){ctx.beginPath();ctx.ellipse(cx,cy,el.rx,el.ry,el.a,0,Math.PI*2);ctx.clip()}ctx.translate(cx,cy);ctx.rotate(Math.sin(t*.2)*.14);cover(ctx,img,-r,-r,r*2,r*2);ctx.restore()}
+   const img=this.loaded[Math.floor(t/3)%Math.max(1,this.loaded.length)]||this.loaded[0];if(img){ctx.save();for(const el of ellipses){ctx.beginPath();ctx.ellipse(cx,cy,el.rx,el.ry,el.a,0,Math.PI*2);ctx.clip()}ctx.translate(cx,cy);ctx.rotate(Math.sin(t*.2)*.14);cover(ctx,img,-r,-r,r*2,r*2);ctx.restore()}
    ctx.strokeStyle='rgba(255,255,255,.95)';for(const el of ellipses){ctx.beginPath();ctx.ellipse(cx,cy,el.rx,el.ry,el.a,0,Math.PI*2);ctx.stroke()}}
  }
  class MovieWall{
@@ -98,5 +171,5 @@
   resize(){const rect=this.canvas.getBoundingClientRect();this.w=rect.width;this.h=rect.height;const d=Math.min(devicePixelRatio||1,1.5);this.canvas.width=this.w*d;this.canvas.height=this.h*d;this.ctx.setTransform(d,0,0,d,0,0)}
   draw(time,scroll=0){const ctx=this.ctx,w=this.w,h=this.h;ctx.fillStyle='#151515';ctx.fillRect(0,0,w,h);ctx.save();ctx.translate(w/2,h/2-scroll*.12);ctx.rotate(Math.PI/12);const tw=w*.64,th=h*.64;const t=this.reduced?0:time/1000;for(let row=-2;row<3;row++){const drift=Math.sin(t*.075)*w*.13*(row%2===0?1:-1);for(let col=-2;col<3;col++){const x=col*(tw+10)+drift-tw/2,y=row*(th+10)-th/2;ctx.save();ctx.beginPath();ctx.rect(x,y,tw,th);ctx.clip();const source=this.video.readyState>=2?this.video:this.loaded[(row+col+12)%Math.max(1,this.loaded.length)];cover(ctx,source,x,y,tw,th);ctx.restore()}}ctx.restore();}
  }
- window.ResumeEffects={LensSlideshow,OrbitDisc,MovieWall,clamp};
+ window.ResumeEffects={LensSlideshow,OrbitDisc,MovieWall,clamp,loadImage};
 })();
