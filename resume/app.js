@@ -129,7 +129,7 @@
   }
   requestAnimationFrame(frame);
  }
- const entryTasks=[...(lens?.imageLoads||[]),lens?.ready,orbit?.ready,document.fonts.ready].filter(Boolean);
+ const entryTasks=[...new Set([...(lens?.imageLoads||[]),...(orbit?.imageLoads||[]),lens?.ready,orbit?.ready,document.fonts.ready].filter(Boolean))];
  const resources=Promise.allSettled(entryTasks);
  if(reduced||cover.dataset.ready==='true'){
   finishEntry();
@@ -140,7 +140,6 @@
   document.body.classList.add('entry-loading');
   const ring=$('.entry-progress-front',cover);
   const ringLength=Number(ring.getAttribute('stroke-dashoffset'));
-  const entryStarted=Number(cover.dataset.startedAt);
   let completed=0,showingProgress=false;
   function updateProgress(){
    if(showingProgress&&cover.dataset.ready!=='true'){
@@ -157,14 +156,13 @@
    showingProgress=true;
    cover.classList.add('entry-progress-visible');
    updateProgress();
-   const showCompleted=resources.then(()=>new Promise(resolve=>setTimeout(resolve,500)));
-   const waitLimit=new Promise(resolve=>setTimeout(resolve,Math.max(500,entryStarted+2000-performance.now())));
-   Promise.race([showCompleted,waitLimit]).then(revealEntry);
+   resources.then(()=>setTimeout(revealEntry,500));
   }
   const intro=$('.entry-identity',cover).getAnimations?.()[0];
   if(intro)intro.finished.then(showProgress,showProgress);
   else showProgress();
  }
+ cover.dataset.entryManaged='true';
  document.addEventListener('click',event=>{const link=event.target.closest('a');if(!link||event.defaultPrevented||editing||link.target==='_blank'||event.metaKey||event.ctrlKey||event.shiftKey)return;const url=new URL(link.href,location.href);if(url.origin!==location.origin||!/\/(index|profile|project)\.html$/.test(url.pathname))return;if(url.pathname===location.pathname&&url.search===location.search){if(url.hash){event.preventDefault();goTo(url.hash)}return;}event.preventDefault();try{sessionStorage.setItem('kelen-internal-navigation','1')}catch{}cover.style.maskImage='none';cover.style.webkitMaskImage='none';cover.removeAttribute('data-ready');cover.classList.add('leaving');cover.classList.remove('hidden');setTimeout(()=>location.assign(url.href),reduced?0:450)});
  window.addEventListener('hashchange',()=>{if(location.hash)goTo(location.hash,false)});
  if(new URLSearchParams(location.search).has('print'))setTimeout(()=>{setEditing(false);window.print()},1200);

@@ -74,5 +74,5 @@ html{scroll-padding-top:0}
 
 .entry-complete .site-header{transition-delay:0s}
 
-/* Enable the entry overlay only after its independent timeout is installed. */
+/* Enable the entry overlay when its startup script runs. */
 html:not(.entry-enabled) .page-cover{display:none}
