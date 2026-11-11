@@ -1,7 +1,20 @@
 /* Native WebGL layer compositor and Canvas orbit renderer. Lens formulas adapted from LENZ. */
 (()=>{'use strict';
  const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
- const loadImage=src=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src});
+ const pendingImages=new Map();
+ function loadImage(src){
+  if(pendingImages.has(src))return pendingImages.get(src);
+  const pending=new Promise((resolve,reject)=>{
+   const img=new Image();
+   img.onload=()=>resolve(img);
+   img.onerror=reject;
+   img.src=src;
+  });
+  pendingImages.set(src,pending);
+  const clear=()=>pendingImages.delete(src);
+  pending.then(clear,clear);
+  return pending;
+ }
  const cover=(ctx,img,x,y,w,h)=>{if(!img)return;const iw=img.videoWidth||img.naturalWidth||img.width,ih=img.videoHeight||img.naturalHeight||img.height;if(!iw||!ih)return;const scale=Math.max(w/iw,h/ih);ctx.drawImage(img,x+(w-iw*scale)/2,y+(h-ih*scale)/2,iw*scale,ih*scale)};
  class LensSlideshow {
   constructor(canvas, images, onChange) {
@@ -27,7 +40,8 @@
      const uniforms={};for(let i=0;i<gl.getProgramParameter(program,gl.ACTIVE_UNIFORMS);i++){const info=gl.getActiveUniform(program,i);uniforms[info.name]={location:gl.getUniformLocation(program,info.name),type:info.type}}this.programs[type]={program,uniforms,position:gl.getAttribLocation(program,'aPosition')};
     }
     this.buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,this.buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-.5,-.5,.5,-.5,-.5,.5,-.5,.5,.5,-.5,.5,.5]),gl.STATIC_DRAW);
-    this.loaded=await Promise.all(this.images.map(loadImage));
+    this.imageLoads=this.images.map(loadImage);
+    this.loaded=await Promise.all(this.imageLoads);
     this.textures=this.loaded.map(img=>{
      const crop=document.createElement('canvas');crop.width=crop.height=1024;cover(crop.getContext('2d'),img,0,0,1024,1024);
      const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.MIRRORED_REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.MIRRORED_REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,crop);return tex;
