@@ -19,9 +19,9 @@
  const fieldUpgrades={"profession":["AI 操盘手"],"direction":["AI 应用落地与内容生产"],"bio":["AI 应用落地与内容生产\n把需求拆成步骤把创意推进到交付"],"education":["[学校]｜[专业]｜[学历]｜[起止时间]"],"legalName":["姓名待补充"],"email":["邮箱待补充"],"phone":["手机待补充"],"closingStatement":["AI 把重复的工作带走\n让人重新回到最需要人的地方"],"career.2.period":["2026年—2026.08"],"career.2.category":["团队经历"],"career.2.title":["IP 团队","AI 知识类 IP 转型"],"career.2.role":["IP 整体结构完善"],"career.2.summary":["2026年初开始研究 AI，随后加入 IP 团队，参与完善 IP 整体结构。"],"career.2.detail":["2026年8月离职。入职月份、团队名称、正式岗位及具体职责成果后续补充。"],"projects.3.title":["AI 资讯多渠道内容"],"projects.3.category":["内容流程 渠道适配"],"projects.3.role":["选题要求 渠道适配与 AI 协作整理"],"projects.3.description":["一份经过核对的资料两种适合渠道的表达"],"projects.3.detail":["围绕 AIHOT 资讯建立资料检索、来源核对、主题筛选、写作和文稿交付流程。\n将同一主题分别整理为微信公众号长文与小红书分页文案，适配不同渠道的信息密度和表达结构。\n积累可编辑文稿与内容结构模板，强调事实依据、信息时效及内容价值，依据当日资料决定是否成稿。"]};for(const [key,old] of Object.entries(fieldUpgrades))if(old.includes(state.fields[key]))state.fields[key]=defaults[key];
  let editing=false,saveTimer,toastTimer,lens,orbit,movieWall,slideIndex=0,activeUpload=0,scrollTarget=window.scrollY,scrollAnimating=false;
  const images=()=>[0,1,2].map(i=>state.fields['projects.'+i+'.image']);
- const previousSlidePaths=['assets/seaside.png','assets/blackhole.png'];
+ const previousSlidePaths=['assets/volcano.png','assets/seaside.png','assets/blackhole.png'];
  previousSlidePaths.forEach((path,i)=>{
-  const key='projects.'+(i+1)+'.image';
+  const key='projects.'+i+'.image';
   if(state.fields[key]===path)state.fields[key]=defaults[key];
  });
  let firstSlideLoad,beginBackgroundSlides;

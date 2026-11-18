@@ -31,7 +31,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=20261014-orbit10">
-  <link rel="stylesheet" href="scene.css?v=20261013-square">
+  <link rel="stylesheet" href="scene.css?v=20261118-navigation">
   <link rel="stylesheet" href="interests.css?v=20261016-vault29">
   <link rel="stylesheet" href="research-library.css?v=20261029-research46">
   <link rel="stylesheet" href="arrival.css?v=20261015-archive22">
@@ -39,11 +39,11 @@
   <link rel="stylesheet" href="programs.css?v=20261022-functions44b">
   <link rel="stylesheet" href="project-library.css?v=20261022-functions44b">
   <link rel="stylesheet" href="resume.css?v=20261015-type19">
-  <link rel="stylesheet" href="profile-reveal.css?v=20261016-spectrum36">
+  <link rel="stylesheet" href="profile-reveal.css?v=20261118-navigation">
   <link rel="stylesheet" href="cosmic-handoff.css?v=20261014-k1">
   <link rel="stylesheet" href="visual-content.css?v=20261015-type19">
   <link rel="stylesheet" href="title-system.css?v=20261016-research26">
-  <link rel="stylesheet" href="theme-switch.css?v=20261016-pearl38">
+  <link rel="stylesheet" href="theme-switch.css?v=20261118-navigation">
 </head>
 <body>
   <div class="site-arrival" aria-label="同心圆收拢，KELEN 档案标题显现，压成细线后展开网页">
@@ -73,13 +73,13 @@
         <span class="sr-only" id="theme-status" role="status" aria-live="polite"></span>
       </div>
       <nav class="side-nav" aria-label="页面目录">
-        <a class="active" href="#home"><span class="nav-no">00</span><span>首页 / INDEX</span></a>
-        <a href="#about"><span class="nav-no">01</span><span>基本信息 / PROFILE</span></a>
-        <a href="#work"><span class="nav-no">02</span><span>研究 / RESEARCH</span></a>
-        <a href="#programs"><span class="nav-no">03</span><span>程序与项目 / PROJECTS</span></a>
-        <a href="#resume"><span class="nav-no">04</span><span>履历 / RESUME</span></a>
-        <a href="#notes"><span class="nav-no">05</span><span>性格与计划 / MIND</span></a>
-        <a href="#contact"><span class="nav-no">06</span><span>生活 / LIFE</span></a>
+        <a class="active" href="#home" aria-current="location"><span class="nav-no" aria-hidden="true">00</span><span class="nav-desktop">首页 / INDEX</span><span class="nav-mobile">首页</span></a>
+        <a href="#about"><span class="nav-no" aria-hidden="true">01</span><span class="nav-desktop">基本信息 / PROFILE</span><span class="nav-mobile">简介</span></a>
+        <a href="#work"><span class="nav-no" aria-hidden="true">02</span><span class="nav-desktop">研究 / RESEARCH</span><span class="nav-mobile">研究</span></a>
+        <a href="#programs"><span class="nav-no" aria-hidden="true">03</span><span class="nav-desktop">程序与项目 / PROJECTS</span><span class="nav-mobile">项目</span></a>
+        <a href="#resume"><span class="nav-no" aria-hidden="true">04</span><span class="nav-desktop">履历 / RESUME</span><span class="nav-mobile">履历</span></a>
+        <a href="#notes"><span class="nav-no" aria-hidden="true">05</span><span class="nav-desktop">性格与计划 / MIND</span><span class="nav-mobile">计划</span></a>
+        <a href="#contact"><span class="nav-no" aria-hidden="true">06</span><span class="nav-desktop">生活 / LIFE</span><span class="nav-mobile">生活</span></a>
       </nav>
       <div class="rail-bottom"><span class="status"><i></i> SYSTEM ONLINE</span><span class="mono">SH 31°13′N<br>121°28′E</span></div>
     </aside>
@@ -139,7 +139,15 @@
             </svg>
             <span class="scene-coordinate coordinate-one">K — 001<br>ENERGY / IDEAS</span><span class="scene-coordinate coordinate-two">02 / EXPLORATION<br>∞ POSSIBILITIES</span>
           </div>
-          <div class="scene-intro"><p class="scene-eyebrow"><i></i> HELLO, I'M</p><h1>KELEN<span>谢凯伦的个人档案</span></h1><p class="scene-lead">保持好奇，向未知出发。</p></div>
+          <div class="scene-intro">
+            <p class="scene-eyebrow"><i></i> HELLO, I'M</p>
+            <h1>KELEN<span>谢凯伦的个人档案</span></h1>
+            <p class="scene-lead">保持好奇，向未知出发。</p>
+            <div class="scene-actions">
+              <a class="scene-action-primary" href="#programs">查看项目 <span aria-hidden="true">↓</span></a>
+              <a href="resume/">完整履历 <span aria-hidden="true">↗</span></a>
+            </div>
+          </div>
           <svg class="scene-connectors" viewBox="0 0 1000 640" preserveAspectRatio="none" aria-hidden="true"><path class="connector-route" d="M504 346 616 346 797 88 840 236 778 384 725 530"/><path d="M504 346H575M616 346V302"/><circle cx="504" cy="346" r="4"/><circle class="route-beacon" cx="616" cy="346" r="5"/></svg>
           <nav class="scene-nav" aria-label="介绍导航">
             <a class="scene-link" href="#about" data-module="profile" data-summary="02 年生 · 能源与动力 · 仲恺大学" aria-label="基本信息，进入个人介绍">
@@ -155,7 +163,7 @@
               <span class="scene-node"><span class="node-orbit"></span><svg viewBox="0 0 40 40" aria-hidden="true"><path d="m4 31 11-18 8 11 4-6 10 13H4Z"/><path d="m11 20 4 2 3-4"/><circle cx="29" cy="9" r="4"/><path d="M29 1v2m8 6h2m-18 0h-2"/></svg><span class="node-index">04</span></span><span class="scene-link-copy"><strong>我的生活</strong><small>LIFE / KEEP EXPLORING</small></span><span class="node-arrow" aria-hidden="true">↗</span>
             </a>
           </nav>
-          <div class="scene-bottomline"><span class="scene-hint">选择右侧入口，慢慢认识我。</span><span class="scene-counter">FOUR CHAPTERS / ONE OPEN MIND</span></div>
+          <div class="scene-bottomline"><span class="scene-hint">从任一章节开始，慢慢认识我。</span><span class="scene-counter">FOUR CHAPTERS / ONE OPEN MIND</span></div>
         </div>
         <div class="hero-footer"><span class="bar"></span><span>02 年生 · 能源与动力专业 · 仲恺大学</span><a href="#about">SCROLL TO EXPLORE&nbsp; ↓</a></div>
       </section>

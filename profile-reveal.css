@@ -12,6 +12,7 @@ html.profile-layout-changing,html.profile-layout-changing body{overflow-anchor:n
 .profile-unfold-trigger:disabled{cursor:default;opacity:.6}
 .profile-unfold-revealed .profile-unfold-trigger{visibility:hidden}
 .profile-unfold-throne{position:absolute;object-fit:contain;pointer-events:none;filter:brightness(.42) sepia(1) hue-rotate(38deg) saturate(.48);opacity:.9}
+@media(max-width:680px){.about.profile-unfold-ready{overflow-x:clip}}
 .profile-unfold-mask{position:absolute;left:0;right:0;top:0;height:0;overflow:hidden;z-index:2;background:var(--paper);box-shadow:0 12px 20px -18px #35482b33}
 .about.profile-unfold-ready .profile-layout{--profile-actor-gutter:160px;will-change:transform;background:var(--paper);grid-template-columns:minmax(105px,.32fr) minmax(0,.68fr);column-gap:6%;row-gap:16px;padding:20px 3% 18px;align-items:center;align-content:center}
 .about.profile-unfold-ready .profile-information-label{grid-column:1/-1;grid-row:1;justify-self:start;margin:0 0 2px;font-size:7px;line-height:1.8;letter-spacing:.08em}
