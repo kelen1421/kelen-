@@ -96,3 +96,5 @@
 .yao-data .yao-profile-chart .yao-category>i>i{background:var(--accent);transform-origin:left;transition:width .4s}
 .yao-data .yao-profile-head .chart-mode button.active{color:var(--accent)}
 @media(max-width:660px){.yao-data .yao-scenario-metrics dd{font-size:26px}}
+
+[data-chart-hit]:focus-visible{outline:1px solid var(--accent);outline-offset:2px}

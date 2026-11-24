@@ -49,7 +49,7 @@ const D=window.FUSHI_ACCOUNT_DATA,$=s=>root.querySelector(s),$$=s=>[...root.quer
     const ymin=vmin<0?vmin-span*.1:0,ymax=vmax+span*.15;
     const x=t=>b.x+(t-xmin)/(xmax-xmin)*b.w,y=v=>b.y+b.h-(v-ymin)/(ymax-ymin)*b.h;
     host.replaceChildren();
-    const svg=svgEl('svg',{viewBox:`0 0 ${W} ${H}`,width:W,height:H,role:'img','aria-label':`${d.label}${monthly?'月度粉丝增量':'历史粉丝走势'}估算。${d.basis}`});
+    const svg=svgEl('svg',{viewBox:`0 0 ${W} ${H}`,width:W,height:H,role:'group','aria-label':`${d.label}${monthly?'月度粉丝增量':'历史粉丝走势'}估算。${d.basis}`});
     svg.append(svgEl('title',{},`${d.label}粉丝${monthly?'月度增量':'走势'}估算`));
     const defs=svgEl('defs'),clip=svgEl('clipPath',{id:'chart-clip'});clip.append(svgEl('rect',{x:b.x,y:b.y,width:b.w,height:b.h}));defs.append(clip);svg.append(defs);
     const ticks=4;
@@ -70,9 +70,22 @@ const D=window.FUSHI_ACCOUNT_DATA,$=s=>root.querySelector(s),$$=s=>[...root.quer
     const overlay=svgEl('rect',{x:b.x,y:b.y,width:b.w,height:b.h,fill:'transparent','data-chart-hit':'true'});
     const readout=$('#chart-readout');
     const defaultText=monthly?`${d.label} 月度增量 估算`:`${d.asOf} ${wan(d.fans)} 粉丝`;
-    readout.textContent=defaultText;
-    function inspect(e){const rect=svg.getBoundingClientRect(),px=Math.max(b.x,Math.min(b.x+b.w,(e.clientX-rect.left)*W/rect.width));const t=xmin+(px-b.x)/b.w*(xmax-xmin);let row=all[0];for(const r of all){if(Math.abs(ts(r[0])-t)<Math.abs(ts(row[0])-t))row=r;}const xx=x(ts(row[0]));guide.setAttribute('x1',xx);guide.setAttribute('x2',xx);guide.setAttribute('visibility','visible');dot.setAttribute('cx',xx);dot.setAttribute('cy',y(row[1]));dot.setAttribute('visibility','visible');readout.textContent=`${monthly?row[0].slice(0,7):row[0]} · ${monthly?'模型月增量':'模型粉丝'} ${wan(row[1])}${future&&ts(row[0])>ts(d.asOf)?'（条件情景）':'（估算）'}`}
-    overlay.addEventListener('pointermove',inspect);overlay.addEventListener('pointerdown',inspect);overlay.addEventListener('pointerleave',()=>{guide.setAttribute('visibility','hidden');dot.setAttribute('visibility','hidden')});svg.append(overlay);host.append(svg);
+    svg.append(overlay);host.append(svg);
+    const times=all.map(row=>ts(row[0]));
+    window.bindChartInspection({
+      overlay,guide,dot,readout,summary:defaultText,label:d.label+'走势，按左右方向键逐期查看',count:all.length,
+      nearest(px){
+        const time=xmin+(px-b.x)/b.w*(xmax-xmin);
+        let lo=0,hi=times.length-1;
+        while(lo<hi){const mid=Math.floor((lo+hi)/2);if(times[mid]<time)lo=mid+1;else hi=mid}
+        return lo>0&&time-times[lo-1]<times[lo]-time?lo-1:lo;
+      },
+      pointAt(i){
+        const row=all[i],date=monthly?row[0].slice(0,7):row[0];
+        const note=future&&times[i]>ts(d.asOf)?'条件情景':'估算';
+        return {x:x(times[i]),y:y(row[1]),text:`${date} · ${monthly?'模型月增量':'模型粉丝'} ${wan(row[1])}（${note}）`};
+      }
+    });
     $('#growth-title').textContent=monthly?'月度增量 估算':'粉丝走势 估算';
     $('.dot-key').parentElement.hidden=monthly;
   }

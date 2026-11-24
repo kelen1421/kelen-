@@ -9,11 +9,14 @@
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const cover=document.createElement('div');cover.className='orbit-exit-cover';cover.setAttribute('aria-hidden','true');document.body.append(cover);
  const header=document.querySelector('.site-header');
- let fade=0,mask=0,metrics={},lastY=scrollY;
- const measure=()=>{const sr=section.getBoundingClientRect(),ir=intro.getBoundingClientRect();metrics={width:innerWidth,height:innerHeight,top:sr.top+scrollY,introTop:ir.top-sr.top,introHeight:ir.height,end:sr.top+scrollY+section.offsetHeight}};
+ let fade=0,mask=0,metrics={},lastY=scrollY,frame=0;
+ function wake(){if(!frame)frame=requestAnimationFrame(update)}
+ addEventListener('scroll',wake,{passive:true});
+ const measure=()=>{const sr=section.getBoundingClientRect(),ir=intro.getBoundingClientRect();metrics={width:innerWidth,height:innerHeight,top:sr.top+scrollY,introTop:ir.top-sr.top,introHeight:ir.height,end:sr.top+scrollY+section.offsetHeight};wake()};
  new ResizeObserver(measure).observe(intro);window.addEventListener('resize',measure);document.fonts.ready.then(measure);measure();
  const observer=new IntersectionObserver(entries=>{for(const entry of entries)section.classList.toggle('orbit-copy-visible',entry.isIntersecting)}, {threshold:0,rootMargin:'0px 0px -12% 0px'});observer.observe(section.querySelector('.orbit-head'));
  function update(){
+  frame=0;
   const {width,height,top,introTop,introHeight,end}=metrics;if(!height)return;
   const local=scrollY-top;
   const delta=scrollY-lastY;lastY=scrollY;
@@ -37,6 +40,7 @@
    const gradient=`radial-gradient(circle at 50% 50%,transparent ${radius}px,#000 ${radius+1}px)`;
    cover.style.maskImage=gradient;cover.style.webkitMaskImage=gradient;cover.style.opacity=active?String(fade):'0';
   }
+  if(!reduced&&(fade!==targetFade||mask!==targetMask))wake();
   section.dataset.orbitPhase=entrance<1?'intro':local<fadeStart?'disc':local<fadeEnd?'fade':local<maskEnd?'aperture':'complete';
  }
  // Let the following scene begin inside this aperture instead of after its runway.

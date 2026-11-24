@@ -83,7 +83,11 @@
    this.pendingSlide=undefined;
   }
   go(index){
-   if(this.transitioning||this.failedSlides.has(index))return;
+   if(this.failedSlides.has(index))return;
+   if(this.transitioning){
+    this.pendingSlide=index===this.next?undefined:index;
+    return;
+   }
    if(index===this.index){
     this.pendingSlide=undefined;
     return;
@@ -98,10 +102,10 @@
    this.start=performance.now();
    this.transitioning=true;
    this.onChange?.(index);
-   if(!this.isReady){
+   if(!this.isReady||matchMedia('(prefers-reduced-motion: reduce)').matches){
     this.index=index;
     this.transitioning=false;
-    this.canvas.previousElementSibling.src=this.images[index];
+    if(!this.isReady)this.canvas.previousElementSibling.src=this.images[index];
    }
    this.lastChange=performance.now();
   }
@@ -116,6 +120,7 @@
     }
    }
    if(!this.gl||!this.isReady)return;
+   if(!this.transitioning&&this.pendingSlide!==undefined&&this.textures[this.pendingSlide])this.go(this.pendingSlide);
    const dt=this.lastFrame?Math.min(.06,(time-this.lastFrame)/1000):0;this.lastFrame=time;if(!matchMedia('(prefers-reduced-motion: reduce)').matches)this.clock+=dt;
    const elapsed=this.transitioning?(time-this.start)/1000:0;
    const cubic=t=>{t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};

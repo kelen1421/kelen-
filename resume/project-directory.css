@@ -135,9 +135,7 @@ body.project-detail-open{overflow:hidden}
   display:block;
   min-height:0;
   border-radius:6px;
-  border:1px solid #282d2820;
   overflow:hidden;
-  background:#171b17;
   touch-action:pan-y;
 }
 .project-page-image img {

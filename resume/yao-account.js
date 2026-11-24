@@ -13,7 +13,7 @@ function draw(){
  const W=Math.max(260,Math.floor(chart.clientWidth)),H=W<550?280:370,b={x:52,y:32,w:W-70,h:H-84};
  const span=Math.max(m.end-m.baseline,1000),raw=span/4,mag=10**Math.floor(Math.log10(raw)),step=[1,2,2.5,5,10].map(x=>x*mag).find(x=>x>=raw),top=m.baseline+Math.ceil(span/step)*step;
  const x=i=>b.x+i/(m.daily.length-1)*b.w,y=v=>b.y+b.h-(v-m.baseline)/(top-m.baseline)*b.h;
- const svg=node('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':`3至9月粉丝走势 ${format(m.baseline)}至${format(m.end)}`});
+ const svg=node('svg',{viewBox:`0 0 ${W} ${H}`,role:'group','aria-label':`3至9月粉丝走势 ${format(m.baseline)}至${format(m.end)}`});
  for(let value=m.baseline;value<=top+.1;value+=step){const yy=y(value);svg.append(node('line',{x1:b.x,y1:yy,x2:b.x+b.w,y2:yy,stroke:'var(--soft)','stroke-opacity':.15}),node('text',{x:b.x-9,y:yy+4,'text-anchor':'end'},format(value)))}
  const dates=m.daily.flatMap((r,i)=>i===0||r.date.slice(0,7)!==m.daily[i+1]?.date.slice(0,7)?[i]:[]);
  (W<550?[dates[0],dates[1],dates[4],dates[7]]:dates).forEach(i=>svg.append(node('text',{x:x(i),y:H-20,'text-anchor':i===0?'start':i===m.daily.length-1?'end':'middle'},i===0?'2月底':`${Number(m.daily[i].date.slice(5,7))}月底`)));
@@ -26,10 +26,17 @@ function draw(){
  svg.append(node('text',{x:b.x+b.w,y:y(m.end)-13,'text-anchor':'end',class:'yao-end-label'},format(m.end)));
  if(W>650)for(const [date,label]of [['2026-04-23','4月 6条集中发布'],['2026-08-14','8月 3/4'],['2026-09-07','9月 2/2']]){const i=m.daily.findIndex(r=>r.date===date),xx=x(i);svg.append(node('line',{x1:xx,x2:xx,y1:b.y,y2:b.y+b.h,stroke:'currentColor','stroke-opacity':.18}),node('text',{x:Math.min(xx+7,W-65),y:16},label))}
  const guide=node('line',{y1:b.y,y2:b.y+b.h,stroke:'var(--paper)','stroke-opacity':.45,visibility:'hidden'}),dot=node('circle',{r:4,fill:'var(--paper)',visibility:'hidden'}),overlay=node('rect',{x:b.x,y:b.y,width:b.w,height:b.h,fill:'transparent','data-chart-hit':'true'});
- const defaultText=`2026.03—09 · ${format(m.end)} 粉丝`;if(readout)readout.textContent=defaultText;
- function inspect(event){const box=svg.getBoundingClientRect(),px=Math.max(b.x,Math.min(b.x+b.w,(event.clientX-box.left)*W/box.width)),i=Math.round((px-b.x)/b.w*(m.daily.length-1)),row=m.daily[i],xx=x(i);guide.setAttribute('x1',xx);guide.setAttribute('x2',xx);guide.setAttribute('visibility','visible');dot.setAttribute('cx',xx);dot.setAttribute('cy',y(row.fans));dot.setAttribute('visibility','visible');if(readout)readout.textContent=`${row.date} · ${format(row.fans)} 粉丝`}
- overlay.addEventListener('pointermove',inspect);overlay.addEventListener('pointerdown',inspect);overlay.addEventListener('pointerleave',()=>{guide.setAttribute('visibility','hidden');dot.setAttribute('visibility','hidden');if(readout)readout.textContent=defaultText});
  svg.append(guide,dot,overlay);chart.replaceChildren(svg);
+ window.bindChartInspection({
+  overlay,guide,dot,readout,count:m.daily.length,label:'姚千万说AI粉丝走势，按左右方向键逐日查看',
+  summary:`2026.03—09 · ${format(m.end)} 粉丝（估算）`,
+  nearest:px=>Math.round(Math.max(0,Math.min(1,(px-b.x)/b.w))*(m.daily.length-1)),
+  pointAt(i){
+   const row=m.daily[i];
+   return {x:x(i),y:y(row.fans),text:`${row.date} · ${format(row.fans)} 粉丝（估算）`};
+  }
+ });
+
 }
 function drawProfile(){
  const host=$('.yao-profile-chart');host.replaceChildren(...data.demographics[audience].map(([label,percent])=>{const row=document.createElement('div');row.className='yao-category';const text=document.createElement('span');text.textContent=label;const value=document.createElement('b');value.textContent=percent+'%';const bar=document.createElement('i'),fill=document.createElement('i');bar.className='rank-track';fill.className='rank-fill';fill.style.width=percent+'%';bar.append(fill);row.append(text,value,bar);return row}));if(profileEntered)revealProfile();
